@@ -1,0 +1,43 @@
+// ============================================================================
+// CIP - STRIKE COCKPIT : Cloudflare Workers configuration
+// ============================================================================
+// Deploying (dashboard-oriented, no command line required):
+//   1. Create the D1 database first (dashboard: Storage & Databases > D1
+//      SQL Database > Create) named  cip-strike-cockpit-db  - then paste the
+//      contents of migrations/0001_initial.sql into its Console tab.
+//   2. Replace PASTE_YOUR_D1_DATABASE_ID_HERE below with the database's ID
+//      (shown on its dashboard page), or connect the binding through the
+//      Worker's Settings > Bindings UI (binding name: DB).
+//   3. Deploy the Worker (dashboard code editor: keep this file at the
+//      project root, src/worker.js and public/index.html in place).
+//
+// No secrets or credentials are stored in this file. The database_id is a
+// non-secret Cloudflare resource identifier.
+// ============================================================================
+
+{
+  // Worker name (becomes part of the deployed URL)
+  "name": "cip-strike-cockpit",
+
+  // Worker entry point (thin API; serves public/index.html through assets)
+  "main": "src/worker.js",
+
+  "compatibility_date": "2026-09-08",
+
+  // Static assets: public/index.html is served for every non-/api/ request.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+
+  // D1 binding - the authoritative persistent database.
+  // Create the database in the Cloudflare dashboard first, then paste its ID.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "cip-strike-cockpit-db",
+      "database_id": "PASTE_YOUR_D1_DATABASE_ID_HERE",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

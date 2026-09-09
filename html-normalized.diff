@@ -1,0 +1,475 @@
+--- ORIGINAL
++++ REVISED
+@@ -796,6 +796,388 @@
+    ===================================================== */
+ var LS_KEY="cip-command-center-v1";
+ var RECOVERY_KEY=LS_KEY+"-recovery"; /* corrupted data is preserved here BEFORE the fresh blank state replaces the active key; it is cleared only by an explicit resolution (successful restore, explicit discard, or a reset that itself committed successfully) - NEVER by an ordinary backup export */
++/* ============================================================
++   PERSISTENCE BOUNDARY (added for the future Cloudflare Worker + D1 phase)
++   The ONLY place in this file that touches localStorage for persistent
++   application data. Methods deliberately keep the raw semantics of the
++   underlying store (they may throw) so the existing callers keep their
++   own try/catch, rollback and failure messaging unchanged.
++   A later CloudPersistenceAdapter can replace this object without the
++   application logic above it changing.
++   ============================================================ */
++var Persistence=(function(){
++  return {
++    /* authoritative persistent state (serialized JSON string or null) */
++    readState:function(){ return localStorage.getItem(LS_KEY); },
++    writeState:function(json){ localStorage.setItem(LS_KEY,json); Cloud.queueSync(); }, /* mirror first (existing rollback semantics), then cloud sync */
++    /* recovery copy of unreadable/corrupted bytes - never authoritative */
++    readRecovery:function(){ return localStorage.getItem(RECOVERY_KEY); },
++    writeRecovery:function(raw){ localStorage.setItem(RECOVERY_KEY,raw); },
++    clearRecovery:function(){ localStorage.removeItem(RECOVERY_KEY); },
++    /* cloud synchronization cursor - metadata, not application state */
++    readCloudVector:function(){ var v=localStorage.getItem(LS_CLOUD_KEY); return v?JSON.parse(v):null; },
++    writeCloudVector:function(v){ if(v) localStorage.setItem(LS_CLOUD_KEY,JSON.stringify(v)); }
++  };
++})();
++/* ============================================================
++   2a. CLOUD PERSISTENCE (Cloudflare Worker + D1)
++   Integrated at the prepared persistence boundary above. localStorage
++   remains the local mirror (instant boot + offline fallback); the Worker
++   API and its D1 database are the AUTHORITATIVE persistent store whenever
++   the connection is available:
++     boot  -> GET  /api/bootstrap   one request, full authoritative state
++     save  -> POST /api/sync        fine-grained: ONLY records changed since
++                                    the last acknowledged sync, applied by
++                                    the Worker in one transactional D1 batch
++   How the integration stays surgical:
++   - save() still writes the local mirror FIRST through the existing
++     Persistence boundary, so every existing rollback, quota and failure
++     behavior above is untouched; the cloud layer syncs afterwards.
++   - Cloud state is fed through the app's own sanitizeState() - the exact
++     validation/migration path used for localStorage and restores.
++   - Optimistic concurrency: the Worker stamps each applied batch with a
++     generation number. Stale writes are skipped and reported as conflicts;
++     the app then re-bootstraps and keeps the newer cloud version. Nothing
++     is silently overwritten and no failed write is reported as success.
++   - Worker unreachable: the app keeps working from the local mirror, the
++     backup pill turns red (CLOUD OFFLINE - SAVED LOCALLY) and changes
++     sync automatically once the connection returns.
++   - CIP_CLOUD_MODE=false restores the pure static/local build exactly
++     (development fallback; the app then behaves like the pre-cloud file).
++   ============================================================ */
++var CIP_CLOUD_MODE=true;
++var LS_CLOUD_KEY=LS_KEY+"-cloud";
++var Cloud=(function(){
++  var API="/api/";
++  var ready=false,syncing=false,failed=false,warned=false,migrating=false,again=false,needRefresh=false;
++  var vector=null; /* {gen:Number,sig:{p:{id:sig},e:{id:sig},l:{id:sig},settings:sig,strike:sig,metadata:sig}} */
++  var flushTimer=null,retryTimer=null;
++
++  function nowIso(){ return new Date().toISOString(); }
++  function recJson(x){ try{ return JSON.stringify(x); }catch(e){ return "{}"; } }
++  /* two independent 32-bit string hashes -> short stable record signature;
++     a false "changed" is impossible, a false "unchanged" (collision) is
++     negligible and would only suppress an idempotent re-send */
++  function djb(s){ var h=5381,i; for(i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0; } return h>>>0; }
++  function sdbm(s){ var h=0,i; for(i=0;i<s.length;i++){ h=(s.charCodeAt(i)+(h<<6)+(h<<16)-h)>>>0; } return h>>>0; }
++  function sig(s){ return djb(s).toString(36)+"-"+sdbm(s).toString(36); }
++  function sigsOf(st){
++    var s={p:{},e:{},l:{},settings:"",strike:"",metadata:""},i;
++    if(st&&typeof st==="object"){
++      if(Array.isArray(st.prospects)) for(i=0;i<st.prospects.length;i++) s.p[st.prospects[i].id]=sig(recJson(st.prospects[i]));
++      if(Array.isArray(st.events)) for(i=0;i<st.events.length;i++) s.e[st.events[i].id]=sig(recJson(st.events[i]));
++      if(Array.isArray(st.learnings)) for(i=0;i<st.learnings.length;i++) s.l[st.learnings[i].id]=sig(recJson(st.learnings[i]));
++      s.settings=sig(recJson(st.settings));
++      s.strike=sig(recJson(st.strike));
++      s.metadata=sig(recJson(st.metadata));
++    }
++    return s;
++  }
++  function emptySigs(){ return {p:{},e:{},l:{},settings:"",strike:"",metadata:""}; }
++  function readVector(){ try{ return Persistence.readCloudVector(); }catch(e){ return null; } }
++  function persistVector(){ if(!vector) return; try{ Persistence.writeCloudVector(vector); }catch(e){} }
++
++  /* HTTP helper: fetch on modern browsers, XHR fallback for legacy
++     browsers - callback style, never throws */
++  function httpJson(method,path,body,cb){
++    var url=API+path;
++    try{
++      if(typeof fetch==="function"&&typeof Promise!=="undefined"){
++        fetch(url,{method:method,headers:{"content-type":"application/json"},body:body?recJson(body):undefined})
++          .then(function(r){ return r.text().then(function(t){ return {status:r.status,text:t}; }); })
++          .then(function(r){
++            var data=null; try{ data=r.text?JSON.parse(r.text):null; }catch(e){}
++            if(r.status<200||r.status>=300){ cb((data&&data.error)?data:new Error("HTTP "+r.status),null); return; }
++            cb(null,data);
++          })
++          .catch(function(err){ cb(err,null); });
++        return;
++      }
++    }catch(e){}
++    try{
++      var xhr=new XMLHttpRequest();
++      xhr.open(method,url,true);
++      xhr.setRequestHeader("content-type","application/json");
++      xhr.onreadystatechange=function(){
++        if(xhr.readyState!==4) return;
++        var data=null; try{ data=xhr.responseText?JSON.parse(xhr.responseText):null; }catch(e2){}
++        if(xhr.status<200||xhr.status>=300){ cb((data&&data.error)?data:new Error("HTTP "+xhr.status),null); return; }
++        cb(null,data);
++      };
++      xhr.onerror=function(){ cb(new Error("network error"),null); };
++      xhr.send(body?recJson(body):null);
++    }catch(e3){ cb(e3,null); }
++  }
++
++  /* fine-grained diff: added/changed records become upserts, removed
++     records become deletes, global objects are sent only when changed.
++     null = nothing to send (no request is made). */
++  function computeOps(){
++    if(!vector) return null;
++    var v=vector.sig,cur=sigsOf(state),n=0,i,rec;
++    var ops={prospects:{upserts:[],deletes:[]},events:{upserts:[],deletes:[]},learnings:{upserts:[],deletes:[]}};
++    for(i=0;i<state.prospects.length;i++){ rec=state.prospects[i]; if(!v.p[rec.id]||v.p[rec.id]!==cur.p[rec.id]){ ops.prospects.upserts.push(rec); n++; } }
++    for(i=0;i<state.events.length;i++){ rec=state.events[i]; if(!v.e[rec.id]||v.e[rec.id]!==cur.e[rec.id]){ ops.events.upserts.push(rec); n++; } }
++    for(i=0;i<state.learnings.length;i++){ rec=state.learnings[i]; if(!v.l[rec.id]||v.l[rec.id]!==cur.l[rec.id]){ ops.learnings.upserts.push(rec); n++; } }
++    for(var pk in v.p){ if(!cur.p[pk]){ ops.prospects.deletes.push(pk); n++; } }
++    for(var ek in v.e){ if(!cur.e[ek]){ ops.events.deletes.push(ek); n++; } }
++    for(var lk in v.l){ if(!cur.l[lk]){ ops.learnings.deletes.push(lk); n++; } }
++    if(v.settings!==cur.settings){ ops.settings=state.settings; n++; }
++    if(v.strike!==cur.strike){ ops.strike=state.strike; n++; }
++    if(v.metadata!==cur.metadata){ ops.metadata=state.metadata; n++; }
++    return n?ops:null;
++  }
++
++  function onOffline(err){
++    if(!failed){ failed=true; safe(renderTopbar); }
++    if(!warned){
++      warned=true;
++      toast("CLOUD DATABASE UNREACHABLE - working from this browser's local copy. Your changes stay saved locally and will sync when the connection returns.",
++        {type:"warn",life:15000,actionLabel:"RETRY",onAction:function(){ flush(); }});
++    }
++  }
++  function recover(){
++    var was=failed;
++    failed=false;
++    if(warned) warned=false;
++    if(was){ safe(renderTopbar); toast("Cloud sync restored - the database is up to date.","info"); }
++  }
++  function mergeUnsyncedCollection(cloudArr,sentArr,currentArr){
++    var sent={},cur={},out=[],i,r,s,c,pos={};
++    for(i=0;i<sentArr.length;i++){ r=sentArr[i]; sent[r.id]=r; }
++    for(i=0;i<currentArr.length;i++){ r=currentArr[i]; cur[r.id]=r; }
++    out=cloudArr.slice();
++    for(i=0;i<out.length;i++) pos[out[i].id]=i;
++    /* Local additions/edits made while the cloud request was in flight win
++       over the pre-send local snapshot, then are sent again against the new
++       cloud generation. */
++    for(i=0;i<currentArr.length;i++){
++      r=currentArr[i]; s=sent[r.id];
++      if(!s||sig(recJson(r))!==sig(recJson(s))){
++        if(pos[r.id]!==undefined) out[pos[r.id]]=r;
++        else { pos[r.id]=out.length; out.push(r); }
++      }
++    }
++    /* Local deletions are retained only when the cloud row is still exactly
++       the pre-send version. If the cloud changed meanwhile, keep the newer
++       cloud row rather than silently deleting it. Use filter() rather than
++       mutating by stale array indexes while processing multiple deletions. */
++    var remove={};
++    for(i=0;i<sentArr.length;i++){
++      r=sentArr[i];
++      if(cur[r.id]===undefined&&pos[r.id]!==undefined){
++        c=out[pos[r.id]];
++        if(sig(recJson(c))===sig(recJson(r))) remove[r.id]=true;
++      }
++    }
++    if(Object.keys(remove).length) out=out.filter(function(x){ return !remove[x.id]; });
++    return out;
++  }
++  function mergeUnsyncedState(cloudSt,sentSt,currentSt){
++    return {
++      settings: sig(recJson(currentSt.settings))!==sig(recJson(sentSt.settings))?currentSt.settings:cloudSt.settings,
++      prospects:mergeUnsyncedCollection(cloudSt.prospects,sentSt.prospects,currentSt.prospects),
++      events:mergeUnsyncedCollection(cloudSt.events,sentSt.events,currentSt.events),
++      learnings:mergeUnsyncedCollection(cloudSt.learnings,sentSt.learnings,currentSt.learnings),
++      strike: sig(recJson(currentSt.strike))!==sig(recJson(sentSt.strike))?currentSt.strike:cloudSt.strike,
++      metadata: sig(recJson(currentSt.metadata))!==sig(recJson(sentSt.metadata))?currentSt.metadata:cloudSt.metadata
++    };
++  }
++  /* replace the in-memory state with the authoritative cloud state, through
++     the app's own sanitize/validation path (identical to a restore), and
++     refresh the local mirror. When a request had conflicts, preserve any
++     local edits made after that request started and re-send them against the
++     newly adopted cloud generation. */
++  function adopt(res,sendSnapshot){
++    try{
++      var cloudSt=sanitizeState(res.state);
++      var st=sendSnapshot?mergeUnsyncedState(cloudSt,sendSnapshot,state):cloudSt;
++      var fresh=recJson(st);
++      vector={gen:Number(res.gen)||0,sig:sigsOf(cloudSt)};
++      persistVector();
++      var mirror=null; try{ mirror=Persistence.readState(); }catch(e2){}
++      if(recJson(state)!==fresh||mirror!==fresh){
++        state=st;
++        try{ Persistence.writeState(fresh); }catch(e3){}
++        safeRender();
++      }
++    }catch(err){ reportError(err,"cloud-adopt"); }
++  }
++  function rebootstrapAdopt(cb,sendSnapshot){
++    httpJson("GET","bootstrap",null,function(err,res){
++      if(err||!res||!res.ok){ onOffline(err); if(cb) cb(false); return; }
++      recover();
++      adopt(res,sendSnapshot);
++      if(cb) cb(true);
++    });
++  }
++
++  function opCount(o){
++    return (o.prospects.upserts.length+o.prospects.deletes.length+
++            o.events.upserts.length+o.events.deletes.length+
++            o.learnings.upserts.length+o.learnings.deletes.length+
++            (o.settings!==undefined?1:0)+(o.strike!==undefined?1:0)+(o.metadata!==undefined?1:0));
++  }
++  /* Split a logical diff into <=40-op requests. Each request remains a single
++     D1 transaction; larger migrations are serialized and advance vector.gen
++     after every committed transaction. */
++  function chunkOps(all,limit){
++    var chunks=[],work={
++      pU:all.prospects.upserts.slice(),pD:all.prospects.deletes.slice(),
++      eU:all.events.upserts.slice(),eD:all.events.deletes.slice(),
++      lU:all.learnings.upserts.slice(),lD:all.learnings.deletes.slice(),
++      settings:all.settings,strike:all.strike,metadata:all.metadata
++    };
++    function remainingCount(){ return work.pU.length+work.pD.length+work.eU.length+work.eD.length+work.lU.length+work.lD.length+
++      (work.settings!==undefined?1:0)+(work.strike!==undefined?1:0)+(work.metadata!==undefined?1:0); }
++    while(remainingCount()>0){
++      var c={prospects:{upserts:[],deletes:[]},events:{upserts:[],deletes:[]},learnings:{upserts:[],deletes:[]}},left=limit;
++      function take(src,dst){ while(left>0&&src.length){ dst.push(src.shift()); left--; } }
++      take(work.pU,c.prospects.upserts); take(work.pD,c.prospects.deletes);
++      take(work.eU,c.events.upserts); take(work.eD,c.events.deletes);
++      take(work.lU,c.learnings.upserts); take(work.lD,c.learnings.deletes);
++      if(left>0&&work.settings!==undefined){ c.settings=work.settings; work.settings=undefined; left--; }
++      if(left>0&&work.strike!==undefined){ c.strike=work.strike; work.strike=undefined; left--; }
++      if(left>0&&work.metadata!==undefined){ c.metadata=work.metadata; work.metadata=undefined; left--; }
++      chunks.push(c);
++    }
++    return chunks;
++  }
++
++  function flush(cb){
++    if(!CIP_CLOUD_MODE||!ready){ if(cb) cb(false); return; }
++    if(syncing){ again=true; if(cb) cb(false); return; }
++    var ops=computeOps();
++    if(!ops){
++      if(failed){
++        rebootstrapAdopt(cb);
++      } else if(cb) cb(true);
++      return;
++    }
++    /* Capture the complete pre-send state once. Every chunk below is derived
++       from the same logical diff, while vector.gen advances between chunks. */
++    var sentState;
++    try{ sentState=JSON.parse(recJson(state)); }catch(e0){ sentState=null; }
++    var chunks=chunkOps(ops,40);
++    syncing=true;
++    function finish(ok){
++      syncing=false;
++      if(ok&&needRefresh){ needRefresh=false; rebootstrapAdopt(null); }
++      if(cb) cb(ok);
++      if(ok&&again){ again=false; flush(); }
++    }
++    function sendChunk(idx){
++      if(idx>=chunks.length){
++        if(migrating){
++          migrating=false;
++          toast("LOCAL DATA UPLOADED - your browser data is now in the cloud database.","ok");
++        }
++        recover();
++        finish(true);
++        return;
++      }
++      var chunk=chunks[idx],sigSent={p:{},e:{},l:{}},i,k;
++      for(i=0;i<chunk.prospects.upserts.length;i++){ var pr=chunk.prospects.upserts[i]; sigSent.p[pr.id]=sig(recJson(pr)); }
++      for(i=0;i<chunk.events.upserts.length;i++){ var ev=chunk.events.upserts[i]; sigSent.e[ev.id]=sig(recJson(ev)); }
++      for(i=0;i<chunk.learnings.upserts.length;i++){ var lr=chunk.learnings.upserts[i]; sigSent.l[lr.id]=sig(recJson(lr)); }
++      var sentSettings=chunk.settings?sig(recJson(chunk.settings)):null,sentStrike=chunk.strike?sig(recJson(chunk.strike)):null,sentMetadata=chunk.metadata?sig(recJson(chunk.metadata)):null;
++      httpJson("POST","sync",{ops:chunk,baseGen:vector.gen,clientTime:nowIso()},function(err,res){
++        if(err||!res||!res.ok){ syncing=false; onOffline(err); if(cb) cb(false); return; }
++        if(res.conflicts&&res.conflicts.length){
++          syncing=false;
++          rebootstrapAdopt(function(){
++            toast("CLOUD SYNC CONFLICT - the cloud database changed while this browser was syncing. New cloud data was adopted and any newer local edits were preserved for re-sync.",{type:"warn",life:15000});
++            if(cb) cb(true);
++          },sentState);
++          return;
++        }
++        for(k in sigSent.p) vector.sig.p[k]=sigSent.p[k];
++        for(k in sigSent.e) vector.sig.e[k]=sigSent.e[k];
++        for(k in sigSent.l) vector.sig.l[k]=sigSent.l[k];
++        for(i=0;i<chunk.prospects.deletes.length;i++) delete vector.sig.p[chunk.prospects.deletes[i]];
++        for(i=0;i<chunk.events.deletes.length;i++) delete vector.sig.e[chunk.events.deletes[i]];
++        for(i=0;i<chunk.learnings.deletes.length;i++) delete vector.sig.l[chunk.learnings.deletes[i]];
++        if(sentSettings) vector.sig.settings=sentSettings;
++        if(sentStrike) vector.sig.strike=sentStrike;
++        if(sentMetadata) vector.sig.metadata=sentMetadata;
++        vector.gen=Number(res.gen)||vector.gen;
++        persistVector();
++        sendChunk(idx+1);
++      });
++    }
++    sendChunk(0);
++  }
++
++  /* push pending local edits first (they win where they are newer), then
++     adopt the merged server truth so server-only records appear too */
++  function reconcile(){
++    needRefresh=true;
++    flush();
++  }
++
++  function init(){
++    if(!CIP_CLOUD_MODE) return;
++    if(retryTimer) return;
++    retryTimer=setInterval(function(){ try{ if(failed&&ready) flush(); }catch(e){} },30000);
++    onEvt(window,"online",function(){ try{ if(ready) flush(); }catch(e){} });
++    httpJson("GET","bootstrap",null,function(err,res){
++      ready=true;
++      if(err||!res||!res.ok){ onOffline(err); return; }
++      failed=false;
++      var gen=Number(res.gen)||0;
++      var counts=res.counts||{};
++      var serverBlank=!counts.prospects&&!counts.events&&!counts.learnings;
++      var localBlank=!state.prospects.length&&!state.events.length&&!state.learnings.length;
++      var vec=readVector();
++      if(serverBlank&&localBlank){
++        /* nothing anywhere: mark the current state as synced */
++        vector={gen:gen,sig:sigsOf(state)};
++        persistVector();
++        return;
++      }
++      if(serverBlank&&!localBlank){
++        /* FIRST-RUN MIGRATION: upload this browser's existing local data to
++           the fresh cloud database - ids, timestamps, events, learnings,
++           settings and strike state are all preserved */
++        migrating=true;
++        vector={gen:gen,sig:emptySigs()};
++        persistVector();
++        flush();
++        return;
++      }
++      if(localBlank){ adopt(res); return; }
++      if(!vec){
++        /* data here, but this browser never synced: everything counts as
++           pending; records the server already holds newer versions of are
++           rejected by the generation guard and adopted afterwards */
++        vector={gen:0,sig:emptySigs()};
++        persistVector();
++        reconcile();
++        return;
++      }
++      vector={gen:Number(vec.gen)||0,sig:(vec.sig||emptySigs())};
++      if(!computeOps()){ adopt(res); return; } /* mirror clean - cloud authoritative */
++      reconcile();
++    });
++  }
++
++  return {
++    init:init,
++    queueSync:function(){
++      if(!CIP_CLOUD_MODE) return;
++      try{
++        if(flushTimer) clearTimeout(flushTimer);
++        flushTimer=setTimeout(function(){ flushTimer=null; flush(); },350);
++      }catch(e){}
++    },
++    status:function(){
++      if(!CIP_CLOUD_MODE||!failed) return {level:"ok",label:""};
++      return {level:"fail",label:"CLOUD OFFLINE - SAVED LOCALLY"};
++    },
++    flush:flush
++  };
++})();
++
+ var DATA_VERSION=2; /* schema is a superset of v1/v2 - migration is idempotent and value-preserving: replaced settings are recorded in metadata, never silently discarded. The sent/bypassed repair below is a sanitize fix, not a schema change. */
+ var S={NEW:"NEW",FO:"FIRST_OUTREACH",F1:"FOLLOWUP_1",F2:"FOLLOWUP_2",F3:"FOLLOWUP_3",
+        REPLIED:"REPLIED",CALL:"CALL_BOOKED",WON:"WON",LOST:"LOST",DORMANT:"DORMANT"};
+@@ -892,7 +1274,7 @@
+   try{
+     var msg=(err&&err.message)||String(err);
+     var raw="";
+-    try{ raw=localStorage.getItem(LS_KEY)||""; }catch(e2){}
++    try{ raw=Persistence.readState()||""; }catch(e2){}
+     document.body.innerHTML=
+       '<div style="max-width:620px;margin:70px auto;padding:30px 34px;font-family:Consolas,monospace;color:#eceae5;background:#15161a;border:1px solid #4d515c;border-radius:12px;">'+
+       '<div style="font-size:16px;letter-spacing:.14em;color:#ec6a5f;font-weight:700;margin-bottom:14px;">CIP INITIALIZATION ERROR</div>'+
+@@ -1127,7 +1509,7 @@
+ }
+ function load(){
+   var raw=null;
+-  try{ raw=localStorage.getItem(LS_KEY); }catch(e){ return null; }
++  try{ raw=Persistence.readState(); }catch(e){ return null; }
+   if(!raw) return null;
+   try{
+     return sanitizeState(JSON.parse(raw));
+@@ -1135,13 +1517,13 @@
+     /* preserve the unreadable bytes under the recovery key BEFORE the fresh
+        blank state replaces the active key - a crash can no longer destroy them. */
+     corruptedRaw=raw;
+-    try{ localStorage.setItem(RECOVERY_KEY,raw); }catch(e2){}
++    try{ Persistence.writeRecovery(raw); }catch(e2){}
+     return null;
+   }
+ }
+ function save(){
+   try{
+-    localStorage.setItem(LS_KEY,JSON.stringify(state));
++    Persistence.writeState(JSON.stringify(state));
+     storageFailed=false;
+     return true;
+   }catch(e){
+@@ -1750,9 +2132,9 @@
+   }catch(e3){}
+   toast("This browser cannot download files directly. Copy the data manually before leaving the page.",{type:"warn"});
+ }
+-function clearRecoveryKey(){ try{ localStorage.removeItem(RECOVERY_KEY); }catch(e){} }
++function clearRecoveryKey(){ try{ Persistence.clearRecovery(); }catch(e){} }
+ function recoveryCopyExists(){
+-  try{ var v=localStorage.getItem(RECOVERY_KEY); return !!v; }catch(e){ return false; }
++  try{ var v=Persistence.readRecovery(); return !!v; }catch(e){ return false; }
+ }
+ function downloadRecoveryCopy(){
+   if(corruptedRaw){
+@@ -1760,7 +2142,7 @@
+     toast("Recovery copy downloaded. The retained browser copy stays until you restore or discard it.","info");
+   } else {
+     var v="";
+-    try{ v=localStorage.getItem(RECOVERY_KEY)||""; }catch(e2){}
++    try{ v=Persistence.readRecovery()||""; }catch(e2){}
+     if(v) downloadFile("cip-recovery-"+todayKey()+".json",v,"application/json");
+   }
+ }
+@@ -2024,12 +2406,16 @@
+   for(var i=0;i<mb.length;i++){ setCls(mb[i],"active", mb[i].getAttribute("data-mode")===ui.mode); }
+   var bs=backupStatus();
+   var pill=$("#backupPill");
+-  pill.className="backup-pill"+(storageFailed?" fail":(bs.warn?" warn":""));
++  var cl=Cloud.status(); /* minimal cloud status: red pill only when the cloud database is unreachable */
++  var cloudFail=cl.level==="fail";
++  pill.className="backup-pill"+((storageFailed||cloudFail)?" fail":(bs.warn?" warn":""));
+   pill.title=storageFailed
+     ?"SAVE FAILED - data could not be written. Click to export a backup."
+-    :(bs.warn?"Backup recommended - click to open settings":"Backup status - click for settings");
+-  pill.innerHTML='<span class="bdot '+(storageFailed?"fail":(bs.ok?"ok":(bs.warn?"warn":"")))+'"></span><span class="bp-txt">'+
+-    esc(storageFailed?"SAVE FAILED - EXPORT NOW":bs.txt)+'</span>';
++    :(cloudFail
++      ?"Cloud database unreachable - changes are kept in this browser and will sync when the connection returns. Click for settings."
++      :(bs.warn?"Backup recommended - click to open settings":"Backup status - click for settings"));
++  pill.innerHTML='<span class="bdot '+((storageFailed||cloudFail)?"fail":(bs.ok?"ok":(bs.warn?"warn":"")))+'"></span><span class="bp-txt">'+
++    esc(storageFailed?"SAVE FAILED - EXPORT NOW":(cloudFail?cl.label:bs.txt))+'</span>';
+   /* TEST MODE banner: one master switch, never stored in data */
+   var tb=$("#testModeBanner");
+   if(tb){ tb.style.display=CIP_TEST_MODE?"block":"none"; }
+@@ -4014,6 +4400,7 @@
+   booted=true;
+   startEnhancements();
+   runSelfCheck();
++  Cloud.init(); /* async - never blocks boot; falls back to the local mirror */
+   if(corruptedRaw){
+     toast("The previous stored data was unreadable. A recovery copy has been retained in this browser where storage allowed. Starting fresh.",
+       {type:"warn",life:30000,actionLabel:"DOWNLOAD RECOVERY COPY",onAction:function(){
