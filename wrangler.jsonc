@@ -36,7 +36,7 @@
     {
       "binding": "DB",
       "database_name": "cip-strike-cockpit-db",
-      "database_id": "PASTE_YOUR_D1_DATABASE_ID_HERE",
+      "database_id": "9ae66de3-f441-4218-8508-d8cc402ca306",
       "migrations_dir": "migrations"
     }
   ]
