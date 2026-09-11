@@ -1163,13 +1163,17 @@ var Cloud=(function(){
 
   return {
     init:init,
-    queueSync:function(){
-      if(!CIP_CLOUD_MODE) return;
-      try{
-        if(flushTimer) clearTimeout(flushTimer);
-        flushTimer=setTimeout(function(){ flushTimer=null; flush(); },350);
-      }catch(e){}
-    },
+queueSync:function(){
+  if(!CIP_CLOUD_MODE) return;
+  pendingSync=true;
+  try{
+    if(flushTimer) clearTimeout(flushTimer);
+    flushTimer=setTimeout(function(){
+      flushTimer=null;
+      flush();
+    },350);
+  }catch(e){}
+},
     status:function(){
       if(!CIP_CLOUD_MODE||!failed) return {level:"ok",label:""};
       return {level:"fail",label:"CLOUD OFFLINE - SAVED LOCALLY"};
