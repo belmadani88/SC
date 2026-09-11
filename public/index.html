@@ -816,7 +816,9 @@ var Persistence=(function(){
     clearRecovery:function(){ localStorage.removeItem(RECOVERY_KEY); },
     /* cloud synchronization cursor - metadata, not application state */
     readCloudVector:function(){ var v=localStorage.getItem(LS_CLOUD_KEY); return v?JSON.parse(v):null; },
-    writeCloudVector:function(v){ if(v) localStorage.setItem(LS_CLOUD_KEY,JSON.stringify(v)); }
+    writeCloudVector:function(v){ if(v) localStorage.setItem(LS_CLOUD_KEY,JSON.stringify(v)); },
+    readCloudBase:function(){ var v=localStorage.getItem(LS_CLOUD_BASE_KEY); return v?JSON.parse(v):null; },
+    writeCloudBase:function(v){ if(v) localStorage.setItem(LS_CLOUD_BASE_KEY,JSON.stringify(v)); }
   };
 })();
 /* ============================================================
@@ -847,6 +849,7 @@ var Persistence=(function(){
    ============================================================ */
 var CIP_CLOUD_MODE=true;
 var LS_CLOUD_KEY=LS_KEY+"-cloud";
+var LS_CLOUD_BASE_KEY=LS_KEY+"-cloud-base";
 var Cloud=(function(){
   var API="/api/";
   var ready=false,syncing=false,failed=false,warned=false,migrating=false,again=false,needRefresh=false,pendingSync=false;
@@ -876,6 +879,132 @@ var Cloud=(function(){
   function emptySigs(){ return {p:{},e:{},l:{},settings:"",strike:"",metadata:""}; }
   function readVector(){ try{ return Persistence.readCloudVector(); }catch(e){ return null; } }
   function persistVector(){ if(!vector) return; try{ Persistence.writeCloudVector(vector); }catch(e){} }
+
+  function readCloudBase(){ try{ return Persistence.readCloudBase(); }catch(e){ return null; } }
+  function persistCloudBase(st,gen){
+    try{ Persistence.writeCloudBase({gen:Number(gen)||0,state:JSON.parse(recJson(st))}); }catch(e){}
+  }
+  function cloneJson(x){ try{ return JSON.parse(recJson(x)); }catch(e){ return x; } }
+  function plainObj(x){ return !!x && Object.prototype.toString.call(x)==="[object Object]"; }
+  function idArray(x){
+    var i;
+    if(!Array.isArray(x)) return false;
+    for(i=0;i<x.length;i++){ if(!x[i]||typeof x[i]!=="object"||x[i].id===undefined||x[i].id===null) return false; }
+    return true;
+  }
+  function mergeThreeWayValue(base,cloud,local){
+    var bs=recJson(base),cs=recJson(cloud),ls=recJson(local),out,k,keys={};
+    if(ls===bs) return cloneJson(cloud);
+    if(cs===bs) return cloneJson(local);
+    if(ls===cs) return cloneJson(local);
+    if(idArray(base)&&idArray(cloud)&&idArray(local)) return mergeThreeWayCollection(base,cloud,local);
+    if(plainObj(base)&&plainObj(cloud)&&plainObj(local)){
+      out={};
+      for(k in base) keys[k]=true;
+      for(k in cloud) keys[k]=true;
+      for(k in local) keys[k]=true;
+      for(k in keys) out[k]=mergeThreeWayValue(base[k],cloud[k],local[k]);
+      return out;
+    }
+    /* Same scalar/array field changed in both places: cloud wins. */
+    return cloneJson(cloud);
+  }
+  function mergeThreeWayCollection(base,cloud,local){
+    var bm={},cm={},lm={},out=[],i,r,id,choice;
+    for(i=0;i<base.length;i++){ r=base[i]; bm[r.id]=r; }
+    for(i=0;i<cloud.length;i++){ r=cloud[i]; cm[r.id]=r; }
+    for(i=0;i<local.length;i++){ r=local[i]; lm[r.id]=r; }
+    for(i=0;i<cloud.length;i++){
+      id=cloud[i].id;
+      choice=mergeThreeWayCollectionItem(bm[id],cm[id],lm[id]);
+      if(choice!==undefined) out.push(choice);
+    }
+    for(i=0;i<local.length;i++){
+      id=local[i].id;
+      if(cm[id]===undefined){
+        choice=mergeThreeWayCollectionItem(bm[id],undefined,lm[id]);
+        if(choice!==undefined) out.push(choice);
+      }
+    }
+    return out;
+  }
+  function mergeThreeWayCollectionItem(base,cloud,local){
+    var hasBase=base!==undefined,hasCloud=cloud!==undefined,hasLocal=local!==undefined;
+    if(!hasBase){
+      if(hasLocal&&!hasCloud) return cloneJson(local);
+      if(hasCloud&&!hasLocal) return cloneJson(cloud);
+      if(hasCloud&&hasLocal) return mergeThreeWayValue(null,cloud,local);
+      return undefined;
+    }
+    if(!hasLocal&&!hasCloud) return undefined;
+    if(!hasLocal) return recJson(cloud)===recJson(base)?undefined:cloneJson(cloud);
+    if(!hasCloud){
+      /* A cloud deletion wins over a concurrent local edit. */
+      return undefined;
+    }
+    return mergeThreeWayValue(base,cloud,local);
+  }
+  function mergeThreeWayState(base,cloud,local){
+    var out={};
+    base=base||blankState(); cloud=cloud||blankState(); local=local||blankState();
+    out.settings=mergeThreeWayValue(base.settings,cloud.settings,local.settings);
+    out.prospects=mergeThreeWayValue(base.prospects,cloud.prospects,local.prospects);
+    out.events=mergeThreeWayValue(base.events,cloud.events,local.events);
+    out.learnings=mergeThreeWayValue(base.learnings,cloud.learnings,local.learnings);
+    out.strike=mergeThreeWayValue(base.strike,cloud.strike,local.strike);
+    out.metadata=mergeThreeWayValue(base.metadata,cloud.metadata,local.metadata);
+    return out;
+  }
+
+  /* Older browser copies may have a cloud cursor but no cloud-base snapshot
+     because the base snapshot was added later. Rebuild a safe record-level
+     three-way merge from that vector instead of treating the stale local copy
+     as authoritative. */
+  function mergeFromVector(cloud,local,vec){
+    var out={},i,id,baseSig,cloudSig,localSig;
+    vec=vec||{}; vec.sig=vec.sig||emptySigs(); cloud=cloud||blankState(); local=local||blankState();
+    function singleton(baseSig,cloudVal,localVal){
+      cloudSig=sig(recJson(cloudVal)); localSig=sig(recJson(localVal));
+      if(localSig===baseSig) return cloneJson(cloudVal);
+      if(cloudSig===baseSig) return cloneJson(localVal);
+      return cloneJson(cloudVal);
+    }
+    out.settings=singleton(vec.sig.settings,cloud.settings,local.settings);
+    out.strike=singleton(vec.sig.strike,cloud.strike,local.strike);
+    out.metadata=singleton(vec.sig.metadata,cloud.metadata,local.metadata);
+
+    function collection(kind,cloudArr,localArr){
+      var cb={},lb={},baseMap=vec.sig[kind]||{},result=[],seen={};
+      for(i=0;i<cloudArr.length;i++){ cb[cloudArr[i].id]=cloudArr[i]; seen[cloudArr[i].id]=1; }
+      for(i=0;i<localArr.length;i++){ lb[localArr[i].id]=localArr[i]; seen[localArr[i].id]=1; }
+      for(id in seen){
+        baseSig=baseMap[id];
+        if(lb[id]===undefined){
+          if(cb[id]!==undefined && baseSig!==undefined && sig(recJson(cb[id]))===baseSig) continue;
+          if(cb[id]!==undefined) result.push(cloneJson(cb[id]));
+          continue;
+        }
+        if(cb[id]===undefined){
+          /* A cloud deletion is authoritative when this browser has no
+             trustworthy base snapshot to prove that its local row was added
+             after the last sync. */
+          if(baseSig===undefined) result.push(cloneJson(lb[id]));
+          else if(sig(recJson(lb[id]))!==baseSig) { /* cloud deletion wins */ }
+          continue;
+        }
+        localSig=sig(recJson(lb[id])); cloudSig=sig(recJson(cb[id]));
+        if(baseSig===undefined) result.push(cloneJson(lb[id]));
+        else if(localSig===baseSig) result.push(cloneJson(cb[id]));
+        else if(cloudSig===baseSig) result.push(cloneJson(lb[id]));
+        else result.push(cloneJson(cb[id]));
+      }
+      return result;
+    }
+    out.prospects=collection("p",cloud.prospects,local.prospects);
+    out.events=collection("e",cloud.events,local.events);
+    out.learnings=collection("l",cloud.learnings,local.learnings);
+    return out;
+  }
 
   /* HTTP helper: fetch on modern browsers, XHR fallback for legacy
      browsers - callback style, never throws */
@@ -995,6 +1124,7 @@ var Cloud=(function(){
       var fresh=recJson(st);
       vector={gen:Number(res.gen)||0,sig:sigsOf(cloudSt)};
       persistVector();
+      persistCloudBase(cloudSt,vector.gen);
       var mirror=null; try{ mirror=Persistence.readState(); }catch(e2){}
       if(recJson(state)!==fresh||mirror!==fresh){
         state=st;
@@ -1010,6 +1140,29 @@ var Cloud=(function(){
       adopt(res,sendSnapshot);
       if(cb) cb(true);
     });
+  }
+
+  function rebaseFromBootstrap(res,cb,fallbackSnapshot){
+    try{
+      var cloudSt=sanitizeState(res.state),baseRec=readCloudBase(),localSt=sanitizeState(state),merged;
+      if(baseRec&&baseRec.state) merged=mergeThreeWayState(sanitizeState(baseRec.state),cloudSt,localSt);
+      else if(fallbackSnapshot) merged=mergeUnsyncedState(cloudSt,fallbackSnapshot,localSt);
+      else merged=mergeFromVector(cloudSt,localSt,vector);
+      vector={gen:Number(res.gen)||0,sig:sigsOf(cloudSt)};
+      persistVector();
+      persistCloudBase(cloudSt,vector.gen);
+      var fresh=recJson(merged),current=recJson(state),mirror=null;
+      try{ mirror=Persistence.readState(); }catch(e2){}
+      if(current!==fresh||mirror!==fresh){
+        state=merged;
+        try{ Persistence.writeState(fresh); }catch(e3){}
+        safeRender();
+      }
+      if(cb) cb(true);
+    }catch(err){
+      reportError(err,"cloud-rebase");
+      if(cb) cb(false);
+    }
   }
 
   function opCount(o){
@@ -1044,7 +1197,7 @@ var Cloud=(function(){
     return chunks;
   }
 
-  function flush(cb){
+  function flushCore(cb){
     if(!CIP_CLOUD_MODE){
       if(cb) cb(false);
       return;
@@ -1076,6 +1229,7 @@ var Cloud=(function(){
     }
     function sendChunk(idx){
       if(idx>=chunks.length){
+       persistCloudBase(sentState||state,vector.gen);
         if(migrating){
           migrating=false;
           toast("LOCAL DATA UPLOADED - your browser data is now in the cloud database.","ok");
@@ -1094,10 +1248,16 @@ var Cloud=(function(){
         pendingSync=false;
         if(res.conflicts&&res.conflicts.length){
           syncing=false;
-          rebootstrapAdopt(function(){
-            toast("CLOUD SYNC CONFLICT - the cloud database changed while this browser was syncing. New cloud data was adopted and any newer local edits were preserved for re-sync.",{type:"warn",life:15000});
-            if(cb) cb(true);
-          },sentState);
+          httpJson("GET","bootstrap",null,function(err2,res2){
+            if(err2||!res2||!res2.ok){ onOffline(err2); if(cb) cb(false); return; }
+            rebaseFromBootstrap(res2,function(ok){
+              if(ok){
+                toast("CLOUD SYNC CONFLICT - newer cloud data was detected. Independent local edits were merged back in; conflicting fields kept the newer cloud value.",{type:"warn",life:15000});
+                if(cb) cb(true);
+                flushCore();
+              }else if(cb) cb(false);
+            },sentState);
+          });
           return;
         }
         for(k in sigSent.p) vector.sig.p[k]=sigSent.p[k];
@@ -1117,6 +1277,43 @@ var Cloud=(function(){
     sendChunk(0);
   }
 
+  /* Before sending pending local edits, verify that the cloud generation has
+     not advanced since this browser's last acknowledged save. The Worker
+     generation guard remains the final race-safety check. */
+  function flush(cb){
+    if(!CIP_CLOUD_MODE){
+      if(cb) cb(false);
+      return;
+    }
+    if(!ready){
+      pendingSync=true;
+      if(cb) cb(false);
+      return;
+    }
+    if(syncing){ again=true; if(cb) cb(false); return; }
+    var ops=computeOps();
+    if(!ops){
+      if(failed){ rebootstrapAdopt(cb); }
+      else if(cb) cb(true);
+      return;
+    }
+    httpJson("GET","bootstrap",null,function(err,res){
+      if(err||!res||!res.ok){ onOffline(err); if(cb) cb(false); return; }
+      recover();
+      var remoteGen=Number(res.gen)||0,localGen=Number(vector&&vector.gen)||0;
+      if(remoteGen!==localGen){
+        syncing=true;
+        rebaseFromBootstrap(res,function(ok){
+          syncing=false;
+          if(!ok){ if(cb) cb(false); return; }
+          flushCore(cb);
+        });
+        return;
+      }
+      flushCore(cb);
+    });
+  }
+
   /* push pending local edits first (they win where they are newer), then
      adopt the merged server truth so server-only records appear too */
   function reconcile(){
@@ -1134,9 +1331,16 @@ var Cloud=(function(){
       if(err||!res||!res.ok){ onOffline(err); return; }
       failed=false;
       var gen=Number(res.gen)||0;
+      var cloudState=sanitizeState(res.state);
       var counts=res.counts||{};
-      var serverBlank=!counts.prospects&&!counts.events&&!counts.learnings;
       var localDefaults=blankState();
+      var serverBlank=(
+        !counts.prospects &&
+        !counts.events &&
+        !counts.learnings &&
+        sig(recJson(cloudState.settings))===sig(recJson(localDefaults.settings)) &&
+        sig(recJson(cloudState.strike))===sig(recJson(localDefaults.strike))
+      );
       var localBlank=(
         !state.prospects.length &&
         !state.events.length &&
@@ -1145,17 +1349,38 @@ var Cloud=(function(){
         sig(recJson(state.strike))===sig(recJson(localDefaults.strike))
       );
       var vec=readVector();
+
+      /* A browser with an existing cloud cursor has already participated in
+         synchronization. Its cursor takes precedence over the "empty cloud"
+         heuristic, so an intentional reset/import cannot be mistaken for a
+         first-run database and resurrected from stale localStorage. */
+      if(vec){
+        vector={gen:Number(vec.gen)||0,sig:(vec.sig||emptySigs())};
+        if(gen!==vector.gen){
+          rebaseFromBootstrap(res,function(ok){
+            if(ok) flush();
+          });
+          return;
+        }
+        if(!computeOps()){
+          adopt(res);
+          return;
+        }
+        reconcile();
+        return;
+      }
+
+      /* No prior cloud cursor means this browser has never participated in the
+         cloud protocol. Only an actually empty/default cloud may be seeded from
+         its existing local data. A non-empty cloud is authoritative. */
       if(serverBlank&&localBlank){
-        /* nothing anywhere: mark the current state as synced */
         vector={gen:gen,sig:sigsOf(state)};
         pendingSync=false;
         persistVector();
+        persistCloudBase(state,gen);
         return;
       }
       if(serverBlank&&!localBlank){
-        /* FIRST-RUN MIGRATION: upload this browser's existing local data to
-           the fresh cloud database - ids, timestamps, events, learnings,
-           settings and strike state are all preserved */
         migrating=true;
         vector={gen:gen,sig:emptySigs()};
         persistVector();
@@ -1163,18 +1388,11 @@ var Cloud=(function(){
         return;
       }
       if(localBlank){ adopt(res); return; }
-      if(!vec){
-        /* data here, but this browser never synced: everything counts as
-           pending; records the server already holds newer versions of are
-           rejected by the generation guard and adopted afterwards */
-        vector={gen:0,sig:emptySigs()};
-        persistVector();
-        reconcile();
-        return;
-      }
-      vector={gen:Number(vec.gen)||0,sig:(vec.sig||emptySigs())};
-      if(!computeOps()){ adopt(res); return; } /* mirror clean - cloud authoritative */
-      reconcile();
+
+      /* This browser has local data but no prior cloud cursor, while the cloud
+         is already populated. There is no trustworthy local base generation,
+         so adopt the authoritative cloud rather than risking an overwrite. */
+      adopt(res);
     });
   }
 
