@@ -1380,7 +1380,10 @@ var Cloud=(function(){
         persistCloudBase(state,gen);
         return;
       }
-      if(serverBlank&&!localBlank){
+      /* A brand-new cloud can be seeded only at generation 0. Once the cloud
+         has any history, an empty cloud is authoritative (for example after a
+         global reset) and this browser's localStorage must never resurrect it. */
+      if(serverBlank&&!localBlank&&gen===0){
         migrating=true;
         vector={gen:gen,sig:emptySigs()};
         persistVector();
@@ -1389,10 +1392,11 @@ var Cloud=(function(){
       }
       if(localBlank){ adopt(res); return; }
 
-      /* This browser has local data but no prior cloud cursor, while the cloud
-         is already populated. There is no trustworthy local base generation,
-         so adopt the authoritative cloud rather than risking an overwrite. */
+      /* No cursor + non-default local data against an established cloud
+         generation is stale/unknown browser-local state. Adopt the cloud
+         rather than treating it as a first migration candidate. */
       adopt(res);
+      return;
     });
   }
 
