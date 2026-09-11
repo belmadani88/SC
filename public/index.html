@@ -2301,19 +2301,51 @@ function toast(msg,opts){
   setTimeout(function(){ addCls(t,"out"); setTimeout(function(){ removeEl(t); },260); },life);
 }
 function copyText(text,label){
-  var ok=function(){ toast((label||"Copied")+" - "+text,{type:"ok"}); };
+  var done=false;
+  var ok=function(){
+    if(done) return;
+    done=true;
+    toast((label||"Copied")+" - "+text,{type:"ok"});
+  };
+  var fail=function(){
+    if(done) return;
+    done=true;
+    toast("Copy failed: "+text,{type:"warn"});
+  };
+  /* Primary path: direct synchronous copy during the user click. This works
+     in browsers/contexts where the asynchronous Clipboard API is restricted. */
   var fb=function(){
-    var ta=null;
+    var ta=null,active=document.activeElement,okCopy=false;
     try{
       ta=document.createElement("textarea");
-      ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
-      document.body.appendChild(ta); ta.select();
-      document.execCommand("copy"); ok();
-    }catch(e){ toast("Copy failed: "+text,{type:"warn"}); }
-    finally{ if(ta&&ta.parentNode) ta.parentNode.removeChild(ta); }
+      ta.value=text;
+      ta.setAttribute("readonly","readonly");
+      ta.style.position="fixed";
+      ta.style.left="-9999px";
+      ta.style.top="0";
+      ta.style.width="1px";
+      ta.style.height="1px";
+      ta.style.opacity="0";
+      ta.style.pointerEvents="none";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      if(ta.setSelectionRange) ta.setSelectionRange(0,ta.value.length);
+      okCopy=document.execCommand("copy")===true;
+      if(okCopy) ok();
+      else fail();
+    }catch(e){ fail(); }
+    finally{
+      if(ta&&ta.parentNode) ta.parentNode.removeChild(ta);
+      if(active&&active.focus){ try{ active.focus(); }catch(e2){} }
+    }
   };
+  /* Modern Clipboard API is a secondary path. Do not use it as the only
+     mechanism because some browsers expose it but reject the write at runtime. */
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(ok,fb);
+    try{
+      navigator.clipboard.writeText(text).then(ok,fb);
+    }catch(e){ fb(); }
   } else fb();
 }
 function openModal(html){
