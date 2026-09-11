@@ -849,7 +849,7 @@ var CIP_CLOUD_MODE=true;
 var LS_CLOUD_KEY=LS_KEY+"-cloud";
 var Cloud=(function(){
   var API="/api/";
-  var ready=false,syncing=false,failed=false,warned=false,migrating=false,again=false,needRefresh=false;
+  var ready=false,syncing=false,failed=false,warned=false,migrating=false,again=false,needRefresh=false,pendingSync=false;
   var vector=null; /* {gen:Number,sig:{p:{id:sig},e:{id:sig},l:{id:sig},settings:sig,strike:sig,metadata:sig}} */
   var flushTimer=null,retryTimer=null;
 
