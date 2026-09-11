@@ -1045,7 +1045,15 @@ var Cloud=(function(){
   }
 
   function flush(cb){
-    if(!CIP_CLOUD_MODE||!ready){ if(cb) cb(false); return; }
+    if(!CIP_CLOUD_MODE){
+      if(cb) cb(false);
+      return;
+    }
+    if(!ready){
+      pendingSync=true;
+      if(cb) cb(false);
+      return;
+    }
     if(syncing){ again=true; if(cb) cb(false); return; }
     var ops=computeOps();
     if(!ops){
@@ -1083,6 +1091,7 @@ var Cloud=(function(){
       var sentSettings=chunk.settings?sig(recJson(chunk.settings)):null,sentStrike=chunk.strike?sig(recJson(chunk.strike)):null,sentMetadata=chunk.metadata?sig(recJson(chunk.metadata)):null;
       httpJson("POST","sync",{ops:chunk,baseGen:vector.gen,clientTime:nowIso()},function(err,res){
         if(err||!res||!res.ok){ syncing=false; onOffline(err); if(cb) cb(false); return; }
+        pendingSync=false;
         if(res.conflicts&&res.conflicts.length){
           syncing=false;
           rebootstrapAdopt(function(){
@@ -1127,11 +1136,19 @@ var Cloud=(function(){
       var gen=Number(res.gen)||0;
       var counts=res.counts||{};
       var serverBlank=!counts.prospects&&!counts.events&&!counts.learnings;
-      var localBlank=!state.prospects.length&&!state.events.length&&!state.learnings.length;
+      var localDefaults=blankState();
+      var localBlank=(
+        !state.prospects.length &&
+        !state.events.length &&
+        !state.learnings.length &&
+        sig(recJson(state.settings))===sig(recJson(localDefaults.settings)) &&
+        sig(recJson(state.strike))===sig(recJson(localDefaults.strike))
+      );
       var vec=readVector();
       if(serverBlank&&localBlank){
         /* nothing anywhere: mark the current state as synced */
         vector={gen:gen,sig:sigsOf(state)};
+        pendingSync=false;
         persistVector();
         return;
       }
