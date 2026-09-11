@@ -17,7 +17,7 @@
 
 {
   // Worker name (becomes part of the deployed URL)
-  "name": "cip-strike-cockpit",
+  "name": "scp",
 
   // Worker entry point (thin API; serves public/index.html through assets)
   "main": "src/worker.js",
