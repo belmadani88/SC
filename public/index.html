@@ -2312,9 +2312,9 @@ function copyText(text,label){
     done=true;
     toast("Copy failed: "+text,{type:"warn"});
   };
-  /* Primary path: direct synchronous copy during the user click. This works
-     in browsers/contexts where the asynchronous Clipboard API is restricted. */
-  var fb=function(){
+  /* Primary path: synchronous execCommand during the actual button click.
+     Some browsers expose navigator.clipboard but reject it at runtime. */
+  var syncCopy=function(){
     var ta=null,active=document.activeElement,okCopy=false;
     try{
       ta=document.createElement("textarea");
@@ -2332,21 +2332,24 @@ function copyText(text,label){
       ta.select();
       if(ta.setSelectionRange) ta.setSelectionRange(0,ta.value.length);
       okCopy=document.execCommand("copy")===true;
-      if(okCopy) ok();
-      else fail();
-    }catch(e){ fail(); }
-    finally{
+      return okCopy;
+    }catch(e){
+      return false;
+    }finally{
       if(ta&&ta.parentNode) ta.parentNode.removeChild(ta);
       if(active&&active.focus){ try{ active.focus(); }catch(e2){} }
     }
   };
-  /* Modern Clipboard API is a secondary path. Do not use it as the only
-     mechanism because some browsers expose it but reject the write at runtime. */
+  if(syncCopy()){ ok(); return; }
+  /* Secondary path: modern Clipboard API, still invoked directly from the
+     user gesture when the synchronous legacy path is unavailable. */
   if(navigator.clipboard&&navigator.clipboard.writeText){
     try{
-      navigator.clipboard.writeText(text).then(ok,fb);
-    }catch(e){ fb(); }
-  } else fb();
+      navigator.clipboard.writeText(text).then(ok,fail);
+      return;
+    }catch(e3){}
+  }
+  fail();
 }
 function openModal(html){
   var w=$("#modalWrap");
@@ -3127,6 +3130,71 @@ function handleAgeCommit(inp){
     safe(renderQueue); safe(renderRail); /* queue meta chips and rail refresh */
   }catch(err){ reportError(err,"age-commit"); }
 }
+/* LOOM URL HARDENING: persist the pasted link independently of the broad
+   focusout handler, and update only the affected controls so the focused
+   input is never destroyed by a re-render. */
+function normalizeLoomValue(raw){
+  return String(raw==null?"":raw).trim();
+}
+function refreshLoomUI(p){
+  try{
+    if(!p) return;
+    var v=normalizeLoomValue(p.strike.loomUrl);
+    var btn=$("#drawer .loom-copy-btn");
+    if(btn){
+      if(v) btn.removeAttribute("disabled");
+      else btn.setAttribute("disabled","disabled");
+    }
+    var hint=$("#drawer .loom-req");
+    if(hint){
+      hint.className=v?"hint loom-req":"hint req loom-req";
+      hint.textContent=v
+        ?"DELIVER IT NOW - MOMENTUM FADES FAST."
+        :"PASTE THE LOOM LINK ABOVE - NORMAL DELIVERY REQUIRES IT. THE BYPASS IS IN THE NEXT STEP SECTION.";
+    }
+  }catch(err){ reportError(err,"loom-ui"); }
+}
+function commitLoom(p,raw){
+  if(!p) return false;
+  var v=normalizeLoomValue(raw);
+  if(String(p.strike.loomUrl||"")===v){
+    refreshLoomUI(p);
+    return false;
+  }
+  var okc=commitState(function(){
+    p.strike.loomUrl=v;
+    p.updatedAt=new Date().toISOString();
+  });
+  if(okc) refreshLoomUI(p);
+  return !!okc;
+}
+function handleLoomCommit(inp){
+  try{
+    if(!inp) return;
+    var pid=inp.getAttribute("data-id");
+    var p=pid?arrFind(state.prospects,function(x){ return x.id===pid; }):null;
+    if(!p||ui.drawerId!==p.id) return;
+    commitLoom(p,inp.value);
+  }catch(err){ reportError(err,"loom-commit"); }
+}
+function bindLoomInput(){
+  var els=$$(".loom-inp");
+  for(var i=0;i<els.length;i++){
+    try{
+      (function(inp){
+        if(inp.getAttribute("data-bound")==="1") return;
+        inp.setAttribute("data-bound","1");
+        var queued=debounce(function(){ handleLoomCommit(inp); },200);
+        onEvt(inp,"input",queued);
+        onEvt(inp,"keyup",queued);
+        onEvt(inp,"paste",function(){ setTimeout(function(){ handleLoomCommit(inp); },0); });
+        onEvt(inp,"change",function(){ handleLoomCommit(inp); });
+        onEvt(inp,"blur",function(){ handleLoomCommit(inp); });
+      })(els[i]);
+    }catch(err){ reportError(err,"loom-bind"); }
+  }
+}
+
 function bindAgeInput(){
   var els=$$(".age-inp");
   for(var i=0;i<els.length;i++){
@@ -3199,7 +3267,7 @@ function xrayHTML(p){
   if(p.testing.qualification!=="go") return '<div class="empty-inline">The X-ray step unlocks once the target is qualified GO.</div>';
   var s=p.strike;
   var loomRow='<div class="crow"><span class="clabel">LOOM URL</span>'+
-    '<input class="inline-inp mono" data-field="strike.loomUrl" type="text" value="'+esc(s.loomUrl)+'" placeholder="paste the Loom link after recording" spellcheck="false"></div>';
+    '<input class="inline-inp mono loom-inp" data-field="strike.loomUrl" data-id="'+p.id+'" type="text" value="'+esc(s.loomUrl)+'" placeholder="paste the Loom link after recording" spellcheck="false"></div>';
   if(s.videoStatus==="sent"){
     return '<div class="qual-result"><span class="chip-status st-won">X-RAY DELIVERED</span></div>'+loomRow;
   }
@@ -3221,10 +3289,10 @@ function xrayHTML(p){
   }
   if(s.videoStatus==="recorded"){
     var loomReq=s.loomUrl
-      ?'<span class="hint">DELIVER IT NOW - MOMENTUM FADES FAST.</span>'
-      :'<span class="hint req">PASTE THE LOOM LINK ABOVE - NORMAL DELIVERY REQUIRES IT. THE BYPASS IS IN THE NEXT STEP SECTION.</span>';
+      ?'<span class="hint loom-req">DELIVER IT NOW - MOMENTUM FADES FAST.</span>'
+      :'<span class="hint req loom-req">PASTE THE LOOM LINK ABOVE - NORMAL DELIVERY REQUIRES IT. THE BYPASS IS IN THE NEXT STEP SECTION.</span>';
     return '<div class="qual-result"><span class="chip-status st-go">X-RAY RECORDED</span></div>'+loomRow+
-      '<div class="trow"><button type="button" class="btn" data-action="copy-loom" data-id="'+p.id+'"'+(s.loomUrl?"":" disabled")+'>'+icon("copy","ic-sm")+' COPY LOOM LINK</button>'+
+      '<div class="trow"><button type="button" class="btn loom-copy-btn" data-action="copy-loom" data-id="'+p.id+'"'+(s.loomUrl?"":" disabled")+'>'+icon("copy","ic-sm")+' COPY LOOM LINK</button>'+
       '<button type="button" class="linkish quiet" data-action="xray-reset" data-id="'+p.id+'">re-record</button></div>'+
       loomReq;
   }
@@ -3498,8 +3566,8 @@ function focusTC(sel){
    same dotted path - contact.*, strike.leak1/leak2/loomUrl, and strike.adAge.
    The field commits transactionally: a failed write reverts the value.
    The drawer is re-rendered only when focus has left it entirely.
-   AUDIT assembly line: when both leaks exist and focus leaves the drawer,
-   advance automatically - guarded on relatedTarget so a pending GO click wins. */
+   IMPORTANT: focusout never advances the workflow. It is only a persistence
+   boundary; workflow progression happens only through explicit actions. */
 onEvt(document,"focusout",function(e){
   try{
     e=e||window.event;
@@ -3524,12 +3592,8 @@ onEvt(document,"focusout",function(e){
     if(!okc) return; /* reverted - commitState already re-rendered */
     var rt=e.relatedTarget||e.toElement, drawerEl=$("#drawer");
     if(rt&&drawerEl&&drawerEl.contains&&drawerEl.contains(rt)) return;
-    if(ui.batchPhase==="AUDIT"&&phaseOf(p)>2){
-      setTimeout(function(){
-        if(ui.drawerId===p.id&&ui.batchPhase==="AUDIT"&&phaseOf(p)>2) batchAutoAdvance(p);
-      },150);
-      return;
-    }
+    /* Losing focus is only a save boundary. It never advances the workflow.
+       Batch progression requires an explicit workflow action. */
     setTimeout(function(){
       safe(function(){
         var d=$("#drawer");
@@ -4530,6 +4594,7 @@ function registerErrorHandlers(){
    el.innerHTML=wizardHTML(p);
    bindRadioHandlers(); /* FIX: rebind the target-check radios after every wizard render */
    bindAgeInput(); /* AD AGE hardening: direct change/blur bindings after every wizard render */
+   bindLoomInput(); /* LOOM URL hardening: dedicated immediate/deferred commit bindings */
  }
  function uniqueEventCount(pred){
    var seen={};
