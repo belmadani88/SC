@@ -2300,12 +2300,13 @@ function toast(msg,opts){
   var life=opts.life||(opts.actionLabel?8000:4200);
   setTimeout(function(){ addCls(t,"out"); setTimeout(function(){ removeEl(t); },260); },life);
 }
-function copyText(text,label){
+function copyText(text,label,onSuccess){
   var done=false;
   var ok=function(){
     if(done) return;
     done=true;
     toast((label||"Copied")+" - "+text,{type:"ok"});
+    if(onSuccess){ try{ onSuccess(); }catch(e){ reportError(e,"copy-success"); } }
   };
   var fail=function(){
     if(done) return;
@@ -4061,7 +4062,27 @@ function handleAction(a,el,id,p,e){
       break;
     case "phone-link": if(p&&p.contact.phone) location.href="tel:"+p.contact.phone; break;
     case "copy-email": if(p&&p.contact.email) copyText(p.contact.email,"Email copied"); break;
-    case "copy-loom": if(p&&p.strike.loomUrl) copyText(p.strike.loomUrl,"Loom link copied"); break;
+    case "copy-loom": {
+      if(!p) break;
+      /* Flush the currently visible Loom field before copying. This closes the
+         debounce/blur race where a very fast paste -> click can reach the
+         button before the deferred input commit runs. */
+      var loomInput=$("#drawer .loom-inp");
+      if(loomInput) commitLoom(p,loomInput.value);
+      var loom=p.strike.loomUrl;
+      if(!loom){
+        toast("CANNOT COPY - paste the Loom link first.", {type:"warn"});
+        break;
+      }
+      /* Successful Loom copy completes the X-ray screen. Re-render the same
+         prospect so workflowStage() moves it from X-RAY to DELIVERY. This is
+         deliberately NOT batchAutoAdvance(), which would skip to another
+         prospect during a strike batch. */
+      copyText(loom,"Loom link copied",function(){
+        if(ui.drawerId===p.id) safe(renderDrawer,"loom-to-delivery");
+      });
+      break;
+    }
     case "focus-contact": {
       var em=$("#drawer [data-field='contact.email']")||$("#drawer [data-field='contact.name']");
       if(em){
