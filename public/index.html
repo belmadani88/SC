@@ -3,394 +3,479 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light">
 <title>CIP - Strike Cockpit</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0a458' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23176B63' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3C/svg%3E">
 <style>
 /* ============================================================
    CIP STRIKE COCKPIT - visual system
-   dark charcoal | amber momentum | red = risk/overdue/trust debt
-   COMPATIBILITY NOTE: no CSS custom properties, no min()/calc(),
-   no backdrop-filter, and no CSS grid for the primary layout.
-   All colors are literal hex so IE9/10/11 render the real design.
-   Vertical rhythm uses margins (not flex gap) so old browsers
-   keep identical spacing. The two-column layout uses floats.
+   QUIET PRECISION - calm | intelligent | premium | trustworthy
+   botanical teal primary | warm amber attention | green success
+   red risk | muted blue info | dusty lavender reserved
+   Hierarchy: background -> surfaces -> typography -> primary
+   actions -> data emphasis -> alerts (80% calm, 15% structure,
+   5% emphasis).
+   COMPATIBILITY NOTE (preserved from the original build):
+   no CSS custom properties, no min()/calc(), no backdrop-filter,
+   and no CSS grid for the primary page layout - the two-column
+   shell and the queue use floats. CSS grid IS used, deliberately,
+   only in secondary components (settings/edit form fields, data
+   tables, stat grids); browsers without grid support simply stack
+   those blocks, so the page stays usable. All colors are literal
+   hex so IE9/10/11 render the real design. Vertical rhythm uses
+   margins (not flex gap) so old browsers keep identical spacing.
+   Responsive type uses a fixed-size declaration followed by
+   clamp() as a progressive enhancement - legacy browsers keep
+   the fixed size.
    ============================================================ */
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html{color-scheme:dark}
-body{margin:0;background:#0e0f11;color:#eceae5;font:16px/1.55 "Avenir Next","Segoe UI","Helvetica Neue",Helvetica,"PT Sans",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+html{color-scheme:light}
+body{margin:0;background:#F6F7F4;color:#1F2933;font:16px/1.55 "DM Sans","Avenir Next","Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
 button{font-family:inherit}
-::selection{background:rgba(232,172,96,.35)}
+::selection{background:rgba(23,107,99,.22)}
 ::-webkit-scrollbar{width:10px;height:10px}
-::-webkit-scrollbar-thumb{background:#4d515c;border-radius:5px;border:2px solid #0e0f11}
+::-webkit-scrollbar-thumb{background:#C7D0CB;border-radius:5px;border:2px solid #F6F7F4}
 ::-webkit-scrollbar-track{background:transparent}
-:focus{outline:2px solid #e8ac60;outline-offset:1px}
-input:focus,textarea:focus,select:focus{border-color:#e8ac60}
-input,textarea,select{background:#0b0c0e;border:2px solid #6a6f7c;border-radius:6px;color:#eceae5;padding:10px 12px;font:15px "Avenir Next","Segoe UI","Helvetica Neue",Helvetica,"PT Sans",Arial,sans-serif;outline:none;min-width:0}
-input::placeholder,textarea::placeholder{color:#9298a3}
+:focus{outline:2px solid #176B63;outline-offset:1px}
+input:focus,textarea:focus,select:focus{border-color:#176B63}
+input,textarea,select{background:#FFFFFF;border:2px solid #C7D0CB;border-radius:6px;color:#1F2933;padding:10px 12px;font:15px "DM Sans","Avenir Next","Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;outline:none;min-width:0}
+input::placeholder,textarea::placeholder{color:#7B878D}
 .ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .ic-sm{width:14px;height:14px}
 .ic-lg{width:24px;height:24px}
-.mono{font-family:"SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace}
-.dim{color:#b8bbc3}
+.mono{font-family:"IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace}
+.dim{color:#46545D}
 
 /* ---------- test mode banner (shown only when CIP_TEST_MODE = true) ---------- */
-.test-banner{background:#e8ac60;border:2px solid #b57a2e;color:#1a1206;font:700 14px "SF Mono",Consolas,monospace;letter-spacing:.06em;padding:12px 16px;border-radius:8px;text-align:center;margin:0 0 14px}
+.test-banner{background:#F8EDE2;border:2px solid #E8C6A6;color:#C97D3C;font:700 14px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.06em;padding:12px 16px;border-radius:8px;text-align:center;margin:0 0 14px}
 
 /* ---------- top bar ---------- */
 /* topbar wraps on narrow screens instead of pushing the settings button and
    backup pill off-screen (which caused page-wide horizontal scrolling on
    tablet/mobile). flex-wrap is IE10+; old browsers simply keep one row. */
-.topbar{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:10px 20px;min-height:64px;background:rgba(14,15,17,.95);border-bottom:1px solid #4d515c}
+.topbar{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:10px 20px;min-height:64px;background:rgba(255,255,255,.94);border-bottom:1px solid #DCE2DE}
 .brand{display:flex;align-items:center;gap:11px;flex:none}
-.brand>.ic{width:26px;height:26px;color:#e8ac60}
+.brand>.ic{width:26px;height:26px;color:#176B63}
 .brand-text{display:flex;flex-direction:column;line-height:1.3}
-.brand-text span{font:600 10px "SF Mono",Consolas,monospace;letter-spacing:.2em;color:#9298a3}
-.brand-text b{font:700 13px "SF Mono",Consolas,monospace;letter-spacing:.13em;color:#eceae5}
-.mode-switch{display:flex;background:#15161a;border:1px solid #565a66;border-radius:7px;padding:3px;gap:2px;flex:none}
-.mode-switch button{font:600 13px "SF Mono",Consolas,monospace;letter-spacing:.08em;padding:7px 14px;border-radius:5px;border:none;background:none;color:#eceae5;cursor:pointer}
-.mode-switch button.active{background:#22242a;color:#e8ac60}
+.brand-text span{font:600 10px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.2em;color:#7B878D}
+.brand-text b{font:700 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.13em;color:#1F2933}
+.mode-switch{display:flex;background:#F0F3F0;border:1px solid #DCE2DE;border-radius:8px;padding:3px;gap:2px;flex:none}
+.mode-switch button{font:600 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.08em;padding:7px 14px;border-radius:6px;border:none;background:none;color:#46545D;cursor:pointer}
+.mode-switch button:hover{color:#1F2933}
+.mode-switch button.active{background:#FFFFFF;color:#176B63;box-shadow:0 1px 2px rgba(31,41,51,.12)}
 .search{flex:1;max-width:430px;min-width:110px;position:relative;margin-left:auto}
-.search>.ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9298a3;width:15px;height:15px}
-.search input{width:100%;background:#15161a;border:1px solid #565a66;border-radius:7px;padding:10px 38px 10px 34px;color:#eceae5;font:13px "SF Mono",Consolas,monospace}
-.search input::placeholder{color:#9298a3}
-.skbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font:11px "SF Mono",Consolas,monospace;color:#9298a3;border:1px solid #4d515c;border-radius:4px;padding:1px 6px;pointer-events:none}
-.backup-pill{display:flex;align-items:center;gap:7px;flex:none;background:none;border:1px solid #565a66;border-radius:7px;padding:8px 11px;cursor:pointer;font:600 12px "SF Mono",Consolas,monospace;letter-spacing:.06em;color:#eceae5}
-.backup-pill:hover{border-color:#6a6f7c;color:#eceae5}
-.backup-pill.warn{border-color:#e8ac60;color:#e8ac60}
-.backup-pill.fail{border-color:#ec6a5f;color:#ec6a5f}
-.bdot{width:8px;height:8px;border-radius:50%;background:#9298a3}
-.bdot.ok{background:#5fc27c}.bdot.warn{background:#e8ac60}.bdot.fail{background:#ec6a5f}
-.icon-btn{width:38px;height:38px;flex:none;display:inline-flex;align-items:center;justify-content:center;background:#15161a;border:1px solid #6a6f7c;border-radius:6px;color:#eceae5;cursor:pointer}
-.icon-btn:hover{color:#eceae5;border-color:#6a6f7c}
+.search>.ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#7B878D;width:15px;height:15px}
+.search input{width:100%;background:#FFFFFF;border:1px solid #C7D0CB;border-radius:8px;padding:10px 38px 10px 34px;color:#1F2933;font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace}
+.search input::placeholder{color:#7B878D}
+.skbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font:11px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#7B878D;border:1px solid #DCE2DE;border-radius:4px;padding:1px 6px;pointer-events:none}
+.backup-pill{display:flex;align-items:center;gap:7px;flex:none;background:#FFFFFF;border:1px solid #C7D0CB;border-radius:8px;padding:8px 11px;cursor:pointer;font:600 12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.06em;color:#1F2933}
+.backup-pill:hover{border-color:#7B878D;color:#1F2933}
+.backup-pill.warn{border-color:#C97D3C;color:#C97D3C}
+.backup-pill.fail{border-color:#A33F3F;color:#A33F3F}
+.bdot{width:8px;height:8px;border-radius:50%;background:#C7D0CB}
+.bdot.ok{background:#2F7D6D}.bdot.warn{background:#C97D3C}.bdot.fail{background:#A33F3F}
+.icon-btn{width:38px;height:38px;flex:none;display:inline-flex;align-items:center;justify-content:center;background:#FFFFFF;border:1px solid #C7D0CB;border-radius:6px;color:#46545D;cursor:pointer}
+.icon-btn:hover{color:#1F2933;border-color:#7B878D}
 .icon-btn.sm{width:32px;height:32px}
 
 /* ---------- layout (float-based: works on IE9/10/11 and older) ---------- */
-main{max-width:1240px;margin:0 auto;padding:20px}
-#viewExecute,#viewAnalytics{display:block}
+main{max-width:1240px;margin:0 auto;padding:24px 20px}
+#viewExecute,#viewAnalytics,#viewProspects{display:block}
 .addbar{margin-bottom:16px}
 .exec-grid{margin-bottom:16px;zoom:1}
 .exec-grid:after{content:"";display:block;clear:both}
 .exec-rail{float:left;width:330px}
 .exec-rail .panel{margin-bottom:16px}
 .exec-main{margin-left:346px;min-width:0}
-.panel{background:#15161a;border:1px solid #4d515c;border-radius:10px}
-.p-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:14px 16px 0}
-.label{font:600 14px "SF Mono",Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;color:#eceae5}
-.p-note{font:13px "SF Mono",Consolas,monospace;color:#b8bbc3;letter-spacing:.05em}
+.panel{background:#FFFFFF;border:1px solid #DCE2DE;border-radius:10px}
+.p-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:16px 18px 0}
+.label{font:600 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.09em;text-transform:uppercase;color:#1F2933}
+.p-note{font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#5E6B73;letter-spacing:.05em}
 #viewAnalytics>.panel,#viewAnalytics>.an-grid,#viewAnalytics>.review-gate{margin-bottom:16px}
+#viewProspects>.pv-head,#viewProspects>#pvFilters,#viewProspects>#pvList,#viewProspects>#pvDetail{margin-bottom:16px}
 
 /* ---------- add target ---------- */
-.addbar{padding:14px 16px}
+.addbar{padding:16px 18px}
 .addrow{display:flex;gap:10px}
-.addrow input{flex:1;font:15px "SF Mono",Consolas,monospace;background:#0b0c0e;border:2px solid #4d515c;border-radius:7px;padding:12px 14px;color:#eceae5}
-.dupwarn{margin-top:12px;border:1px solid #ec6a5f;background:rgba(226,85,74,.08);border-radius:8px;padding:14px}
-.dw-title{display:flex;gap:8px;align-items:center;color:#ec6a5f;font:700 13px "SF Mono",Consolas,monospace;letter-spacing:.08em}
+.addrow input{flex:1;font:15px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;background:#FFFFFF;border:2px solid #C7D0CB;border-radius:7px;padding:12px 14px;color:#1F2933}
+.dupwarn{margin-top:12px;border:1px solid #E5BEBE;background:#F7E8E8;border-radius:8px;padding:14px}
+.dw-title{display:flex;gap:8px;align-items:center;color:#A33F3F;font:700 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.08em}
 .dw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 16px;margin:12px 0}
 .dw-grid>div{min-width:0}
-.dw-grid span{display:block;font:11px "SF Mono",Consolas,monospace;letter-spacing:.08em;color:#9298a3;margin-bottom:2px}
-.dw-grid b{font:13px "SF Mono",Consolas,monospace;color:#eceae5;font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dw-grid span{display:block;font:11px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.08em;color:#5E6B73;margin-bottom:2px}
+.dw-grid b{font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#1F2933;font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ---------- strike / today panel ---------- */
-.today-body{padding:14px 16px 16px}
+.today-body{padding:16px 18px 18px}
 .tnumrow{display:flex;align-items:baseline;gap:8px}
-.tnum{font-size:44px;font-weight:500;color:#eceae5;line-height:1;font-variant-numeric:tabular-nums;font-family:"SF Mono",Consolas,monospace}
-.tnum.complete{color:#5fc27c}
+.tnum{font-size:44px;font-weight:500;color:#1F2933;line-height:1;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace}
+.tnum.complete{color:#2F7D6D}
 .tnum.flash{animation:pop .7s ease}
-@keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.08)}55%{color:#5fc27c}100%{transform:scale(1)}}
-.tgoal{font:20px "SF Mono",Consolas,monospace;color:#9298a3}
+@keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.08)}55%{color:#2F7D6D}100%{transform:scale(1)}}
+.tgoal{font:20px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#5E6B73}
 .tickbar{display:flex;gap:2px;margin:14px 0 10px}
-.tick{flex:1;height:12px;border-radius:2px;background:#4d515c}
-.tick.on{background:#e8ac60}
-.tickbar.done .tick.on{background:#5fc27c}
-.tnote{font-size:15px;color:#b8bbc3;margin-top:2px}
-.tnote.done{color:#5fc27c;display:flex;gap:6px;align-items:center;font-weight:600;font-size:14px;letter-spacing:.03em}
-.tnote.warn{color:#f4c37a;font:600 13px "SF Mono",Consolas,monospace;letter-spacing:.07em;margin-top:8px;display:flex;gap:6px;align-items:center}
-.tnote.micro{font:12px "SF Mono",Consolas,monospace;letter-spacing:.04em;color:#9298a3;margin-top:8px}
+.tick{flex:1;height:12px;border-radius:2px;background:#DCE2DE}
+.tick.on{background:#176B63}
+.tickbar.done .tick.on{background:#2F7D6D}
+.tnote{font-size:15px;color:#46545D;margin-top:2px}
+.tnote.done{color:#2F7D6D;display:flex;gap:6px;align-items:center;font-weight:600;font-size:14px;letter-spacing:.03em}
+.tnote.warn{color:#C97D3C;font:600 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em;margin-top:8px;display:flex;gap:6px;align-items:center}
+.tnote.micro{font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.04em;color:#5E6B73;margin-top:8px}
 .trow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
 
 /* ---------- due panel ---------- */
-.due-body{padding:14px 16px 16px}
-.due-num{font:500 40px/1 "SF Mono",Consolas,monospace;font-variant-numeric:tabular-nums;color:#b8bbc3}
-.due-num.bad{color:#ec6a5f}.due-num.warn{color:#e8ac60}
-.due-sub{display:block;font:600 13px "SF Mono",Consolas,monospace;letter-spacing:.07em;color:#b8bbc3;margin:8px 0 12px}
-.due-clear{display:flex;align-items:center;gap:7px;color:#5fc27c;font-size:15px;margin-top:8px}
+.due-body{padding:16px 18px 18px}
+.due-num{font:500 40px/1 "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;font-variant-numeric:tabular-nums;color:#46545D}
+.due-num.bad{color:#A33F3F}.due-num.warn{color:#C97D3C}
+.due-sub{display:block;font:600 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em;color:#46545D;margin:8px 0 12px}
+.due-clear{display:flex;align-items:center;gap:7px;color:#2F7D6D;font-size:15px;margin-top:8px}
 
-/* ---------- learning lab (deliberately quiet) ---------- */
-.learn-body{padding:12px 16px 14px}
-.learn-input{display:flex;gap:8px;margin-bottom:8px}
-.learn-input input{flex:1}
-.learn-item{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid #3a3d45}
-.ldate{color:#9298a3;font:12px "SF Mono",Consolas,monospace;flex:none;width:58px;padding-top:2px;letter-spacing:.04em}
-.ltext{flex:1;font-size:15px;color:#b8bbc3;line-height:1.45;overflow-wrap:anywhere;word-wrap:break-word}
-.ldelete{opacity:0;flex:none;background:none;border:none;color:#9298a3;cursor:pointer;padding:2px;display:flex}
+/* ---------- learning lab (quiet precision working tool) ----------
+   Scoped widgets: the Execute rail and the Review page each render one
+   instance. All controls resolve their own <input> by walking up to the
+   enclosing [data-learn-scope] root - never through a shared element id. */
+.learn-widget{display:block}
+.learn-body{padding:16px 18px 18px}
+.learn-desc{font-size:14px;color:#5E6B73;line-height:1.5;margin:0 0 12px}
+.learn-form{display:flex;gap:8px;align-items:stretch}
+.learn-form input{flex:1;min-width:0;font-size:15px}
+.learn-form .btn{flex:none}
+.learn-hint{display:flex;gap:14px;flex-wrap:wrap;font:11px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.06em;color:#7B878D;margin:8px 0 2px}
+.learn-hint .lcount{color:#5E6B73}
+.learn-hint .learn-chars{color:#A4ADAE}
+.learn-list{margin-top:4px}
+.learn-item{display:flex;gap:10px;align-items:flex-start;padding:10px 4px;border-top:1px solid #DCE2DE}
+.learn-item:hover{background:#FCFDFB}
+.ldate{color:#5E6B73;font:11.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;flex:none;width:64px;padding-top:3px;letter-spacing:.04em}
+.ltext{flex:1;font-size:15px;color:#1F2933;line-height:1.5;overflow-wrap:anywhere;word-wrap:break-word}
+.ldelete{opacity:.35;flex:none;background:none;border:none;color:#5E6B73;cursor:pointer;padding:3px;display:flex;border-radius:4px}
 .learn-item:hover .ldelete{opacity:1}
-.ldelete:hover{color:#ec6a5f}
+.ldelete:hover{color:#A33F3F;background:#F7E8E8}
+.learn-empty{color:#5E6B73;font-size:14.5px;line-height:1.55;padding:10px 0}
+.learn-more{padding:6px 0 2px}
 
 /* ---------- queue ---------- */
-.queue-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-.q-title{font:700 16px "SF Mono",Consolas,monospace;letter-spacing:.1em;color:#eceae5;margin-right:2px}
-.q-note{font:13px "SF Mono",Consolas,monospace;color:#b8bbc3;letter-spacing:.05em;margin-right:6px}
-.q-count{font:13px "SF Mono",Consolas,monospace;color:#eceae5;letter-spacing:.05em}
+.queue-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.q-title{font:700 17px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.1em;color:#1F2933;margin-right:2px}
+.q-note{font:12.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#5E6B73;letter-spacing:.05em;margin-right:6px}
+.q-count{font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#1F2933;letter-spacing:.05em}
 .q-chips{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
-.chip{font:600 14px "SF Mono",Consolas,monospace;letter-spacing:.04em;padding:6px 12px;border-radius:999px;border:2px solid #6a6f7c;background:#15161a;color:#eceae5;cursor:pointer}
-.chip:hover{color:#eceae5;border-color:#6a6f7c}
-.chip.active{border-color:#e8ac60;color:#f4c37a;background:rgba(232,172,96,.15)}
-.chip-n{color:#9298a3;margin-left:3px}
-.chip.active .chip-n{color:#f4c37a}
+.chip{font:600 13.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.04em;padding:6px 12px;border-radius:999px;border:2px solid #C7D0CB;background:#FFFFFF;color:#46545D;cursor:pointer}
+.chip:hover{color:#1F2933;border-color:#7B878D}
+.chip.active{border-color:#176B63;color:#0E4740;background:#E5F1EF}
+.chip-n{color:#7B878D;margin-left:3px}
+.chip.active .chip-n{color:#12584F}
 .qgroup{display:flex;align-items:center;gap:8px;margin:16px 2px 8px}
 #queueList>.qgroup:first-child{margin-top:4px}
-.qgroup>span:first-child{font:600 13px "SF Mono",Consolas,monospace;letter-spacing:.11em;text-transform:uppercase;color:#b8bbc3}
-.qgroup.red>span:first-child{color:#ec6a5f}
-.qgroup.amber>span:first-child{color:#e8ac60}
-.qgroup.hot>span:first-child{color:#f4c37a}
-.gcount{font:12px "SF Mono",Consolas,monospace;color:#9298a3}
-.row{display:flex;align-items:center;gap:12px;background:#15161a;border:1px solid #4d515c;border-radius:8px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
-.row:hover{background:#1c1e23;border-color:#6a6f7c}
-.row.overdue{box-shadow:inset 4px 0 0 #ec6a5f;background:rgba(226,85,74,.07)}
-.row.overdue:hover{background:rgba(226,85,74,.11);border-color:#ec6a5f}
-.row.due{box-shadow:inset 4px 0 0 #e8ac60}
-.row.deliver{box-shadow:inset 4px 0 0 #e8ac60;background:rgba(232,172,96,.07)}
-.row.deliver:hover{background:rgba(232,172,96,.11);border-color:#e8ac60}
+.qgroup>span:first-child{font:600 12.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.11em;text-transform:uppercase;color:#46545D}
+.qgroup.red>span:first-child{color:#A33F3F}
+.qgroup.amber>span:first-child{color:#C97D3C}
+.qgroup.hot>span:first-child{color:#C97D3C}
+.gcount{font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#7B878D}
+.row{display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #DCE2DE;border-radius:8px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.row:hover{background:#FCFDFB;border-color:#C7D0CB}
+.row.overdue{box-shadow:inset 4px 0 0 #A33F3F;background:#F7E8E8}
+.row.overdue:hover{background:#F7E8E8;border-color:#E5BEBE}
+.row.due{box-shadow:inset 4px 0 0 #C97D3C}
+.row.deliver{box-shadow:inset 4px 0 0 #C97D3C;background:#F8EDE2}
+.row.deliver:hover{background:#F8EDE2;border-color:#E8C6A6}
 .dot{width:10px;height:10px;border-radius:50%;flex:none}
-.dot-red{background:#ec6a5f}.dot-amber{background:#e8ac60}.dot-green{background:#5fc27c}
-.dot-gray{background:#6a6f7c}.dot-faint{background:#4d515c}
+.dot-red{background:#A33F3F}.dot-amber{background:#C97D3C}.dot-green{background:#2F7D6D}
+.dot-gray{background:#7B878D}.dot-faint{background:#C7D0CB}
 .row-main{flex:1;min-width:0}
-.rname{font-weight:600;font-size:17px;color:#eceae5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rmeta{font:14px "SF Mono",Consolas,monospace;color:#b8bbc3;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rmeta .mm{color:#9298a3}
-.rline{font:13px "SF Mono",Consolas,monospace;letter-spacing:.035em;color:#b8bbc3;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rline.rnext{color:#f4c37a;font-weight:700;letter-spacing:.06em}
-.mini{font:12px "SF Mono",Consolas,monospace;letter-spacing:.04em;padding:1px 6px;border-radius:3px;display:inline-block}
-.mini.go{color:#5fc27c;border:1px solid #3f8a56}
-.mini.nogo{color:#ec6a5f;border:1px solid #a33830}
-.mini.leak{color:#e8ac60;border:1px solid #a3742f}
-.mini.nt{color:#9298a3;border:1px dashed #4d515c}
+.rname{font-weight:600;font-size:17px;color:#1F2933;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rmeta{font:13.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#46545D;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rmeta .mm{color:#7B878D}
+.rline{font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.035em;color:#46545D;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rline.rnext{color:#C97D3C;font-weight:700;letter-spacing:.06em}
+.mini{font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.04em;padding:1px 6px;border-radius:3px;display:inline-block}
+.mini.go{color:#2F7D6D;border:1px solid #B8D9D1}
+.mini.nogo{color:#A33F3F;border:1px solid #E5BEBE}
+.mini.leak{color:#C97D3C;border:1px solid #E8C6A6}
+.mini.nt{color:#7B878D;border:1px dashed #C7D0CB}
 .row-side{display:flex;align-items:center;gap:8px;flex:none}
-.badge{font:600 12px "SF Mono",Consolas,monospace;letter-spacing:.06em;padding:3px 8px;border-radius:4px}
-.badge.ov{background:#c03d33;color:#ffffff}
-.badge.due{background:rgba(232,172,96,.2);color:#f4c37a;border:1px solid #e8ac60}
-.indays{font:12px "SF Mono",Consolas,monospace;color:#9298a3}
-.chip-status{font:13px "SF Mono",Consolas,monospace;letter-spacing:.05em;text-transform:uppercase;padding:3px 7px;border-radius:4px;border:1px solid #6a6f7c;color:#eceae5;white-space:nowrap}
-.st-run{color:#e0bb85;border-color:#a3742f}
-.st-hot{color:#f4c37a;border-color:#e8ac60}
-.st-won{color:#5fc27c;border-color:#3f8a56}
-.st-lost{color:#ec6a5f;border-color:#a33830}
-.st-dorm{color:#9298a3;border-style:dashed}
-.st-go{color:#5fc27c;border-color:#3f8a56}
-.st-nogo{color:#ec6a5f;border-color:#a33830}
+.badge{font:600 12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.06em;padding:3px 8px;border-radius:4px}
+.badge.ov{background:#A33F3F;color:#FFFFFF}
+.badge.due{background:#F8EDE2;color:#C97D3C;border:1px solid #E8C6A6}
+.indays{font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#7B878D}
+.chip-status{font:12.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.05em;text-transform:uppercase;padding:3px 7px;border-radius:4px;border:1px solid #C7D0CB;color:#46545D;white-space:nowrap}
+.st-run{color:#C97D3C;border-color:#E8C6A6}
+.st-hot{color:#C97D3C;border-color:#E8C6A6}
+.st-won{color:#2F7D6D;border-color:#B8D9D1}
+.st-lost{color:#A33F3F;border-color:#E5BEBE}
+.st-dorm{color:#7B878D;border-style:dashed;border-color:#C7D0CB}
+.st-go{color:#2F7D6D;border-color:#B8D9D1}
+.st-nogo{color:#A33F3F;border-color:#E5BEBE}
 .showmore{display:flex;justify-content:center;padding:10px 0}
-.empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:34px 20px;color:#9298a3;text-align:center}
-.empty .ic{width:24px;height:24px;color:#6a6f7c}
-.empty p{font-size:15px;color:#b8bbc3;max-width:380px;line-height:1.55;margin:0}
+.empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:34px 20px;color:#7B878D;text-align:center}
+.empty .ic{width:24px;height:24px;color:#C7D0CB}
+.empty p{font-size:15px;color:#46545D;max-width:380px;line-height:1.55;margin:0}
+
+/* ---------- prospects view (the CRM record layer) ---------- */
+.pv-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px}
+.pv-title-block{min-width:220px;flex:1}
+.pv-title{font-size:32px;font-weight:700;color:#1F2933;letter-spacing:-.01em;line-height:1.15;margin:0;font-size:32px;font-size:clamp(26px,4vw,38px)}
+.pv-sub{font-size:15px;color:#5E6B73;margin:6px 0 0;max-width:640px;line-height:1.55}
+.pv-search{flex:0 1 380px;min-width:240px;position:relative}
+.pv-search>.ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#7B878D;width:15px;height:15px}
+.pv-search input{width:100%;background:#FFFFFF;border:1px solid #C7D0CB;border-radius:8px;padding:11px 14px 11px 36px;color:#1F2933;font:13.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace}
+.pv-search input::placeholder{color:#7B878D}
+.pv-filters{background:#FFFFFF;border:1px solid #DCE2DE;border-radius:10px;padding:14px 16px}
+.pv-frow{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end}
+.pv-frow+.pv-frow{margin-top:12px;padding-top:12px;border-top:1px solid #DCE2DE}
+.pv-sfield{display:flex;flex-direction:column;gap:4px;min-width:0;flex:0 1 auto}
+.pv-fl{font:600 10.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:#7B878D}
+.pv-sel{background:#FFFFFF;border:1px solid #C7D0CB;border-radius:6px;color:#1F2933;font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;padding:8px 10px;outline:none;min-width:0}
+.pv-sel:focus{border-color:#176B63}
+.pv-dirbtn{font:600 12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em;padding:9px 12px;border-radius:6px;border:1px solid #C7D0CB;background:#FFFFFF;color:#46545D;cursor:pointer;white-space:nowrap}
+.pv-dirbtn:hover{border-color:#176B63;color:#0E4740}
+.pv-count{font:11.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em;color:#5E6B73;padding-top:10px}
+.pv-count.pv-won{color:#2F7D6D}
+.pv-count.pv-lost{color:#A33F3F}
+.pv-card{display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #DCE2DE;border-radius:8px;padding:12px 14px;margin-bottom:8px;cursor:pointer;flex-wrap:wrap}
+.pv-card:hover{background:#FCFDFB;border-color:#C7D0CB}
+.pv-main{flex:1;min-width:200px}
+.pv-name{font-weight:600;font-size:16.5px;color:#1F2933;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-meta-line{font:12.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#46545D;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-meta-line .mm{color:#7B878D}
+.pv-side{display:flex;align-items:center;gap:8px;flex:none;flex-wrap:wrap}
+.pv-detail{background:#FFFFFF;border:1px solid #DCE2DE;border-radius:10px;overflow:hidden}
+.pv-dhead{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;padding:18px 20px;border-bottom:1px solid #DCE2DE}
+.pv-dtitle-block{flex:1;min-width:200px}
+.pv-dtitle{font-size:23px;font-weight:700;color:#1F2933;letter-spacing:-.01em;line-height:1.2;overflow-wrap:anywhere;word-wrap:break-word}
+.pv-dsub{font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#5E6B73;margin-top:5px;overflow-wrap:anywhere;word-wrap:break-word}
+.pv-dactions{display:flex;gap:8px;flex-wrap:wrap;flex:none}
+.pv-dsec{padding:16px 20px;border-bottom:1px solid #DCE2DE}
+.pv-dsec:last-child{border-bottom:none}
+.pv-dsec h3{font:600 12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:#7B878D;margin:0 0 10px}
+.pv-grid{display:flex;flex-wrap:wrap;margin:0 -8px}
+.pv-field{flex:1 1 220px;min-width:180px;max-width:420px;padding:0 8px 12px}
+.pv-fl{display:block;font:600 10.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:#7B878D;margin-bottom:3px}
+.pv-fv{font-size:15px;color:#1F2933;line-height:1.5;overflow-wrap:anywhere;word-wrap:break-word}
+.pv-fv .pv-copy{margin-left:6px}
+.pv-link{color:#176B63;text-decoration:underline dotted}
+.pv-link:hover{color:#0E4740}
+.pv-copy{display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid #DCE2DE;border-radius:5px;color:#46545D;cursor:pointer;font:600 11px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.05em;padding:4px 8px;vertical-align:middle}
+.pv-copy:hover{border-color:#176B63;color:#0E4740}
+.pv-note{font-size:15px;color:#46545D;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;word-wrap:break-word}
+.pv-timeline{padding-left:4px}
 
 /* ---------- buttons ---------- */
-.btn{display:inline-flex;align-items:center;gap:7px;font:600 15px "SF Mono",Consolas,monospace;letter-spacing:.05em;text-transform:uppercase;color:#eceae5;background:#23252b;border:2px solid #6a6f7c;border-radius:6px;padding:10px 16px;cursor:pointer;text-decoration:none;line-height:1.2}
-.btn:hover{border-color:#8a8f9c;background:#2a2d34;color:#eceae5}
-.btn.primary{background:#e8ac60;border-color:#e8ac60;color:#1a1206}
-.btn.primary:hover{background:#f4c37a;border-color:#f4c37a}
-.btn.good{border-color:#3f8a56;color:#5fc27c}
-.btn.good:hover{background:rgba(95,194,124,.14)}
-.btn.danger{border-color:#a33830;color:#ec6a5f}
-.btn.danger:hover{background:rgba(226,85,74,.12)}
-.btn:disabled{opacity:1;cursor:default;color:#9298a3;background:#1c1e23;border-color:#565a66}
-.qbtn{padding:9px 14px;font-size:14px}
+.btn{display:inline-flex;align-items:center;gap:7px;font:600 14.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.05em;text-transform:uppercase;color:#1F2933;background:#FFFFFF;border:2px solid #C7D0CB;border-radius:6px;padding:10px 16px;cursor:pointer;text-decoration:none;line-height:1.2}
+.btn:hover{border-color:#7B878D;background:#FCFDFB;color:#1F2933}
+.btn.primary{background:#176B63;border-color:#176B63;color:#FFFFFF}
+.btn.primary:hover{background:#12584F;border-color:#12584F}
+.btn.good{border-color:#B8D9D1;color:#2F7D6D;background:#FFFFFF}
+.btn.good:hover{background:#E5F1ED;border-color:#B8D9D1}
+.btn.danger{border-color:#E5BEBE;color:#A33F3F;background:#FFFFFF}
+.btn.danger:hover{background:#F7E8E8;border-color:#E5BEBE}
+.btn:disabled{opacity:1;cursor:default;color:#A4ADAE;background:#F0F3F0;border-color:#DCE2DE}
+.qbtn{padding:9px 14px;font-size:13.5px}
 .btn-big{padding:14px 20px;font-size:15px;flex:1;min-width:170px;justify-content:center}
-.linkish{background:none;border:none;color:#e8ac60;font:600 13px "SF Mono",Consolas,monospace;letter-spacing:.03em;cursor:pointer;padding:2px 0;text-decoration:underline dotted}
-.linkish:hover{color:#f4c37a}
-.linkish.quiet{color:#9298a3;text-decoration:none}
-.linkish.quiet:hover{color:#b8bbc3}
+.linkish{background:none;border:none;color:#176B63;font:600 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.03em;cursor:pointer;padding:2px 0;text-decoration:underline dotted}
+.linkish:hover{color:#0E4740}
+.linkish.quiet{color:#5E6B73;text-decoration:none}
+.linkish.quiet:hover{color:#1F2933}
 .muted{opacity:.5}
 
 /* ---------- drawer ---------- */
 #drawerWrap{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:60}
-.drawer-backdrop{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(5,6,8,.65)}
-.drawer{position:absolute;top:0;right:0;bottom:0;width:480px;max-width:100%;background:#15161a;border-left:1px solid #3a3d45;transform:translateX(103%);overflow-y:auto}
+.drawer-backdrop{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(31,41,51,.35)}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:480px;max-width:100%;background:#FFFFFF;border-left:1px solid #DCE2DE;transform:translateX(103%);overflow-y:auto}
 #drawerWrap.open{pointer-events:auto}
 #drawerWrap.open .drawer{transform:none}
-.batch-strip{display:flex;align-items:center;gap:12px;padding:10px 20px;background:rgba(232,172,96,.12);border-bottom:1px solid #3a3d45;font:600 12px "SF Mono",Consolas,monospace;letter-spacing:.1em;color:#f4c37a}
+.batch-strip{display:flex;align-items:center;gap:12px;padding:10px 20px;background:#F8EDE2;border-bottom:1px solid #DCE2DE;font:600 12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.1em;color:#C97D3C}
 .batch-strip .linkish{margin-left:auto}
-.drawer-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:18px 20px 14px;border-bottom:1px solid #3a3d45}
-.d-title{font-size:22px;font-weight:700;color:#eceae5;letter-spacing:-.01em;overflow-wrap:anywhere;word-wrap:break-word}
-.d-sub{margin-top:5px;font:14px "SF Mono",Consolas,monospace;color:#b8bbc3;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.d-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid #3a3d45;background:#0e0f11}
-.na{font:600 13px "SF Mono",Consolas,monospace;letter-spacing:.07em;text-transform:uppercase;color:#b8bbc3}
-.na.bad{color:#ec6a5f}.na.warn{color:#f4c37a}.na.ok{color:#5fc27c}
-.d-touches{margin-left:auto;font:12px "SF Mono",Consolas,monospace;color:#9298a3;letter-spacing:.06em}
-.d-sec{padding:16px 20px;border-bottom:1px solid #3a3d45}
-/* phase focus: sections away from the current phase recede to 75% (still AA
+.drawer-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:18px 20px 14px;border-bottom:1px solid #DCE2DE}
+.d-title{font-size:22px;font-weight:700;color:#1F2933;letter-spacing:-.01em;overflow-wrap:anywhere;word-wrap:break-word}
+.d-sub{margin-top:5px;font:14px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#46545D;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.d-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid #DCE2DE;background:#FCFDFB}
+.na{font:600 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em;text-transform:uppercase;color:#46545D}
+.na.bad{color:#A33F3F}.na.warn{color:#C97D3C}.na.ok{color:#2F7D6D}
+.d-touches{margin-left:auto;font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#7B878D;letter-spacing:.06em}
+.d-sec{padding:16px 20px;border-bottom:1px solid #DCE2DE}
+/* phase focus: sections away from the current phase recede (still AA
    readable); they light back up on hover or when a field inside is focused */
-.d-sec.fade{opacity:.9;transition:opacity .2s}
+.d-sec.fade{opacity:.85;transition:opacity .2s}
 .d-sec.fade:hover{opacity:1}
 .crow{display:flex;align-items:center;gap:10px;padding:3px 0}
-.clabel{font:14px "SF Mono",Consolas,monospace;letter-spacing:.08em;color:#b8bbc3;width:80px;flex:none}
-.crow-note{font:13px "SF Mono",Consolas,monospace;letter-spacing:.07em;color:#b8bbc3;margin:2px 0 6px}
-.inline-inp{flex:1;min-width:0;background:transparent;border:1px solid transparent;border-radius:5px;color:#eceae5;font:15.5px "Avenir Next","Segoe UI","Helvetica Neue",Helvetica,"PT Sans",Arial,sans-serif;padding:5px 7px;outline:none}
-.inline-inp.mono{font:14px "SF Mono",Consolas,monospace}
-.inline-inp:hover{border-color:#4d515c}
-.inline-inp:focus{border-color:#e8ac60;background:#0b0c0e}
+.clabel{font:13.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.08em;color:#46545D;width:80px;flex:none}
+.crow-note{font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em;color:#5E6B73;margin:2px 0 6px}
+.inline-inp{flex:1;min-width:0;background:transparent;border:1px solid transparent;border-radius:5px;color:#1F2933;font:15.5px "DM Sans","Avenir Next","Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;padding:5px 7px;outline:none}
+.inline-inp.mono{font:14px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace}
+.inline-inp:hover{border-color:#DCE2DE}
+.inline-inp:focus{border-color:#176B63;background:#FFFFFF}
 .inline-inp:focus-visible{outline:none}
 /* target check rows: native radio inputs wrapped in real labels.
    Clicking the control OR the text works via native label behavior;
    selection state is visible even with all custom CSS degraded. */
 .tcrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:5px 0}
-.tclabel{font:14px "SF Mono",Consolas,monospace;letter-spacing:.07em;color:#b8bbc3;width:118px;flex:none}
+.tclabel{font:13.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em;color:#46545D;width:118px;flex:none}
 .tchips{display:inline-block}
-.tlabel{display:inline-block;padding:7px 12px;border:2px solid #6a6f7c;border-radius:6px;background:#101115;color:#eceae5;cursor:pointer;font:600 15px "SF Mono",Consolas,monospace;letter-spacing:.04em;margin:0 6px 4px 0;white-space:nowrap}
-.tlabel:hover{border-color:#8a8f9c;color:#eceae5}
-.tlabel.on{border-color:#e8ac60;background:#2a2418;color:#f4c37a;font-weight:700}
+.tlabel{display:inline-block;padding:7px 12px;border:2px solid #C7D0CB;border-radius:6px;background:#FFFFFF;color:#1F2933;cursor:pointer;font:600 14.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.04em;margin:0 6px 4px 0;white-space:nowrap}
+.tlabel:hover{border-color:#7B878D;color:#1F2933}
+.tlabel.on{border-color:#176B63;background:#E5F1EF;color:#0E4740;font-weight:700}
 .tradio{margin:0 7px 0 0;width:15px;height:15px;vertical-align:middle;cursor:pointer}
-.age-inp{width:74px;background:transparent;border:2px solid #4d515c;border-radius:5px;color:#eceae5;font:14px "SF Mono",Consolas,monospace;padding:6px 8px;outline:none}
-.age-inp:focus{border-color:#e8ac60}
-.agesuf{font:12px "SF Mono",Consolas,monospace;color:#9298a3;letter-spacing:.06em}
-.cannot{margin-top:8px;color:#ec6a5f;font:600 12.5px "SF Mono",Consolas,monospace;letter-spacing:.06em;line-height:1.6;overflow-wrap:anywhere;word-wrap:break-word}
-.nudge{margin-top:8px;color:#f4c37a;font:600 12.5px "SF Mono",Consolas,monospace;letter-spacing:.06em;line-height:1.6}
-.empty-inline{color:#b8bbc3;font-size:15px;padding:6px 0;line-height:1.5}
+.age-inp{width:74px;background:#FFFFFF;border:2px solid #DCE2DE;border-radius:5px;color:#1F2933;font:14px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;padding:6px 8px;outline:none}
+.age-inp:focus{border-color:#176B63}
+.agesuf{font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#7B878D;letter-spacing:.06em}
+.cannot{margin-top:8px;color:#A33F3F;font:600 12.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.06em;line-height:1.6;overflow-wrap:anywhere;word-wrap:break-word}
+.nudge{margin-top:8px;color:#C97D3C;font:600 12.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.06em;line-height:1.6}
+.empty-inline{color:#46545D;font-size:15px;padding:6px 0;line-height:1.5}
 .tin{width:100%}
 .qual-btns{display:flex;gap:8px;margin-top:10px}
-.go-btn{border-color:#3f8a56;color:#5fc27c;flex:1;justify-content:center}
-.nogo-btn{border-color:#a33830;color:#ec6a5f;flex:1;justify-content:center}
+.go-btn{border-color:#B8D9D1;color:#2F7D6D;flex:1;justify-content:center}
+.nogo-btn{border-color:#E5BEBE;color:#A33F3F;flex:1;justify-content:center}
 .qual-result{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.d-note{font-size:15px;color:#b8bbc3;margin-top:8px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;word-wrap:break-word}
+.d-note{font-size:15px;color:#46545D;margin-top:8px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;word-wrap:break-word}
 .aquick{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .aflow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .steps{display:flex;flex-direction:column;gap:12px}
-.steplbl{display:block;font:14px "SF Mono",Consolas,monospace;letter-spacing:.06em;color:#b8bbc3;margin-bottom:6px}
-.banner{border-radius:7px;padding:12px 14px;font:600 14px "SF Mono",Consolas,monospace;letter-spacing:.03em;display:flex;gap:9px;align-items:center;width:100%}
-.banner.ok{background:rgba(95,194,124,.12);border:1px solid #3f8a56;color:#5fc27c}
-.banner.bad{background:rgba(226,85,74,.1);border:1px solid #a33830;color:#ec6a5f}
-.banner.info{background:rgba(232,172,96,.1);border:1px solid #a3742f;color:#f4c37a}
-.hint{width:100%;font:14px "SF Mono",Consolas,monospace;color:#b8bbc3;letter-spacing:.03em}
-.hint.req{color:#f4c37a;font-weight:700}
-.won-box{border:1px solid #3f8a56;background:rgba(95,194,124,.08);border-radius:8px;padding:12px}
+.steplbl{display:block;font:13.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.06em;color:#46545D;margin-bottom:6px}
+.banner{border-radius:7px;padding:12px 14px;font:600 13.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.03em;display:flex;gap:9px;align-items:center;width:100%}
+.banner.ok{background:#E5F1ED;border:1px solid #B8D9D1;color:#2F7D6D}
+.banner.bad{background:#F7E8E8;border:1px solid #E5BEBE;color:#A33F3F}
+.banner.info{background:#E9EEFA;border:1px solid #C6D1ED;color:#4567B2}
+.hint{width:100%;font:13.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#5E6B73;letter-spacing:.03em}
+.hint.req{color:#C97D3C;font-weight:700}
+.won-box{border:1px solid #B8D9D1;background:#E5F1ED;border-radius:8px;padding:12px}
 .won-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
 .won-row input{flex:1;min-width:130px;max-width:220px}
 .ef-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin:10px 0}
 .ef{display:flex;flex-direction:column;gap:4px;min-width:0}
 .ef input{width:100%}
 .tl{margin-top:4px}
-.tl-item{display:flex;gap:12px;padding:6px 0 6px 14px;position:relative;border-left:1px solid #3a3d45;margin-left:4px}
+.tl-item{display:flex;gap:12px;padding:6px 0 6px 14px;position:relative;border-left:1px solid #DCE2DE;margin-left:4px}
 .tl-item:first-child{margin-top:2px}
-.tl-item:before{content:'';position:absolute;left:-3.5px;top:12px;width:6px;height:6px;border-radius:50%;background:#6a6f7c}
-.tl-date{font:12px "SF Mono",Consolas,monospace;color:#9298a3;flex:none;width:88px;padding-top:2px;letter-spacing:.04em}
-.tl-text{font-size:15px;color:#eceae5}
-.drawer-foot{position:sticky;bottom:0;background:#15161a;border-top:1px solid #3a3d45;padding:12px 20px;display:flex;gap:10px;justify-content:flex-end}
+.tl-item:before{content:'';position:absolute;left:-3.5px;top:12px;width:6px;height:6px;border-radius:50%;background:#C7D0CB}
+.tl-date{font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#7B878D;flex:none;width:88px;padding-top:2px;letter-spacing:.04em}
+.tl-text{font-size:15px;color:#1F2933}
+.tl-text b{font-weight:600}
+.drawer-foot{position:sticky;bottom:0;background:#FFFFFF;border-top:1px solid #DCE2DE;padding:12px 20px;display:flex;gap:10px;justify-content:flex-end}
 
 /* ---------- modal ---------- */
 #modalWrap{position:fixed;top:0;left:0;right:0;bottom:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:16px}
-.modal-back{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(5,6,8,.75)}
-.modal-panel{position:relative;width:580px;max-width:94%;max-height:88vh;overflow-y:auto;background:#15161a;border:1px solid #4d515c;border-radius:12px}
-.m-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #3a3d45}
-.m-title{font:700 14px "SF Mono",Consolas,monospace;letter-spacing:.12em;color:#eceae5}
+.modal-back{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(31,41,51,.45)}
+.modal-panel{position:relative;width:580px;max-width:94%;max-height:88vh;overflow-y:auto;background:#FFFFFF;border:1px solid #DCE2DE;border-radius:12px;box-shadow:0 18px 50px rgba(31,41,51,.2)}
+.m-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #DCE2DE}
+.m-title{font:700 14px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.12em;color:#1F2933}
 .m-body{padding:16px 20px 20px;display:flex;flex-direction:column;gap:14px}
-.m-msg{font-size:16px;color:#b8bbc3;line-height:1.55;margin:0}
+.m-msg{font-size:16px;color:#46545D;line-height:1.55;margin:0}
 .m-btns{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 .s-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .s-grid.three{grid-template-columns:repeat(3,1fr)}
 .s-field{display:flex;flex-direction:column;gap:5px}
 .s-field input,.s-field select{width:100%}
-.s-info{font:13px "SF Mono",Consolas,monospace;color:#b8bbc3;letter-spacing:.03em}
-.s-info.dim{color:#9298a3;letter-spacing:0;font-family:"Avenir Next","Segoe UI","Helvetica Neue",Helvetica,"PT Sans",Arial,sans-serif;font-size:14px;line-height:1.5}
+.s-info{font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#46545D;letter-spacing:.03em}
+.s-info.dim{color:#5E6B73;letter-spacing:0;font-family:"DM Sans","Avenir Next","Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5}
 .s-btnrow{display:flex;flex-wrap:wrap;gap:8px}
-.lbl-danger{color:#ec6a5f}
+.lbl-danger{color:#A33F3F}
 
 /* ---------- toasts ---------- */
 #toasts{position:fixed;right:16px;bottom:16px;z-index:100;display:flex;flex-direction:column;gap:8px;max-width:390px}
-.toast{display:flex;align-items:center;gap:12px;background:#1c1e23;border:1px solid #4d515c;border-left:4px solid #5fc27c;border-radius:8px;padding:12px 14px;font-size:15px;color:#eceae5;box-shadow:0 8px 24px rgba(0,0,0,.45);animation:tin .22s ease}
-.toast.info{border-left-color:#e8ac60}
-.toast.warn{border-left-color:#ec6a5f}
+.toast{display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #DCE2DE;border-left:4px solid #2F7D6D;border-radius:8px;padding:12px 14px;font-size:15px;color:#1F2933;box-shadow:0 8px 24px rgba(31,41,51,.16);animation:tin .22s ease}
+.toast.info{border-left-color:#4567B2}
+.toast.warn{border-left-color:#A33F3F}
 .toast.out{opacity:0;filter:none}
 .tmsg{flex:1}
-.tact{flex:none;font:700 13px "SF Mono",Consolas,monospace;letter-spacing:.07em;color:#1a1206;background:#e8ac60;border:1px solid #e8ac60;border-radius:5px;padding:7px 12px;cursor:pointer;white-space:nowrap}
-.tact:hover{background:#f4c37a}
+.tact{flex:none;font:700 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em;color:#FFFFFF;background:#176B63;border:1px solid #176B63;border-radius:5px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+.tact:hover{background:#12584F}
 @keyframes tin{from{opacity:0}}
 
 /* ---------- review (analytics, deliberately secondary) ---------- */
-.review-gate{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:rgba(232,172,96,.1);border:1px solid #e8ac60;border-radius:10px;padding:12px 16px;color:#f4c37a;font:600 13px "SF Mono",Consolas,monospace;letter-spacing:.06em}
+.review-gate{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#F8EDE2;border:1px solid #E8C6A6;border-radius:10px;padding:12px 16px;color:#C97D3C;font:600 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.06em}
 .review-gate .btn{margin-left:auto}
 .an-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding:4px 2px}
-.an-title{font:700 18px "SF Mono",Consolas,monospace;letter-spacing:.12em;color:#eceae5}
-.an-sub{font:13px "SF Mono",Consolas,monospace;color:#b8bbc3;letter-spacing:.04em}
+.an-title{font:700 18px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.12em;color:#1F2933}
+.an-sub{font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#5E6B73;letter-spacing:.04em}
 .stat-band{display:flex;flex-wrap:wrap;padding:6px 0}
-.sgrp{display:flex;flex-direction:column;border-left:1px solid #3a3d45;padding:8px 4px 4px 0}
+.sgrp{display:flex;flex-direction:column;border-left:1px solid #DCE2DE;padding:8px 4px 4px 0}
 .sgrp:first-child{border-left:none}
-.glabel{font:12px "SF Mono",Consolas,monospace;letter-spacing:.1em;color:#b8bbc3;padding:0 20px 5px}
+.glabel{font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.1em;color:#46545D;padding:0 20px 5px}
 .srow{display:flex;flex-wrap:wrap}
 .stat{padding:4px 18px 8px}
-.stat .sv{display:block;font:500 24px "SF Mono",Consolas,monospace;color:#eceae5;font-variant-numeric:tabular-nums}
-.stat .sl{display:block;font:13px "SF Mono",Consolas,monospace;letter-spacing:.07em;color:#b8bbc3;margin-top:3px}
+.stat .sv{display:block;font:500 24px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#1F2933;font-variant-numeric:tabular-nums}
+.stat .sl{display:block;font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em;color:#5E6B73;margin-top:3px}
 /* WHERE THE MACHINE LEAKS - stage conversion rows */
 .lk-row{display:flex;align-items:center;gap:10px;padding:6px 16px}
-.lk-label{font:12px "SF Mono",Consolas,monospace;letter-spacing:.08em;color:#b8bbc3;width:170px;flex:none}
-.lk-track{height:18px;background:#0b0c0e;border:1px solid #3a3d45;border-radius:4px;overflow:hidden;flex:1}
-.lk-fill{display:block;height:100%;background:#e8ac60;opacity:.8}
-.lk-count{font:12px "SF Mono",Consolas,monospace;color:#eceae5;font-variant-numeric:tabular-nums;white-space:nowrap}
-.lk-count .mm{color:#9298a3}
-.lk-weak{padding:8px 16px 14px;font:600 12.5px "SF Mono",Consolas,monospace;letter-spacing:.05em;color:#f4c37a;border-top:1px solid #3a3d45;margin-top:6px}
+.lk-label{font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.08em;color:#46545D;width:170px;flex:none}
+.lk-track{height:18px;background:#F0F3F0;border:1px solid #DCE2DE;border-radius:4px;overflow:hidden;flex:1}
+.lk-fill{display:block;height:100%;background:#176B63;opacity:.85}
+.lk-count{font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#1F2933;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lk-count .mm{color:#7B878D}
+.lk-weak{padding:8px 16px 14px;font:600 12.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.05em;color:#C97D3C;border-top:1px solid #DCE2DE;margin-top:6px}
 .chart-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:14px 16px 0}
-.seg{display:flex;background:#0b0c0e;border:1px solid #565a66;border-radius:7px;padding:2px;gap:1px;flex-wrap:wrap}
-.segb{font:600 13px "SF Mono",Consolas,monospace;letter-spacing:.05em;padding:6px 11px;border:none;border-radius:5px;background:none;color:#eceae5;cursor:pointer}
-.segb.active{background:#22242a;color:#e8ac60}
+.seg{display:flex;background:#F0F3F0;border:1px solid #DCE2DE;border-radius:7px;padding:2px;gap:1px;flex-wrap:wrap}
+.segb{font:600 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.05em;padding:6px 11px;border:none;border-radius:5px;background:none;color:#46545D;cursor:pointer}
+.segb.active{background:#FFFFFF;color:#176B63;box-shadow:0 1px 2px rgba(31,41,51,.12)}
 .chart-wrap{position:relative;height:252px;padding:4px 10px 10px}
-.ch-read{position:absolute;top:12px;right:24px;font:12px "SF Mono",Consolas,monospace;letter-spacing:.05em;color:#b8bbc3;pointer-events:none}
-.gl{stroke:#3a3d45;stroke-width:1}
-.axl{fill:#9298a3;font:11px "SF Mono",Consolas,monospace}
-.area{fill:rgba(232,172,96,.14)}
-.cline{stroke:#e8ac60;stroke-width:2;fill:none}
-.cpt{fill:#15161a;stroke:#e8ac60;stroke-width:1.5}
-.bar{fill:rgba(232,172,96,.85)}
-.hl{stroke:#565a66}
-.hc{fill:#e8ac60;stroke:#15161a;stroke-width:2}
+/* the chart enforces a 320px drawing floor for legibility; on narrower
+   viewports the svg scales down proportionally (viewBox preserved) instead
+   of pushing the page into horizontal scrolling. The hover mapping applies
+   the matching scale correction. */
+#chartWrap svg{display:block;width:100%;height:auto}
+.ch-read{position:absolute;top:12px;right:24px;font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.05em;color:#5E6B73;pointer-events:none}
+.gl{stroke:#DCE2DE;stroke-width:1}
+.axl{fill:#7B878D;font:11px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace}
+.area{fill:rgba(23,107,99,.12)}
+.cline{stroke:#176B63;stroke-width:2;fill:none}
+.cpt{fill:#FFFFFF;stroke:#176B63;stroke-width:1.5}
+.bar{fill:rgba(23,107,99,.8)}
+.hl{stroke:#C7D0CB}
+.hc{fill:#176B63;stroke:#FFFFFF;stroke-width:2}
 /* two-column analytics: floats (works on IE9+) */
 .an-grid{zoom:1}
 .an-grid:after{content:"";display:block;clear:both}
 .an-grid>.panel{float:left;width:49%;margin:0 2% 16px 0}
 .wk-body{padding:12px 16px 14px}
-.wk-hrow{display:flex;justify-content:space-between;font:11px "SF Mono",Consolas,monospace;color:#9298a3;letter-spacing:.08em;padding:4px 0 8px}
+.wk-hrow{display:flex;justify-content:space-between;font:11px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#7B878D;letter-spacing:.08em;padding:4px 0 8px}
 .wk-row{display:flex;align-items:center;gap:10px;padding:4px 0}
-.wk-day{font-size:14px;color:#b8bbc3;width:86px}
-.wk-count{font:13px "SF Mono",Consolas,monospace;color:#eceae5;text-align:right;width:44px;font-variant-numeric:tabular-nums}
-.wk-track{height:9px;background:#3a3d45;border-radius:2px;overflow:hidden;flex:1}
-.wk-fill{display:block;height:100%;background:#e8ac60;border-radius:2px}
-.wk-row.today .wk-day{color:#f4c37a;font-weight:700}
-.wk-row.today .wk-fill{background:#f4c37a}
-.wk-stats{display:flex;gap:20px;flex-wrap:wrap;border-top:1px solid #3a3d45;margin-top:10px;padding-top:12px}
+.wk-day{font-size:14px;color:#46545D;width:86px}
+.wk-count{font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#1F2933;text-align:right;width:44px;font-variant-numeric:tabular-nums}
+.wk-track{height:9px;background:#DCE2DE;border-radius:2px;overflow:hidden;flex:1}
+.wk-fill{display:block;height:100%;background:#176B63;border-radius:2px}
+.wk-row.today .wk-day{color:#C97D3C;font-weight:700}
+.wk-row.today .wk-fill{background:#C97D3C}
+.wk-stats{display:flex;gap:20px;flex-wrap:wrap;border-top:1px solid #DCE2DE;margin-top:10px;padding-top:12px}
 .wk-stats>div{display:flex;flex-direction:column;gap:3px}
-.wk-stats b{font:500 16px "SF Mono",Consolas,monospace;color:#eceae5}
+.wk-stats b{font:500 16px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#1F2933}
 .wk-stats .label{font-size:12px}
-.wk-extra{margin-top:10px;font:12px "SF Mono",Consolas,monospace;color:#b8bbc3;letter-spacing:.05em}
+.wk-extra{margin-top:10px;font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#46545D;letter-spacing:.05em}
 .mt-head,.mt-row{display:grid;grid-template-columns:70px repeat(5,1fr);gap:6px;padding:7px 16px;align-items:baseline}
-.mt-head{font:11px "SF Mono",Consolas,monospace;letter-spacing:.08em;color:#9298a3;padding:12px 16px 4px}
+.mt-head{font:11px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.08em;color:#7B878D;padding:12px 16px 4px}
 .mt-head span:not(:first-child),.mt-row span:not(:first-child){text-align:right}
-.mt-row{font-size:14px;border-top:1px solid #3a3d45}
-.mt-row span:first-child{color:#b8bbc3;font:12.5px "SF Mono",Consolas,monospace}
-.mt-row span.mono{color:#eceae5;font-variant-numeric:tabular-nums}
-.mt-row.cur{background:rgba(232,172,96,.08)}
-.mt-row.cur span:first-child{color:#f4c37a}
-.mt-delta{padding:10px 16px 14px;font:12px "SF Mono",Consolas,monospace;color:#b8bbc3;letter-spacing:.04em;border-top:1px solid #3a3d45;margin-top:4px}
-.fn-ro{margin:8px 16px 16px;padding-top:10px;border-top:1px solid #3a3d45;font:12px "SF Mono",Consolas,monospace;color:#b8bbc3;letter-spacing:.04em}
-.fn-ro b{color:#f4c37a;font-weight:600}
+.mt-row{font-size:14px;border-top:1px solid #DCE2DE}
+.mt-row span:first-child{color:#46545D;font:12.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace}
+.mt-row span.mono{color:#1F2933;font-variant-numeric:tabular-nums}
+.mt-row.cur{background:#E5F1EF}
+.mt-row.cur span:first-child{color:#0E4740}
+.mt-delta{padding:10px 16px 14px;font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#46545D;letter-spacing:.04em;border-top:1px solid #DCE2DE;margin-top:4px}
+.fn-ro{margin:8px 16px 16px;padding-top:10px;border-top:1px solid #DCE2DE;font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#46545D;letter-spacing:.04em}
+.fn-ro b{color:#0E4740;font-weight:600}
 /* the machine flow */
 .machine{display:flex;flex-wrap:wrap;align-items:stretch;padding:18px 16px 10px;gap:8px 0}
 .mstage{flex:1 1 120px;display:flex;flex-direction:column;gap:3px;padding:4px 12px;min-width:0}
-.mstage .sv{font:500 24px "SF Mono",Consolas,monospace;color:#eceae5;font-variant-numeric:tabular-nums}
-.mstage .sl{font:11px "SF Mono",Consolas,monospace;letter-spacing:.1em;color:#9298a3}
-.mstage.green .sv{color:#5fc27c}
-.mtrack{height:7px;background:#3a3d45;border-radius:3px;overflow:hidden;margin-top:5px}
-.mfill{display:block;height:100%;background:#e8ac60;opacity:.85;border-radius:3px}
-.mfill.green{background:#5fc27c;opacity:.9}
+.mstage .sv{font:500 24px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#1F2933;font-variant-numeric:tabular-nums}
+.mstage .sl{font:11px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.1em;color:#7B878D}
+.mstage.green .sv{color:#2F7D6D}
+.mtrack{height:7px;background:#DCE2DE;border-radius:3px;overflow:hidden;margin-top:5px}
+.mfill{display:block;height:100%;background:#176B63;opacity:.9;border-radius:3px}
+.mfill.green{background:#2F7D6D;opacity:.9}
 .mlink{flex:0 1 90px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;padding:0 4px;min-width:0}
-.marr line{stroke:#565a66;stroke-width:1.5}
-.marr polygon{fill:#565a66}
-.mlink .lpct{font:600 13px "SF Mono",Consolas,monospace;color:#f4c37a}
-.mlink .llbl{font:10.5px "SF Mono",Consolas,monospace;letter-spacing:.05em;color:#9298a3;text-align:center}
+.marr line{stroke:#C7D0CB;stroke-width:1.5}
+.marr polygon{fill:#C7D0CB}
+.mlink .lpct{font:600 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#C97D3C}
+.mlink .llbl{font:10.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.05em;color:#7B878D;text-align:center}
 
 /* ---------- guided workflow redesign ---------- */
 #drawerWrap{display:none!important}
 #wizardHost{margin:0 0 18px}
 #wizardHost[hidden]{display:none!important}
-#wizardHost .drawer{position:static;width:auto;max-width:none;min-height:0;background:#15161a;border:1px solid #6a6f7c;border-radius:12px;overflow:visible;transform:none}
+#wizardHost .drawer{position:static;width:auto;max-width:none;min-height:0;background:#FFFFFF;border:1px solid #DCE2DE;border-radius:12px;overflow:visible;transform:none;box-shadow:0 4px 18px rgba(31,41,51,.06)}
 #wizardHost .drawer-backdrop{display:none}
 #wizardHost .drawer-head{padding:22px 24px 18px}
 #wizardHost .d-title{font-size:26px}
@@ -400,75 +485,75 @@ main{max-width:1240px;margin:0 auto;padding:20px}
 #wizardHost .d-sec:first-of-type{border-bottom:none}
 #wizardHost .drawer-foot{position:static;padding:16px 24px;justify-content:space-between}
 #viewExecute.workflow-open .addbar,#viewExecute.workflow-open .exec-grid{display:none}
-.guide-intro{padding:28px 30px 30px;background:#1a1b20;border:1px solid #6a6f7c;border-radius:12px;margin-bottom:18px}
-.guide-kicker{font:600 12px "SF Mono",Consolas,monospace;letter-spacing:.14em;color:#e8ac60}
-.guide-title{font-size:34px;line-height:1.15;max-width:720px;margin:8px 0 10px;color:#eceae5}
-.guide-copy{font-size:17px;line-height:1.6;color:#b8bbc3;max-width:720px;margin:0 0 20px}
+.guide-intro{padding:28px 30px 30px;background:#F0F3F0;border:1px solid #DCE2DE;border-radius:12px;margin-bottom:18px}
+.guide-kicker{font:600 12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.14em;color:#176B63}
+.guide-title{font-size:34px;font-size:clamp(26px,4.5vw,38px);line-height:1.15;max-width:720px;margin:8px 0 10px;color:#1F2933}
+.guide-copy{font-size:17px;line-height:1.6;color:#46545D;max-width:720px;margin:0 0 20px}
 .guide-sequence{display:flex;flex-wrap:wrap;margin:0 0 22px;padding:0;list-style:none}
-.guide-sequence li{font:600 12px "SF Mono",Consolas,monospace;letter-spacing:.05em;color:#eceae5;background:#23252b;border:1px solid #565a66;border-radius:5px;padding:8px 10px;margin:0 7px 7px 0}
-.guide-sequence li strong{color:#e8ac60;margin-right:4px}
-.execute-intro{padding:18px 20px;background:#15161a;border:1px solid #4d515c;border-radius:10px;margin-bottom:16px}
-.execute-intro h1{font-size:28px;line-height:1.2;margin:0 0 5px;color:#eceae5}
-.execute-intro p{margin:0;color:#b8bbc3;font-size:15px}
-.wizard-kicker{font:600 12px "SF Mono",Consolas,monospace;letter-spacing:.12em;color:#e8ac60;margin-bottom:9px}
-.wizard-title{font-size:31px;line-height:1.2;margin:0 0 8px;color:#eceae5}
-.wizard-purpose{font-size:16px;line-height:1.6;color:#b8bbc3;max-width:760px;margin:0}
+.guide-sequence li{font:600 12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.05em;color:#1F2933;background:#FFFFFF;border:1px solid #DCE2DE;border-radius:5px;padding:8px 10px;margin:0 7px 7px 0}
+.guide-sequence li strong{color:#176B63;margin-right:4px}
+.execute-intro{padding:18px 20px;background:#FFFFFF;border:1px solid #DCE2DE;border-radius:10px;margin-bottom:16px}
+.execute-intro h1{font-size:28px;line-height:1.2;margin:0 0 5px;color:#1F2933}
+.execute-intro p{margin:0;color:#46545D;font-size:15px}
+.wizard-kicker{font:600 12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.12em;color:#176B63;margin-bottom:9px}
+.wizard-title{font-size:31px;line-height:1.2;margin:0 0 8px;color:#1F2933}
+.wizard-purpose{font-size:16px;line-height:1.6;color:#46545D;max-width:760px;margin:0}
 .wizard-progress{display:flex;flex-wrap:wrap;padding:14px 24px 0;border-bottom:0}
-.wizard-step{font:600 11px "SF Mono",Consolas,monospace;letter-spacing:.06em;color:#9298a3;padding:7px 9px;border-bottom:3px solid #3a3d45;margin:0 7px 0 0}
-.wizard-step.active{color:#f4c37a;border-color:#e8ac60}
-.wizard-step.done{color:#5fc27c;border-color:#3f8a56}
+.wizard-step{font:600 11px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.06em;color:#7B878D;padding:7px 9px;border-bottom:3px solid #DCE2DE;margin:0 7px 0 0}
+.wizard-step.active{color:#0E4740;border-color:#176B63}
+.wizard-step.done{color:#2F7D6D;border-color:#2F7D6D}
 .wizard-work{max-width:850px}
 .wizard-work .crow-note{margin-top:2px}
-.wizard-complete{display:inline-block;color:#5fc27c;font:700 12px "SF Mono",Consolas,monospace;letter-spacing:.1em;border:1px solid #3f8a56;border-radius:5px;padding:6px 9px;margin-bottom:12px}
-.wizard-instructions{background:#0e0f11;border:1px solid #3a3d45;border-radius:8px;padding:14px 16px;margin:0 0 16px;color:#b8bbc3;font-size:15px;line-height:1.55}
-.wizard-instructions b{color:#eceae5}
+.wizard-complete{display:inline-block;color:#2F7D6D;font:700 12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.1em;border:1px solid #B8D9D1;border-radius:5px;padding:6px 9px;margin-bottom:12px}
+.wizard-instructions{background:#F0F3F0;border:1px solid #DCE2DE;border-radius:8px;padding:14px 16px;margin:0 0 16px;color:#46545D;font-size:15px;line-height:1.55}
+.wizard-instructions b{color:#1F2933}
 .wizard-script{display:flex;flex-wrap:wrap;margin:12px 0 18px}
-.wizard-script div{flex:1 1 150px;background:#0e0f11;border-left:3px solid #e8ac60;padding:10px 12px;margin:0 8px 8px 0;color:#b8bbc3;font-size:14px}
-.wizard-script b{display:block;color:#e8ac60;font:600 12px "SF Mono",Consolas,monospace;letter-spacing:.06em;margin-bottom:3px}
+.wizard-script div{flex:1 1 150px;background:#F0F3F0;border-left:3px solid #176B63;padding:10px 12px;margin:0 8px 8px 0;color:#46545D;font-size:14px}
+.wizard-script b{display:block;color:#0E4740;font:600 12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.06em;margin-bottom:3px}
 .wizard-actions{display:flex;flex-wrap:wrap;align-items:center;margin-top:18px}
 .wizard-actions .btn{margin:0 8px 8px 0}
 .wizard-actions .hint{margin:0 0 8px}
-.wizard-footer-note{font:13px "SF Mono",Consolas,monospace;color:#9298a3;letter-spacing:.03em;margin-top:12px}
-.wizard-warning{border:1px solid #a33830;background:rgba(226,85,74,.09);color:#ec6a5f;border-radius:7px;padding:12px 14px;margin:12px 0;font:600 13px "SF Mono",Consolas,monospace;line-height:1.5}
+.wizard-footer-note{font:13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#7B878D;letter-spacing:.03em;margin-top:12px}
+.wizard-warning{border:1px solid #E5BEBE;background:#F7E8E8;color:#A33F3F;border-radius:7px;padding:12px 14px;margin:12px 0;font:600 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;line-height:1.5}
 .wizard-choice{display:flex;flex-wrap:wrap;margin:14px 0 0}
 .wizard-choice .btn{min-width:170px;margin:0 8px 8px 0;justify-content:center}
 .sequence-line{display:flex;flex-wrap:wrap;margin:14px 0}
-.sequence-node{flex:1 1 130px;padding:12px;background:#0e0f11;border:1px solid #3a3d45;margin:0 8px 8px 0}
-.sequence-node b{display:block;color:#e8ac60;font:700 12px "SF Mono",Consolas,monospace;letter-spacing:.07em}
-.sequence-node span{display:block;color:#b8bbc3;font-size:14px;margin-top:4px}
+.sequence-node{flex:1 1 130px;padding:12px;background:#F0F3F0;border:1px solid #DCE2DE;margin:0 8px 8px 0}
+.sequence-node b{display:block;color:#176B63;font:700 12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em}
+.sequence-node span{display:block;color:#46545D;font-size:14px;margin-top:4px}
 .metric-cards{display:flex;flex-wrap:wrap;padding:8px 0}
-.metric-card{flex:1 1 125px;min-width:110px;background:#1a1b20;border:1px solid #4d515c;border-radius:8px;padding:13px 14px;margin:0 8px 8px 0}
-.metric-card .metric-value{display:block;font:500 24px "SF Mono",Consolas,monospace;color:#eceae5}
-.metric-card .metric-label{display:block;color:#b8bbc3;font:11px "SF Mono",Consolas,monospace;letter-spacing:.08em;margin-top:5px}
-.metric-card.good .metric-value{color:#5fc27c}
-.metric-card.warn .metric-value{color:#f4c37a}
-.metric-card.bad .metric-value{color:#ec6a5f}
+.metric-card{flex:1 1 125px;min-width:110px;background:#FCFDFB;border:1px solid #DCE2DE;border-radius:8px;padding:13px 14px;margin:0 8px 8px 0}
+.metric-card .metric-value{display:block;font:500 24px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#1F2933}
+.metric-card .metric-label{display:block;color:#5E6B73;font:11px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.08em;margin-top:5px}
+.metric-card.good .metric-value{color:#2F7D6D}
+.metric-card.warn .metric-value{color:#C97D3C}
+.metric-card.bad .metric-value{color:#A33F3F}
 .analytics-section{padding:20px 20px 22px}
-.analytics-section h2{font:700 16px "SF Mono",Consolas,monospace;letter-spacing:.1em;color:#eceae5;margin:0 0 5px}
-.analytics-section .section-note{font-size:14px;color:#b8bbc3;margin:0 0 14px}
+.analytics-section h2{font:700 16px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.1em;color:#1F2933;margin:0 0 5px}
+.analytics-section .section-note{font-size:14px;color:#46545D;margin:0 0 14px}
 .analytics-grid{display:flex;flex-wrap:wrap;margin:0 -8px}
 .analytics-grid>.panel,.analytics-grid>.analytics-card{flex:1 1 360px;min-width:0;margin:0 8px 16px}
-.analytics-card{background:#15161a;border:1px solid #4d515c;border-radius:10px;overflow:hidden}
+.analytics-card{background:#FFFFFF;border:1px solid #DCE2DE;border-radius:10px;overflow:hidden}
 .analytics-table{width:100%;border-collapse:collapse;font-size:14px}
-.analytics-table th,.analytics-table td{text-align:left;padding:10px 12px;border-top:1px solid #3a3d45}
-.analytics-table th{font:600 11px "SF Mono",Consolas,monospace;letter-spacing:.07em;color:#9298a3}
-.analytics-table td{color:#eceae5}
-.analytics-table td.mono{text-align:right;font-family:"SF Mono",Consolas,monospace}
+.analytics-table th,.analytics-table td{text-align:left;padding:10px 12px;border-top:1px solid #DCE2DE}
+.analytics-table th{font:600 11px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em;color:#7B878D}
+.analytics-table td{color:#1F2933}
+.analytics-table td.mono{text-align:right;font-family:"IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace}
 .analytics-table th:not(:first-child){text-align:right}
 .analytics-table td:not(:first-child){text-align:right}
-.analytics-table .rate{color:#f4c37a;font-family:"SF Mono",Consolas,monospace}
-.diagnostic{border:1px solid #e8ac60;background:rgba(232,172,96,.08);border-radius:8px;padding:15px 16px}
-.diagnostic b{display:block;color:#f4c37a;font:700 13px "SF Mono",Consolas,monospace;letter-spacing:.08em;margin-bottom:7px}
-.diagnostic p{margin:5px 0;color:#b8bbc3;font-size:15px;line-height:1.5}
+.analytics-table .rate{color:#C97D3C;font-family:"IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace}
+.diagnostic{border:1px solid #E8C6A6;background:#F8EDE2;border-radius:8px;padding:15px 16px}
+.diagnostic b{display:block;color:#C97D3C;font:700 13px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.08em;margin-bottom:7px}
+.diagnostic p{margin:5px 0;color:#46545D;font-size:15px;line-height:1.5}
 .funnel-row{display:flex;align-items:center;margin:9px 0}
-.funnel-label{width:140px;flex:none;color:#b8bbc3;font:12px "SF Mono",Consolas,monospace;letter-spacing:.03em}
-.funnel-bar{height:14px;background:#0b0c0e;border:1px solid #3a3d45;border-radius:3px;overflow:hidden;flex:1}
-.funnel-fill{height:100%;display:block;background:#e8ac60}
-.funnel-number{width:105px;flex:none;text-align:right;color:#eceae5;font:12px "SF Mono",Consolas,monospace}
+.funnel-label{width:140px;flex:none;color:#46545D;font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.03em}
+.funnel-bar{height:14px;background:#F0F3F0;border:1px solid #DCE2DE;border-radius:3px;overflow:hidden;flex:1}
+.funnel-fill{height:100%;display:block;background:#176B63}
+.funnel-number{width:105px;flex:none;text-align:right;color:#1F2933;font:12px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace}
 .strike-compare{overflow-x:auto}
 .strike-compare .analytics-table{min-width:760px}
-.economics-note{font-size:13px;color:#9298a3;line-height:1.5;margin-top:10px}
-.settings-econ{border-top:1px solid #3a3d45;padding-top:14px;margin-top:14px}
+.economics-note{font-size:13px;color:#5E6B73;line-height:1.5;margin-top:10px}
+.settings-econ{border-top:1px solid #DCE2DE;padding-top:14px;margin-top:14px}
 @media(max-width:640px){
   .guide-intro{padding:22px 18px}
   .guide-title{font-size:28px}
@@ -486,6 +571,9 @@ main{max-width:1240px;margin:0 auto;padding:20px}
 @media(max-width:960px){
   .exec-rail{float:none;width:auto}
   .exec-main{margin-left:0}
+  .pv-head{align-items:flex-start;flex-direction:column;gap:12px}
+  .pv-search{flex:1 1 auto;width:100%;max-width:none}
+  .pv-title-block{min-width:0;width:100%}
 }
 @media(max-width:900px){
   .an-grid>.panel{float:none;width:auto;margin-right:0}
@@ -493,10 +581,17 @@ main{max-width:1240px;margin:0 auto;padding:20px}
 @media(max-width:700px){
   .brand-text{display:none}
   .backup-pill .bp-txt{display:none}
-  .mode-switch button{padding:7px 9px;letter-spacing:.03em}
+  .mode-switch button{padding:7px 8px;letter-spacing:.02em;font-size:12px}
   .search .skbd{display:none}
-  main{padding:14px}
+  main{padding:16px 14px}
   #toasts{max-width:280px}
+  .pv-frow{gap:8px 10px}
+  .pv-sfield{flex:1 1 140px}
+  .pv-sel{width:100%}
+  .pv-card{align-items:flex-start}
+  .pv-side{width:100%;justify-content:flex-start;padding-left:22px}
+  .pv-dactions{width:100%;margin-left:0;flex-wrap:wrap}
+  .pv-dactions .btn{flex:1 1 auto;justify-content:center;min-width:140px}
 }
 @media(max-width:640px){
   /* mobile execution order: strike -> due -> the queue -> learning (quiet, last).
@@ -520,6 +615,37 @@ main{max-width:1240px;margin:0 auto;padding:20px}
   .mstage{flex:1 1 40%}
   .review-gate .btn{margin-left:0}
   .lk-label{width:110px}
+  /* learning lab: the add form stacks, the ADD button goes full width */
+  .learn-form{flex-wrap:wrap}
+  .learn-form .btn{flex:1 1 auto;justify-content:center}
+  .learn-hint{gap:10px}
+  /* prospects: detail title and fields tighten up */
+  .pv-title{font-size:24px;font-size:clamp(22px,6vw,28px)}
+  .pv-sub{font-size:14px}
+  .pv-dtitle{font-size:19px}
+  .pv-dhead{padding:16px 16px}
+  .pv-dsec{padding:14px 16px}
+  .pv-filters{padding:12px 14px}
+  .pv-field{flex:1 1 100%;max-width:none;padding-bottom:10px}
+}
+@media(max-width:480px){
+  .mode-switch button{padding:7px 6px;font-size:11px;letter-spacing:0}
+  .search{min-width:90px}
+  .topbar{gap:10px;padding:10px 12px}
+  .pv-search{min-width:0}
+  .pv-sfield{flex:1 1 118px}
+  .pv-name{font-size:15.5px}
+  .pv-meta-line{font-size:11.5px}
+  .btn.qbtn{padding:8px 10px;font-size:11.5px}
+  .pv-dactions .btn{min-width:120px}
+}
+@media(max-width:380px){
+  .mode-switch button{padding:7px 4px;font-size:10px;letter-spacing:0}
+  main{padding:12px 10px}
+  .learn-hint span:nth-child(2){display:none}
+  .pv-sfield{flex:1 1 100%}
+  .pv-side{padding-left:0}
+  .ldate{width:56px;font-size:10.5px}
 }
 </style>
 </head>
@@ -555,6 +681,7 @@ main{max-width:1240px;margin:0 auto;padding:20px}
   </div>
   <nav class="mode-switch">
     <button data-action="mode" data-mode="execute" class="active">EXECUTE</button>
+    <button data-action="mode" data-mode="prospects">PROSPECTS</button>
     <button data-action="mode" data-mode="analytics">REVIEW</button>
   </nav>
   <button class="linkish" type="button" data-action="guide">HELP / GUIDE</button>
@@ -598,6 +725,23 @@ main{max-width:1240px;margin:0 auto;padding:20px}
 
   <!-- ============ MODE B: REVIEW - "WHERE IS THE MACHINE LOSING CONVERSION?" ============ -->
   <section id="viewAnalytics" hidden></section>
+
+  <!-- ============ MODE C: PROSPECTS - "WHO IS ON FILE?" (CRM record layer) ============ -->
+  <section id="viewProspects" hidden>
+    <div class="pv-head">
+      <div class="pv-title-block">
+        <h1 class="pv-title">PROSPECTS</h1>
+        <p class="pv-sub">Every company on file - active, delivered, replied, follow-up, won, lost, dormant and historical records. This is the addressable record layer; EXECUTE stays the workflow.</p>
+      </div>
+      <div class="pv-search">
+        <svg class="ic"><use xlink:href="#i-search" href="#i-search"/></svg>
+        <input id="prospectsSearch" type="text" placeholder="Search - company, domain, contact, email, notes" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+    <div id="pvFilters"></div>
+    <div id="pvList"></div>
+    <div id="pvDetail" hidden></div>
+  </section>
 </main>
 
 <!-- ============ MODAL ============ -->
@@ -1492,7 +1636,8 @@ var MULTI_TLDS=["co.uk","org.uk","ac.uk","gov.uk","com.au","net.au","co.nz","co.
   "batch":1,"batch-exit":1,"toggle-edit":1,"save-edit":1,"filter":1,"focus-add":1,"clear-search":1,"show-more":1,
   "add-learning":1,"del-learning":1,"learning-more":1,"new-strike":1,"lock-strike":1,"unlock-strike":1,
   "export-json":1,"export-csv":1,"restore":1,"reset-data":1,"discard-recovery":1,"download-recovery":1,
-  "modal-close":1,"modal-cancel":1,"modal-confirm":1,"chart-range":1,"chart-metric":1,"chart-cum":1};
+  "modal-close":1,"modal-cancel":1,"modal-confirm":1,"chart-range":1,"chart-metric":1,"chart-cum":1,
+  "prospects-open":1,"prospects-back":1,"prospects-workflow":1,"prospects-dir":1,"prospects-clear":1,"prospects-more":1,"copy-phone":1};
 
 /* =====================================================
    3. ERROR BOUNDARY & SAFE BOOT
@@ -1519,14 +1664,14 @@ function showBootError(err){
     var raw="";
     try{ raw=Persistence.readState()||""; }catch(e2){}
     document.body.innerHTML=
-      '<div style="max-width:620px;margin:70px auto;padding:30px 34px;font-family:Consolas,monospace;color:#eceae5;background:#15161a;border:1px solid #4d515c;border-radius:12px;">'+
-      '<div style="font-size:16px;letter-spacing:.14em;color:#ec6a5f;font-weight:700;margin-bottom:14px;">CIP INITIALIZATION ERROR</div>'+
-      '<p style="color:#b8bbc3;font-size:15px;line-height:1.65;margin:0 0 16px;">The cockpit could not start. Your data has <b style="color:#eceae5">not</b> been deleted - it is still in this browser\'s local storage. Try reloading. If the error repeats, download your raw data below and keep it safe.</p>'+
+      '<div style="max-width:620px;margin:70px auto;padding:30px 34px;font-family:Consolas,monospace;color:#1F2933;background:#FFFFFF;border:1px solid #DCE2DE;border-radius:12px;">'+
+      '<div style="font-size:16px;letter-spacing:.14em;color:#A33F3F;font-weight:700;margin-bottom:14px;">CIP INITIALIZATION ERROR</div>'+
+      '<p style="color:#46545D;font-size:15px;line-height:1.65;margin:0 0 16px;">The cockpit could not start. Your data has <b style="color:#1F2933">not</b> been deleted - it is still in this browser\'s local storage. Try reloading. If the error repeats, download your raw data below and keep it safe.</p>'+
       '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">'+
-      '<button id="cipReload" style="font:600 14px Consolas,monospace;padding:10px 16px;border-radius:6px;border:1px solid #e8ac60;background:#e8ac60;color:#1a1206;cursor:pointer;">RELOAD</button>'+
-      (raw?'<button id="cipRaw" style="font:600 14px Consolas,monospace;padding:10px 16px;border-radius:6px;border:1px solid #4d515c;background:#23252b;color:#eceae5;cursor:pointer;">DOWNLOAD RAW DATA</button>':"")+
+      '<button id="cipReload" style="font:600 14px Consolas,monospace;padding:10px 16px;border-radius:6px;border:1px solid #176B63;background:#176B63;color:#FFFFFF;cursor:pointer;">RELOAD</button>'+
+      (raw?'<button id="cipRaw" style="font:600 14px Consolas,monospace;padding:10px 16px;border-radius:6px;border:1px solid #C7D0CB;background:#F0F3F0;color:#1F2933;cursor:pointer;">DOWNLOAD RAW DATA</button>':"")+
       '</div>'+
-      '<pre style="white-space:pre-wrap;word-break:break-word;color:#9298a3;font-size:12px;border-top:1px solid #3a3d45;margin:0;padding-top:14px;">'+esc(msg)+'</pre></div>';
+      '<pre style="white-space:pre-wrap;word-break:break-word;color:#7B878D;font-size:12px;border-top:1px solid #DCE2DE;margin:0;padding-top:14px;">'+esc(msg)+'</pre></div>';
     var rb=document.getElementById("cipReload"); if(rb) rb.onclick=function(){ location.reload(); };
     var db=document.getElementById("cipRaw");
     if(db) db.onclick=function(){
@@ -1795,7 +1940,9 @@ function commitState(fn){
 /* UI runtime state (not persisted) */
 var ui={mode:"execute",filter:"queue",search:"",limit:150,drawerId:null,
   editOpen:false,wonPrompt:false,learningShowAll:false,batchPhase:null,
-  chart:{range:"month",metric:"outreach",cumulative:false}};
+  chart:{range:"month",metric:"outreach",cumulative:false},
+  learnShow:{rail:false,review:false},
+  prospects:{search:"",status:"all",qual:"all",xray:"all",fu:"all",sort:"updated",dir:"desc",limit:100,detail:null}};
 var pendingConfirm=null, pendingCancel=null;
 
 /* =====================================================
@@ -2521,7 +2668,7 @@ function openSettings(){
   var activeSize=(state.strike&&state.strike.ids&&state.strike.ids.length)?(state.strike.goal||s.strikeGoal):null;
   var currencies=["USD","EUR","GBP","CAD","AUD","CHF","SEK","NOK","DKK","JPY"];
   var recRow=recoveryCopyExists()
-    ?'<div class="s-info" style="color:#e8ac60;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">'+
+    ?'<div class="s-info" style="color:#C97D3C;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">'+
       'A RECOVERY COPY from previously unreadable data is retained in this browser. '+
       '<button type="button" class="linkish" data-action="discard-recovery">discard it</button>'+
       (corruptedRaw?'<button type="button" class="linkish" data-action="download-recovery">download it</button>':"")+
@@ -2551,7 +2698,7 @@ function openSettings(){
       '<div><span class="label">DATA &amp; BACKUP</span>'+
       '<div class="s-info" style="margin-top:6px">DATA FORMAT V'+DATA_VERSION+' | '+state.prospects.length+' PROSPECTS | '+fmtNum(state.events.length)+' EVENTS</div>'+
       '<div class="s-info dim" id="storEst">'+kb+' KB STORED LOCALLY IN THIS BROWSER</div>'+
-      '<div class="s-info'+(bs.warn?'':' dim')+'"'+(bs.warn?' style="color:#e8ac60"':'')+'>'+esc(bline)+'</div>'+
+      '<div class="s-info'+(bs.warn?'':' dim')+'"'+(bs.warn?' style="color:#C97D3C"':'')+'>'+esc(bline)+'</div>'+
       recRow+
       '<div class="s-btnrow" style="margin-top:8px">'+
         '<button type="button" class="btn '+(bs.warn?"primary":"")+'" data-action="export-json">'+icon("download","ic-sm")+' EXPORT JSON BACKUP</button>'+
@@ -2702,7 +2849,8 @@ function renderTopbar(){
 function renderRail(){
   safe(function(){ $("#strikePanel").innerHTML=strikePanelHTML(); },"rail-strike");
   safe(function(){ $("#duePanel").innerHTML=dueHTML(); },"rail-due");
-  safe(function(){ $("#learningPanel").innerHTML=learningHTML(); },"rail-learn");
+  safe(function(){ $("#learningPanel").innerHTML=learningHTML("rail"); },"rail-learn");
+  safe(bindLearningWidgets,"rail-learn-bind");
 }
 function strikePanelHTML(){
   var info=strikeInfo();
@@ -2777,24 +2925,87 @@ function dueHTML(){
       :'<div class="due-clear">'+icon("check")+' No follow-ups due. Your queue is clear.</div>')+
     '</div>';
 }
-function learningHTML(){
+/* ---------- learning lab (scoped instances) ----------
+   The Learning Lab renders in TWO places (Execute rail + Review page).
+   Each instance is a .learn-widget root carrying data-learn-scope
+   ("rail" | "review"). Controls NEVER resolve their input through a
+   shared element id (the old #learningInput existed twice in the DOM,
+   so the Review-page Add button read the Execute-page input and adding
+   failed). Everything resolves through the enclosing widget instead.
+   Add/delete only refresh the learning LISTS in place - the inputs and
+   their focus are never re-rendered while the user is typing. */
+function learningHTML(scope){
   var items=state.learnings;
-  var show=ui.learningShowAll?items:items.slice(0,5);
+  return '<div class="learn-widget" data-learn-scope="'+scope+'">'+
+    '<div class="p-head"><span class="label">LEARNING LAB</span><span class="p-note learn-note">PATTERNS ONLY | '+items.length+'</span></div>'+
+    '<div class="learn-body">'+
+    '<p class="learn-desc">Log the patterns that keep repeating - objections, hooks, timing - not one-off insights. Each line becomes part of your playbook.</p>'+
+    '<div class="learn-form">'+
+    '<input class="learn-inp" type="text" placeholder="What keeps repeating? One line per pattern" maxlength="300" autocomplete="off" spellcheck="false">'+
+    '<button type="button" class="btn primary qbtn" data-action="add-learning" title="Add pattern">'+icon("plus","ic-sm")+' ADD</button></div>'+
+    '<div class="learn-hint"><span>ENTER ADDS</span><span>300 CHAR MAX</span><span class="lcount">'+items.length+' CAPTURED</span><span class="learn-chars"></span></div>'+
+    '<div class="learn-list">'+learningListHTML(scope)+'</div>'+
+    '</div></div>';
+}
+function learningListHTML(scope){
+  var items=state.learnings;
+  var showAll=!!(ui.learnShow&&ui.learnShow[scope]);
+  if(!items.length) return '<div class="learn-empty">Nothing captured yet. Add a line only when a pattern repeats - the lab stays quiet until then.</div>';
+  var show=showAll?items:items.slice(0,5);
   var list=show.map(function(l){
     return '<div class="learn-item"><span class="ldate">'+fmtTs(l.createdAt).toUpperCase()+'</span>'+
     '<span class="ltext">'+esc(l.text)+'</span>'+
-    '<button type="button" class="ldelete" data-action="del-learning" data-id="'+l.id+'" title="Delete lesson">'+icon("x","ic-sm")+'</button></div>';
+    '<button type="button" class="ldelete" data-action="del-learning" data-id="'+l.id+'" title="Delete this pattern">'+icon("trash","ic-sm")+'</button></div>';
   }).join("");
-  return '<div class="p-head"><span class="label">LEARNING LAB</span><span class="p-note">PATTERNS ONLY | '+items.length+'</span></div>'+
-    '<div class="learn-body">'+
-    '<div class="learn-input"><input id="learningInput" type="text" placeholder="Only repeated patterns - one line, no ceremony" maxlength="300">'+
-    '<button type="button" class="icon-btn sm" data-action="add-learning" title="Add lesson">'+icon("plus","ic-sm")+'</button></div>'+
-    (items.length?list:'<div class="empty-inline">Nothing captured yet. Log a lesson only when a pattern repeats - not every single insight.</div>')+
-    (items.length>5?'<button type="button" class="linkish quiet" data-action="learning-more">'+(ui.learningShowAll?"Show recent only":"Show all "+items.length)+'</button>':"")+
-    '</div>';
+  return list+(items.length>5?'<div class="learn-more"><button type="button" class="linkish quiet" data-action="learning-more">'+(showAll?"SHOW RECENT ONLY":"SHOW ALL "+items.length)+'</button></div>':"");
 }
-function addLearning(text){
-  text=String(text||"").trim();
+/* walk up from any inner control to its scoped Learning Lab widget root */
+function learnWidgetOf(el){
+  var w=closestAttr(el,"data-learn-scope");
+  return (w&&hasCls(w,"learn-widget"))?w:null;
+}
+function learnScopeOf(el){
+  var w=learnWidgetOf(el);
+  return w?String(w.getAttribute("data-learn-scope")||""):"";
+}
+/* refresh ONLY the list areas of every rendered instance (rail + review);
+   inputs, their values and their focus are untouched */
+function refreshLearningWidgets(){
+  var ws=$$(".learn-widget");
+  for(var i=0;i<ws.length;i++){
+    (function(w){
+      safe(function(){
+        var scope=String(w.getAttribute("data-learn-scope")||"");
+        var list=w.querySelector(".learn-list");
+        if(list) list.innerHTML=learningListHTML(scope);
+        var cnt=w.querySelector(".lcount");
+        if(cnt) cnt.textContent=state.learnings.length+" CAPTURED";
+        var note=w.querySelector(".learn-note");
+        if(note) note.textContent="PATTERNS ONLY | "+state.learnings.length;
+      },"learn-refresh");
+    })(ws[i]);
+  }
+}
+/* bind the live character counter after each widget render; the handler
+   only updates one tiny label - it never triggers a re-render */
+function bindLearningWidgets(){
+  var ws=$$(".learn-widget");
+  for(var i=0;i<ws.length;i++){
+    (function(w){
+      safe(function(){
+        var inp=w.querySelector(".learn-inp");
+        if(!inp||inp.getAttribute("data-bound")==="1") return;
+        inp.setAttribute("data-bound","1");
+        onEvt(inp,"input",function(){
+          var ch=w.querySelector(".learn-chars");
+          if(ch) ch.textContent=String(inp.value.length)+"/300";
+        });
+      },"learn-bind");
+    })(ws[i]);
+  }
+}
+function addLearning(text,scope){
+  text=String(text==null?"":text).trim();
   if(!text){ toast("Type the pattern first - one line is enough.","warn"); return; }
   var okc=commitState(function(){
     var l={id:uid(),text:text,createdAt:new Date().toISOString()};
@@ -2802,7 +3013,20 @@ function addLearning(text){
     state.events.push({id:uid(),prospectId:null,type:"learning",note:text,refId:l.id,timestamp:l.createdAt});
   });
   if(!okc) return;
-  safe(renderRail); toast("Pattern captured.","ok");
+  refreshLearningWidgets();
+  /* clear and refocus the input the pattern was added from */
+  if(scope){
+    var ws=$$(".learn-widget");
+    for(var i=0;i<ws.length;i++){
+      if(ws[i].getAttribute("data-learn-scope")===scope){
+        var inp=ws[i].querySelector(".learn-inp");
+        if(inp){ try{ inp.value=""; inp.focus(); }catch(e){} }
+        var ch=ws[i].querySelector(".learn-chars");
+        if(ch) ch.textContent="";
+      }
+    }
+  }
+  toast("Pattern captured.","ok");
 }
 function delLearning(id){
   var okc=commitState(function(){
@@ -2810,7 +3034,8 @@ function delLearning(id){
     state.events=state.events.filter(function(e){ return !(e.type==="learning"&&e.refId===id); });
   });
   if(!okc) return;
-  safe(renderRail); toast("Lesson deleted.","info");
+  refreshLearningWidgets();
+  toast("Lesson deleted.","info");
 }
 
 /* ---------- queue rows - NEXT ACTION is the dominant field ---------- */
@@ -2995,6 +3220,261 @@ function renderQueue(){
   }
   if(more>0) body+='<div class="showmore"><button type="button" class="btn" data-action="show-more">'+icon("chevron","ic-sm")+' SHOW MORE</button></div>';
   list.innerHTML=body?body:'<div class="panel empty">'+icon("mark","ic-lg")+'<p>'+esc(empty||"")+'</p></div>';
+}
+
+/* =====================================================
+   10b. PROSPECTS - THE CRM RECORD LAYER
+   A read/find view over the SAME state.prospects records the
+   Execute workflow uses: every status is addressable here
+   (active, delivered, replied, follow-up, won, lost, dormant,
+   no-go, historical). It never mutates workflow state, never
+   creates a second data source, and never hides closed records.
+   ===================================================== */
+var PV_STATUS_OPTS=[
+  ["all","ALL STATUSES"],["active","ACTIVE"],["new","NEW TARGETS"],["delivered","DELIVERED"],
+  ["followup","IN FOLLOW-UP"],["replied","REPLIED"],["call","MAPPING CALL"],["won","WON"],
+  ["lost","LOST"],["dormant","DORMANT"],["nogo","NO-GO (REJECTED)"],["closed","CLOSED / HISTORICAL"]];
+var PV_QUAL_OPTS=[["all","ALL"],["go","GO"],["no_go","NO-GO"],["untested","UNTESTED"]];
+var PV_XRAY_OPTS=[["all","ALL"],["xray","X-RAY RECORDED"],["delivered","DELIVERED"],["pending","ACTIVE, NOT DELIVERED"],["noxray","NO X-RAY"]];
+var PV_FU_OPTS=[["all","ALL"],["overdue","OVERDUE"],["due","DUE TODAY"],["upcoming","UPCOMING"],["none","NO FOLLOW-UP SET"]];
+var PV_SORT_OPTS=[["updated","LAST UPDATED"],["created","DATE ADDED"],["company","COMPANY"],["next_fu","NEXT FOLLOW-UP"],["touches","TOUCHES"],["value","DEAL VALUE"]];
+function pvStatusMatch(p,v){
+  var st=p.outreach.status;
+  if(v==="all") return true;
+  if(v==="active") return ACTIVE.indexOf(st)>-1;
+  if(v==="new") return st===S.NEW;
+  if(v==="delivered") return !!p.outreach.firstOutreachDate; /* delivery truth: evidence, never status inference */
+  if(v==="followup") return st===S.F1||st===S.F2||st===S.F3;
+  if(v==="replied") return st===S.REPLIED;
+  if(v==="call") return st===S.CALL;
+  if(v==="won") return st===S.WON;
+  if(v==="lost") return st===S.LOST;
+  if(v==="dormant") return st===S.DORMANT;
+  if(v==="nogo") return p.testing.qualification==="no_go";
+  if(v==="closed") return st===S.WON||st===S.LOST||st===S.DORMANT;
+  return true;
+}
+function pvQualMatch(p,v){
+  if(v==="all") return true;
+  if(v==="go") return p.testing.qualification==="go";
+  if(v==="no_go") return p.testing.qualification==="no_go";
+  if(v==="untested") return p.testing.qualification!=="go"&&p.testing.qualification!=="no_go";
+  return true;
+}
+function pvXrayMatch(p,v){
+  if(v==="all") return true;
+  if(v==="xray") return p.strike.videoStatus==="recorded"||p.strike.videoStatus==="sent";
+  if(v==="delivered") return !!p.outreach.firstOutreachDate;
+  if(v==="pending") return ACTIVE.indexOf(p.outreach.status)>-1&&!p.outreach.firstOutreachDate;
+  if(v==="noxray") return p.strike.videoStatus==="not_started"||p.strike.videoStatus==="recording";
+  return true;
+}
+function pvFuMatch(p,v){
+  if(v==="all") return true;
+  var f=followState(p);
+  if(v==="overdue") return f.s==="overdue";
+  if(v==="due") return f.s==="due";
+  if(v==="upcoming") return f.s==="future";
+  if(v==="none") return f.s==="none";
+  return true;
+}
+function pvMatches(p){
+  var f=ui.prospects;
+  if(!pvStatusMatch(p,f.status)||!pvQualMatch(p,f.qual)||!pvXrayMatch(p,f.xray)||!pvFuMatch(p,f.fu)) return false;
+  if(f.search&&haystack(p).indexOf(f.search)<0) return false;
+  return true;
+}
+function pvSort(a,b){
+  var f=ui.prospects, r=0;
+  switch(f.sort){
+    case "created": r=String(a.createdAt).localeCompare(String(b.createdAt)); break;
+    case "company": r=String(a.company.name||a.domain).toLowerCase().localeCompare(String(b.company.name||b.domain).toLowerCase()); break;
+    case "next_fu": r=String(a.outreach.nextFollowUpDate||"9999").localeCompare(String(b.outreach.nextFollowUpDate||"9999")); break;
+    case "touches": r=(Number(a.outreach.touches)||0)-(Number(b.outreach.touches)||0); break;
+    case "value": r=(Number(a.commercial.dealValue)||0)-(Number(b.commercial.dealValue)||0); break;
+    default: r=String(a.updatedAt).localeCompare(String(b.updatedAt)); break;
+  }
+  return f.dir==="asc"?r:-r;
+}
+function pvCounts(){
+  var P=state.prospects, n={all:P.length,active:0,won:0,lost:0,dormant:0,nogo:0};
+  P.forEach(function(p){
+    if(ACTIVE.indexOf(p.outreach.status)>-1) n.active++;
+    if(p.outreach.status===S.WON) n.won++;
+    if(p.outreach.status===S.LOST) n.lost++;
+    if(p.outreach.status===S.DORMANT) n.dormant++;
+    if(p.testing.qualification==="no_go") n.nogo++;
+  });
+  return n;
+}
+function pvSel(id,opts,val,label){
+  return '<label class="pv-sfield"><span class="pv-fl">'+label+'</span><select class="pv-sel" id="'+id+'">'+
+    opts.map(function(o){ return '<option value="'+o[0]+'"'+(o[0]===val?" selected":"")+'>'+o[1]+'</option>'; }).join("")+'</select></label>';
+}
+function renderProspects(){
+  var filEl=$("#pvFilters"), listEl=$("#pvList"), detEl=$("#pvDetail");
+  if(!filEl||!listEl||!detEl) return;
+  var f=ui.prospects;
+  var dp=f.detail?arrFind(state.prospects,function(x){ return x.id===f.detail; }):null;
+  if(f.detail&&!dp) f.detail=null; /* record vanished (e.g. after a restore) - fall back to the list */
+  if(f.detail){
+    setHidden(filEl,true); setHidden(listEl,true); setHidden(detEl,false);
+    detEl.innerHTML=pvDetailHTML(dp);
+    return;
+  }
+  setHidden(filEl,false); setHidden(listEl,false); setHidden(detEl,true);
+  var all=state.prospects;
+  var res=all.filter(pvMatches); res.sort(pvSort);
+  var counts=pvCounts();
+  filEl.innerHTML=
+    '<div class="pv-frow">'+
+      pvSel("pvStatusSel",PV_STATUS_OPTS,f.status,"STATUS")+
+      pvSel("pvQualSel",PV_QUAL_OPTS,f.qual,"QUALIFICATION")+
+      pvSel("pvXraySel",PV_XRAY_OPTS,f.xray,"X-RAY / DELIVERY")+
+      pvSel("pvFuSel",PV_FU_OPTS,f.fu,"FOLLOW-UP")+
+      pvSel("pvSortSel",PV_SORT_OPTS,f.sort,"SORT BY")+
+      '<button type="button" class="pv-dirbtn" data-action="prospects-dir" title="Toggle ascending / descending">'+(f.dir==="asc"?"ASCENDING":"DESCENDING")+'</button>'+
+      '<button type="button" class="btn qbtn" data-action="prospects-clear">'+icon("x","ic-sm")+' CLEAR</button>'+
+    '</div>'+
+    '<div class="pv-frow">'+
+      '<span class="pv-count">'+res.length+' OF '+all.length+' PROSPECTS SHOWN</span>'+
+      '<span class="pv-count">ACTIVE '+counts.active+'</span>'+
+      '<span class="pv-count pv-won">WON '+counts.won+'</span>'+
+      '<span class="pv-count pv-lost">LOST '+counts.lost+'</span>'+
+      '<span class="pv-count">DORMANT '+counts.dormant+'</span>'+
+      '<span class="pv-count">NO-GO '+counts.nogo+'</span>'+
+    '</div>';
+  bindProspectSelects();
+  var shown=res.slice(0,f.limit);
+  var body=shown.length?shown.map(pvCardHTML).join(""):
+    '<div class="panel empty">'+icon("search","ic-lg")+'<p>'+esc(all.length
+      ?"No prospects match the current filters. Adjust or clear them to see all "+all.length+" records."
+      :"No prospects yet. Add targets in EXECUTE - every record stays addressable here, including won, lost and dormant.")+'</p></div>';
+  var more=res.length-f.limit;
+  if(more>0) body+='<div class="showmore"><button type="button" class="btn" data-action="prospects-more">'+icon("chevron","ic-sm")+' SHOW MORE ('+more+' LEFT)</button></div>';
+  listEl.innerHTML=body;
+}
+/* filters are re-bound after every filter-bar render (the same direct-binding
+   pattern the target-check radios use); replaced nodes take old handlers with them */
+function bindProspectSelects(){
+  var map=[["pvStatusSel","status"],["pvQualSel","qual"],["pvXraySel","xray"],["pvFuSel","fu"],["pvSortSel","sort"]];
+  for(var i=0;i<map.length;i++){
+    (function(id,key){
+      var el=$("#"+id);
+      if(!el) return;
+      onEvt(el,"change",function(){
+        ui.prospects[key]=el.value||"all";
+        if(key!=="sort") ui.prospects.limit=100;
+        safe(renderProspects,"pv-filter");
+      });
+    })(map[i][0],map[i][1]);
+  }
+}
+function pvCardHTML(p){
+  var fs=followState(p);
+  var side=phaseChip(p);
+  if(fs.s==="overdue") side='<span class="badge ov">OVERDUE '+fs.days+'D</span>'+side;
+  else if(fs.s==="due") side='<span class="badge due">DUE TODAY</span>'+side;
+  var meta=esc(p.domain);
+  if(p.company.niche) meta+=' | <span class="mm">'+esc(p.company.niche)+'</span>';
+  if(p.contact.name) meta+=' | <span class="mm">'+esc(p.contact.name)+'</span>';
+  else if(p.contact.email) meta+=' | <span class="mm">'+esc(p.contact.email)+'</span>';
+  var line2="";
+  if(p.outreach.touches) line2+=String(p.outreach.touches)+' TOUCHES';
+  if(p.outreach.lastOutreachDate) line2+=(line2?" | ":"")+'LAST '+fmtTs(p.outreach.lastOutreachDate).toUpperCase();
+  if(p.outreach.nextFollowUpDate) line2+=(line2?" | ":"")+'NEXT FU '+fmtKey(p.outreach.nextFollowUpDate).toUpperCase()+(fs.s==="overdue"?" - OVERDUE":"");
+  if(p.commercial.dealValue) line2+=(line2?" | ":"")+fmtMoney(p.commercial.dealValue);
+  if(p.strike.videoStatus==="recorded"||p.strike.videoStatus==="sent") line2+=(line2?" | ":"")+'X-RAY';
+  var cpy="";
+  if(p.contact.email) cpy+='<button type="button" class="icon-btn sm" data-action="copy-email" data-id="'+p.id+'" title="Copy email">'+icon("mail","ic-sm")+'</button>';
+  if(p.contact.phone) cpy+='<button type="button" class="icon-btn sm" data-action="copy-phone" data-id="'+p.id+'" title="Copy phone">'+icon("phone","ic-sm")+'</button>';
+  return '<div class="pv-card" data-action="prospects-open" data-id="'+p.id+'">'+
+    '<div class="pv-main"><div class="pv-name">'+esc(p.company.name||p.domain)+'</div>'+
+    '<div class="pv-meta-line">'+meta+'</div>'+
+    (line2?'<div class="pv-meta-line">'+line2+'</div>':"")+'</div>'+
+    '<div class="pv-side">'+side+cpy+'<button type="button" class="btn qbtn" data-action="prospects-open" data-id="'+p.id+'">OPEN</button></div></div>';
+}
+function pvField(label,val){
+  if(val==null) return "";
+  val=String(val);
+  if(!val) return "";
+  return '<div class="pv-field"><span class="pv-fl">'+label+'</span><div class="pv-fv">'+val+'</div></div>';
+}
+function pvLink(href){
+  var full=/^https?:\/\//i.test(href)?href:"https://"+href;
+  return '<a class="pv-link" href="'+esc(full)+'" target="_blank" rel="noopener">'+esc(href)+'</a>';
+}
+function pvCopyBtn(action,id){
+  return '<button type="button" class="pv-copy" data-action="'+action+'" data-id="'+id+'">'+icon("copy","ic-sm")+' COPY</button>';
+}
+function pvDetailHTML(p){
+  var st=p.outreach.status;
+  var evs=state.events.filter(function(e){ return e.prospectId===p.id; })
+    .sort(function(a,b){ return String(b.timestamp).localeCompare(String(a.timestamp)); });
+  var web=p.website||p.domain;
+  var age=adAgeDays(p.strike.adAge);
+  var fs=followState(p);
+  var testingTxt=p.testing.status==="tested"
+    ?(p.testing.qualification==="go"?"TESTED - GO":(p.testing.qualification==="no_go"?"TESTED - NO-GO":"TESTED"))
+    :(p.testing.qualification==="no_go"?"NO-GO":"");
+  var outcome=st===S.WON?"WON":(st===S.LOST?"LOST":(st===S.DORMANT?"DORMANT":""));
+  var nextFu=p.outreach.nextFollowUpDate
+    ?fmtKey(p.outreach.nextFollowUpDate).toUpperCase()+(fs.s==="overdue"?" - OVERDUE":"")
+    :"";
+  function sec(title,fields){
+    return fields?'<div class="pv-dsec"><h3>'+title+'</h3><div class="pv-grid">'+fields+'</div></div>':"";
+  }
+  return '<div class="pv-detail">'+
+    '<div class="pv-dhead"><div class="pv-dtitle-block">'+
+    '<div class="pv-dtitle">'+esc(p.company.name||p.domain)+'</div>'+
+    '<div class="pv-dsub">'+esc(p.domain)+(p.company.niche?' | '+esc(p.company.niche):"")+' | '+esc(STATUS_LABEL[st]||String(st).replace(/_/g," "))+'</div>'+
+    '</div><div class="pv-dactions">'+
+    '<button type="button" class="btn qbtn" data-action="prospects-back">'+icon("x","ic-sm")+' BACK TO LIST</button>'+
+    '<button type="button" class="btn primary qbtn" data-action="prospects-workflow" data-id="'+p.id+'">'+icon("zap","ic-sm")+' OPEN IN WORKFLOW</button>'+
+    '</div></div>'+
+    sec("IDENTITY",
+      pvField("COMPANY",esc(p.company.name))+
+      (web?pvField("WEBSITE",pvLink(web)):"")+
+      pvField("DOMAIN",esc(p.domain))+
+      pvField("NICHE",esc(p.company.niche))+
+      pvField("SOURCE / ACQUISITION",esc(p.company.source)))+
+    sec("CONTACT",
+      pvField("CONTACT",esc(p.contact.name))+
+      pvField("ROLE",esc(p.contact.role))+
+      (p.contact.email?pvField("EMAIL",esc(p.contact.email)+pvCopyBtn("copy-email",p.id)):"")+
+      (p.contact.linkedin?pvField("LINKEDIN",pvLink(p.contact.linkedin)):"")+
+      (p.contact.phone?pvField("PHONE",esc(p.contact.phone)+pvCopyBtn("copy-phone",p.id)):""))+
+    sec("AD INTELLIGENCE",
+      pvField("ACTIVE AD",p.strike.activeAd==="yes"?"YES - LIVE":(p.strike.activeAd==="no"?"NO":""))+
+      pvField("AD SOURCE",p.strike.adSource?String(p.strike.adSource).toUpperCase():"")+
+      (p.company.adUrl?pvField("AD URL",pvLink(p.company.adUrl)):"")+
+      pvField("AD DISCOVERED",p.company.adDiscoveryDate?fmtKey(p.company.adDiscoveryDate):"")+
+      pvField("AD LAUNCHED",p.company.adLaunchDate?fmtKey(p.company.adLaunchDate):"")+
+      pvField("AD AGE",age===null?"":age+" DAYS"))+
+    sec("CONVERSION DIAGNOSIS",
+      pvField("LEAK 1",esc(p.strike.leak1))+
+      pvField("LEAK 2",esc(p.strike.leak2))+
+      pvField("TESTING",testingTxt)+
+      pvField("TESTING NOTES",esc(p.testing.note)))+
+    sec("X-RAY",
+      pvField("STATUS",videoLabel(p.strike.videoStatus))+
+      (p.strike.loomUrl?pvField("LOOM URL",pvLink(p.strike.loomUrl)+pvCopyBtn("copy-loom",p.id)):""))+
+    sec("OUTREACH",
+      pvField("STATUS",esc(STATUS_LABEL[st]||String(st).replace(/_/g," "))) +
+      pvField("FIRST DELIVERY",p.outreach.firstOutreachDate?fmtTs(p.outreach.firstOutreachDate):"")+
+      pvField("LAST TOUCH",p.outreach.lastOutreachDate?fmtTs(p.outreach.lastOutreachDate):"")+
+      pvField("NEXT FOLLOW-UP",nextFu)+
+      pvField("TOUCHES",String(p.outreach.touches||0)))+
+    sec("COMMERCIAL",
+      pvField("DEAL VALUE",p.commercial.dealValue?fmtMoney(p.commercial.dealValue):"")+
+      pvField("WON DATE",p.commercial.wonDate?fmtKey(p.commercial.wonDate):"")+
+      pvField("OUTCOME",outcome))+
+    (p.notes?'<div class="pv-dsec"><h3>NOTES</h3><div class="pv-note">'+esc(p.notes)+'</div></div>':"")+
+    (evs.length?'<div class="pv-dsec"><h3>HISTORY - '+evs.length+' EVENT'+(evs.length===1?"":"S")+'</h3><div class="pv-timeline">'+
+      evs.map(function(e){
+        return '<div class="tl-item"><span class="tl-date">'+fmtTs(e.timestamp).toUpperCase()+'</span><span class="tl-text"><b>'+esc(shortEventLabel(e))+'</b>'+(e.note?' - '+esc(e.note):"")+'</span></div>';
+      }).join("")+'</div></div>':"")+
+    '</div>';
 }
 
 /* =====================================================
@@ -3344,7 +3824,7 @@ function actionsHTML(p){
   var wonBtn='<button type="button" class="btn good" data-action="prompt-won" data-id="'+id+'">MARK WON</button>';
   if(ui.wonPrompt){
     parts.push('<div class="won-box"><span class="label">DEAL VALUE - '+esc(state.settings.currency)+'</span>'+
-      '<div class="won-row"><input type="number" min="0" step="1" class="tin" id="wonValue" placeholder="e.g. 1800" value="'+(p.commercial.dealValue||"")+'">'+
+      '<div class="won-row"><input type="number" min="0" step="1" class="tin" id="wonValueActions" placeholder="e.g. 1800" value="'+(p.commercial.dealValue||"")+'">'+
       '<button type="button" class="btn primary" data-action="confirm-won" data-id="'+id+'">'+icon("check","ic-sm")+' CONFIRM WON</button>'+
       '<button type="button" class="btn" data-action="cancel-won">CANCEL</button></div></div>');
     return parts.join("");
@@ -3689,7 +4169,7 @@ function leakPointsHTML(){
   });
   var foot=(weakest&&weakest.rate<1)
     ?'<div class="lk-weak">'+icon("alert","ic-sm")+' WEAKEST LINK: '+esc(weakest.label)+' - '+fmtPct(weakest.rate)+'. FIX THIS STAGE FIRST.</div>'
-    :'<div class="lk-weak" style="color:#5fc27c">NO LEAKS - every measured stage converts fully.</div>';
+    :'<div class="lk-weak" style="color:#2F7D6D">NO LEAKS - every measured stage converts fully.</div>';
   return '<div class="p-head" style="margin-top:12px"><span class="label">WHERE THE MACHINE LEAKS</span><span class="p-note">ALL TIME | UNIQUE PROSPECTS PER STAGE</span></div>'+
     '<div style="padding:8px 0 2px">'+rows+'</div>'+foot;
 }
@@ -3809,7 +4289,10 @@ function renderChart(){
   var hoverFn=function(ev){
     try{
       var r=svgEl.getBoundingClientRect();
-      var x=ev.clientX-r.left;
+      /* CSS may scale the svg down on narrow screens; normalize pointer x
+         back into the chart's own coordinate system (sc===1 when unscaled) */
+      var sc=(r.width>0)?W/r.width:1;
+      var x=(ev.clientX-r.left)*sc;
       var i;
       if(cumulative) i=Math.max(0,Math.min(n-1,Math.round((x-pl)/(n>1?iw/(n-1):iw))));
       else i=Math.max(0,Math.min(n-1,Math.floor((x-pl)/(iw/n))));
@@ -3959,10 +4442,13 @@ function render(){
   renderTopbar();
    renderOnboarding();
   if(ui.mode==="execute"){
-    setHidden($("#viewExecute"),false); setHidden($("#viewAnalytics"),true);
+    setHidden($("#viewExecute"),false); setHidden($("#viewAnalytics"),true); setHidden($("#viewProspects"),true);
     renderRail(); renderQueue();
+  } else if(ui.mode==="prospects"){
+    setHidden($("#viewExecute"),true); setHidden($("#viewAnalytics"),true); setHidden($("#viewProspects"),false);
+    renderProspects();
   } else {
-    setHidden($("#viewExecute"),true); setHidden($("#viewAnalytics"),false);
+    setHidden($("#viewExecute"),true); setHidden($("#viewAnalytics"),false); setHidden($("#viewProspects"),true);
     renderAnalytics();
   }
   renderDrawer();
@@ -4062,6 +4548,7 @@ function handleAction(a,el,id,p,e){
       break;
     case "phone-link": if(p&&p.contact.phone) location.href="tel:"+p.contact.phone; break;
     case "copy-email": if(p&&p.contact.email) copyText(p.contact.email,"Email copied"); break;
+    case "copy-phone": if(p&&p.contact.phone) copyText(p.contact.phone,"Phone copied"); break;
     case "copy-loom": {
       if(!p) break;
       /* Flush the currently visible Loom field before copying. This closes the
@@ -4155,10 +4642,39 @@ function handleAction(a,el,id,p,e){
     case "focus-add": try{ killEvt(e); var ai=$("#addInput"); if(ai){ ai.focus(); ai.select(); } }catch(e4){} break;
     case "clear-search": clearSearch(); break;
     case "show-more": ui.limit+=150; safe(renderQueue); break;
-    /* learning lab */
-    case "add-learning": { var li=$("#learningInput"); if(li) addLearning(li.value); break; }
+    /* learning lab (scope-aware: the widget that owns the control is found by
+       walking up to its data-learn-scope root - never a global id lookup, so
+       the Execute and Review instances behave independently) */
+    case "add-learning": {
+      var lwAdd=learnWidgetOf(el);
+      var linp=lwAdd?lwAdd.querySelector(".learn-inp"):null;
+      if(linp) addLearning(linp.value,learnScopeOf(el));
+      break;
+    }
     case "del-learning": delLearning(id); break;
-    case "learning-more": ui.learningShowAll=!ui.learningShowAll; safe(renderRail); break;
+    case "learning-more": {
+      var lsc=learnScopeOf(el), lwMore=learnWidgetOf(el);
+      if(lsc&&ui.learnShow){ ui.learnShow[lsc]=!ui.learnShow[lsc]; }
+      if(lwMore){
+        var llst=lwMore.querySelector(".learn-list");
+        if(llst) llst.innerHTML=learningListHTML(lsc);
+      }
+      break;
+    }
+    /* prospects CRM view */
+    case "prospects-open":
+      if(p){ ui.prospects.detail=p.id; safe(renderProspects); try{ window.scrollTo(0,0); }catch(e5){} }
+      break;
+    case "prospects-back": ui.prospects.detail=null; safe(renderProspects); try{ window.scrollTo(0,0); }catch(e5){} break;
+    case "prospects-workflow": if(p) openDrawer(p.id); break;
+    case "prospects-dir": ui.prospects.dir=(ui.prospects.dir==="asc"?"desc":"asc"); safe(renderProspects); break;
+    case "prospects-clear": {
+      ui.prospects={search:"",status:"all",qual:"all",xray:"all",fu:"all",sort:"updated",dir:"desc",limit:100,detail:ui.prospects.detail};
+      var psrch=$("#prospectsSearch"); if(psrch) psrch.value="";
+      safe(renderProspects);
+      break;
+    }
+    case "prospects-more": ui.prospects.limit+=100; safe(renderProspects); break;
     /* strike lifecycle */
     case "new-strike": actNewStrike(); break;
     case "lock-strike":
@@ -4270,12 +4786,20 @@ onEvt(document,"keydown",function(e){
     if(k==="Escape"){
       if(modalOpen()){ closeModal(); return; }
       if(ui.drawerId){ closeDrawer(); return; }
+      if(ui.mode==="prospects"&&ui.prospects&&ui.prospects.detail){ ui.prospects.detail=null; safe(renderProspects); return; }
       if(ui.editOpen||ui.wonPrompt){ ui.editOpen=false; ui.wonPrompt=false; safe(renderDrawer); return; }
       var si=$("#searchInput");
       if(si&&si.value){ clearSearch(); si.blur(); }
       return;
     }
-    if(k==="Enter"&&tgt&&tgt.id==="learningInput"){ addLearning(tgt.value); return; }
+    /* Enter adds a learning from whichever scoped Learning Lab input is
+       focused (event target - never an id lookup), so both the Execute and
+       the Review instance work independently. */
+    if(k==="Enter"&&tgt&&tgt.getAttribute&&hasCls(tgt,"learn-inp")){
+      killEvt(e);
+      addLearning(tgt.value,learnScopeOf(tgt));
+      return;
+    }
     /* Enter commits any inline field (contact, leaks, Loom URL, ad age) immediately.
        No focus move afterward: the next item is a judgment call the user makes. */
     if(k==="Enter"&&tgt&&tgt.getAttribute&&tgt.getAttribute("data-field")){
@@ -4307,6 +4831,18 @@ function wireEvents(){
     onEvt(si,"input",debounce(h,140));
     onEvt(si,"keyup",debounce(h,140));
   },"wire-search");
+  /* PROSPECTS search: the input lives in the static #viewProspects shell and
+     is never re-rendered, so typing is never interrupted by list refreshes */
+  safe(function(){
+    var psi=$("#prospectsSearch");
+    if(!psi) return;
+    var ph=function(){
+      ui.prospects.search=psi.value.trim().toLowerCase();
+      if(ui.mode==="prospects") safe(renderProspects);
+    };
+    onEvt(psi,"input",debounce(ph,140));
+    onEvt(psi,"keyup",debounce(ph,140));
+  },"wire-pvsearch");
   safe(function(){
     onEvt($("#restoreFile"),"change",function(){
       var f=this.files&&this.files[0]; this.value="";
@@ -4557,9 +5093,11 @@ function registerErrorHandlers(){
      nogo:"The qualification filter did not pass; the record remains available as history."
    }[stage]||"Move through the strike one clear step at a time.";
    /* WON PROMPT: rendered here so the wizard's MARK WON buttons (reply / decide /
-     call stages) have a completable flow. Same markup and ids the confirmWon()
-     handler already reads (#wonValue, data-action confirm-won / cancel-won),
-     so the existing won/lost business logic is unchanged. */
+     call stages) have a completable flow. This input carries the id confirmWon()
+     reads (#wonValue) and the data-action confirm-won / cancel-won controls,
+     so the existing won/lost business logic is unchanged. The legacy
+     actionsHTML() copy (drawerHTML path, not rendered by the current wizard
+     flow) uses the distinct id wonValueActions so no duplicate id exists. */
    var wonBox="";
    if(ui.wonPrompt){
      wonBox='<div class="d-sec"><div class="won-box"><span class="label">DEAL VALUE - '+esc(state.settings.currency)+'</span>'+
@@ -4735,7 +5273,7 @@ function registerErrorHandlers(){
  }
  function renderAnalytics(){
    var el=$("#viewAnalytics"), T=allTimeTotals(), pending=pendingActionCount();
-   var gate=pending?'<div class="review-gate">'+icon("alert")+'<span>'+pending+' ACTIONS ARE STILL PENDING IN EXECUTE</span><button type="button" class="btn primary" data-action="mode" data-mode="execute">BACK TO EXECUTE</button></div>':'<div class="review-gate" style="color:#5fc27c;border-color:#3f8a56;background:rgba(95,194,124,.08)">'+icon("check")+'<span>QUEUE CLEAR - GOOD TIME TO REVIEW THE MACHINE</span></div>';
+   var gate=pending?'<div class="review-gate">'+icon("alert")+'<span>'+pending+' ACTIONS ARE STILL PENDING IN EXECUTE</span><button type="button" class="btn primary" data-action="mode" data-mode="execute">BACK TO EXECUTE</button></div>':'<div class="review-gate" style="color:#2F7D6D;border-color:#B8D9D1;background:#E5F1ED">'+icon("check")+'<span>QUEUE CLEAR - GOOD TIME TO REVIEW THE MACHINE</span></div>';
    var cards=reviewMetricCard(reviewTargets(),"TARGETS")+reviewMetricCard(reviewGo(),"GO","good")+reviewMetricCard(reviewXrays(),"X-RAYS","good")+reviewMetricCard(T.delivered,"DELIVERED","good")+reviewMetricCard(T.touches,"TOUCHES")+reviewMetricCard(T.replies,"REPLIES","warn")+reviewMetricCard(T.calls,"CALLS","warn")+reviewMetricCard(T.wins,"WINS","good")+reviewMetricCard(fmtMoney(T.revenue),"REVENUE","good");
    var rates=reviewMetricCard(fmtPct(safeDiv(reviewGo(),reviewTargets())),"GO RATE")+reviewMetricCard(fmtPct(safeDiv(reviewXrays(),reviewGo())),"X-RAY RATE")+reviewMetricCard(fmtPct(safeDiv(T.replies,T.delivered)),"REPLY RATE")+reviewMetricCard(fmtPct(safeDiv(T.calls,T.replies)),"CALL RATE")+reviewMetricCard(fmtPct(safeDiv(T.wins,T.calls)),"CLOSE RATE")+reviewMetricCard(fmtPct(safeDiv(T.wins,T.delivered)),"OVERALL WIN RATE");
    var seg=function(list,cur,attr,dattr){ return list.map(function(x){ return '<button type="button" class="segb'+(x[0]===cur?" active":"")+'" data-action="'+attr+'" data-'+dattr+'="'+x[0]+'">'+x[1]+'</button>'; }).join(""); };
@@ -4748,8 +5286,9 @@ function registerErrorHandlers(){
      '<div class="panel analytics-section"><h2>ACQUISITION ECONOMICS</h2><p class="section-note">Actual recorded costs and optional estimates are separated in the basis below.</p>'+economicsHTML(T)+'</div>'+
      '<div class="panel analytics-section"><h2>TRENDS OVER TIME</h2><p class="section-note">This chart shows logged event activity by the selected period. Use cumulative mode to see the running total.</p><div class="chart-controls"><div class="seg">'+seg(RANGES,ui.chart.range,"chart-range","r")+'</div><div class="seg">'+seg(METRIC_LIST,ui.chart.metric,"chart-metric","m")+'</div><button type="button" class="chip'+(ui.chart.cumulative?" active":"")+'" data-action="chart-cum">CUMULATIVE</button></div><div class="chart-wrap" id="chartWrap"></div></div>'+
      '<div class="panel analytics-section"><h2>COMPARE STRIKES</h2>'+strikeCompareHTML()+'</div>'+
-     '<div class="panel analytics-section"><h2>LEARNING LAB - PATTERNS ONLY</h2><p class="section-note">Capture repeated patterns, not diary notes.</p>'+learningHTML()+'</div>';
+     '<div class="panel">'+learningHTML("review")+'</div>';
    safe(renderChart,"chart");
+   safe(bindLearningWidgets,"learn-bind-review");
  }
 function boot(){
   registerErrorHandlers();
