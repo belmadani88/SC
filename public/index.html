@@ -11,7 +11,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23176B63' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3C/svg%3E">
 <style>
 /* ============================================================
-   CIP STRIKE COCKPIT - visual system.
+   CIP STRIKE COCKPIT - visual system
    QUIET PRECISION - calm | intelligent | premium | trustworthy
    botanical teal primary | warm amber attention | green success
    red risk | muted blue info | dusty lavender reserved
@@ -1939,7 +1939,7 @@ function commitState(fn){
 
 /* UI runtime state (not persisted) */
 var ui={mode:"execute",filter:"queue",search:"",limit:150,drawerId:null,
-  editOpen:false,wonPrompt:false,learningShowAll:false,batchPhase:null,
+  editOpen:false,wonPrompt:false,learningShowAll:false,batchPhase:null,drawerStage:null,
   chart:{range:"month",metric:"outreach",cumulative:false},
   learnShow:{rail:false,review:false},
   prospects:{search:"",status:"all",qual:"all",xray:"all",fu:"all",sort:"updated",dir:"desc",limit:100,detail:null}};
@@ -4074,12 +4074,25 @@ onEvt(document,"focusout",function(e){
     var rt=e.relatedTarget||e.toElement, drawerEl=$("#drawer");
     if(rt&&drawerEl&&drawerEl.contains&&drawerEl.contains(rt)) return;
     /* Losing focus is only a save boundary. It never advances the workflow.
-       Batch progression requires an explicit workflow action. */
+       Batch progression requires an explicit workflow action.
+       STAGE GUARD: when the saved field completes the CONTACT step (the first
+       decision-maker channel) or the LEAKS step (the second leak), the wizard
+       STAYS on the visible step - its explicit CONTINUE button performs the
+       advance. Clicking empty space (or pressing Enter) can no longer jump the
+       screen to the next step while the user is still working on it. Other
+       stages keep the previous refresh behavior unchanged (the Loom URL and
+       AD AGE fields already commit through their dedicated bindings and never
+       advanced through this re-render; their screens move through explicit
+       actions such as COPY LOOM LINK). */
     setTimeout(function(){
       safe(function(){
         var d=$("#drawer");
         var ae=document.activeElement;
-        if(!(d&&ae&&d.contains&&d.contains(ae))) renderDrawer();
+        if(!(d&&ae&&d.contains&&d.contains(ae))){
+          var pNow=ui.drawerId?arrFind(state.prospects,function(x){ return x.id===ui.drawerId; }):null;
+          var stageNow=pNow?workflowStage(pNow):null;
+          if(!((ui.drawerStage==="contact"||ui.drawerStage==="leaks")&&stageNow!==ui.drawerStage)) renderDrawer();
+        }
         renderQueue(); renderRail();
       },"blur-refresh");
     },250);
@@ -5092,6 +5105,10 @@ function registerErrorHandlers(){
      dormant:"Keep the opportunity available without actively chasing it.",
      nogo:"The qualification filter did not pass; the record remains available as history."
    }[stage]||"Move through the strike one clear step at a time.";
+   /* transient render marker: the stage THIS wizard render shows. Read by the
+      inline-save stage guard so a blur-triggered refresh cannot silently
+      advance the visible step (contact/leaks) past what the user is doing. */
+   ui.drawerStage=stage;
    /* WON PROMPT: rendered here so the wizard's MARK WON buttons (reply / decide /
      call stages) have a completable flow. This input carries the id confirmWon()
      reads (#wonValue) and the data-action confirm-won / cancel-won controls,
