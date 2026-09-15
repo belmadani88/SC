@@ -2760,7 +2760,12 @@ function createProspect(norm){
   var p=newProspect(norm);
   var before=JSON.stringify(state);
   var info=strikeInfo();
-  if(info.empty||info.allResolved) state.strike={date:todayKey(),locked:false,ids:[],goal:state.settings.strikeGoal};
+  /* LIFECYCLE BOUNDARY: only an EMPTY strike (fresh file, or an explicitly
+     started next strike) is adopted here and receives its first member. A
+     RESOLVED strike is NEVER silently replaced by an add - the only door to
+     a fresh strike is the explicit START NEXT STRIKE action (doNewStrike).
+     onAddSubmit guards a completed strike with its own confirmation. */
+  if(info.empty) state.strike={date:todayKey(),locked:false,ids:[],goal:state.settings.strikeGoal};
   if(state.strike.ids.indexOf(p.id)<0) state.strike.ids.push(p.id);
   state.prospects.push(p);
   state.events.push({id:uid(),prospectId:p.id,type:"prospect_added",note:norm,timestamp:new Date().toISOString()});
@@ -2797,6 +2802,28 @@ function onAddSubmit(){
   if(dup){ $("#dupWarn").innerHTML=dupWarnHTML(dup); toast("Blocked - "+norm+" is already in your CRM.","warn"); return; }
   var info=strikeInfo();
   var goal=info.goal; /* the strike's own frozen size, not the settings default */
+  /* the external executive-function boundary: a completed strike is never
+     silently replaced by the next add. START NEXT STRIKE (doNewStrike) is
+     the only lifecycle door to a fresh batch, so adding on top of a
+     resolved strike requires that explicit decision - the same boundary
+     style as the lock and slot stops below. */
+  if(!info.empty&&info.allResolved){
+    confirmModal({
+      title:"STRIKE COMPLETE - "+info.resolved+" / "+info.n+" RESOLVED",
+      body:"This strike is finished - "+(info.sent>0?"every target is resolved and the deliveries are out.":"every target is resolved - nothing was delivered.")+" A new target belongs to the NEXT strike, not this finished batch: starting one is an explicit call, never a side effect of the add box. Start the next strike and add "+norm+" as its first target?",
+      cancelLabel:"BACK TO STRIKE",
+      confirmLabel:"START NEXT STRIKE AND ADD",
+      onConfirm:function(){
+        ui.batchPhase=null;
+        if(!commitState(function(){
+          state.strike={date:todayKey(),locked:false,ids:[],goal:state.settings.strikeGoal};
+        })) return;
+        createProspect(norm);
+      },
+      onCancel:function(){ setFilter("strike"); }
+    });
+    return;
+  }
   /* the external executive-function boundary: enforce the hard stop at strike size */
   if(!info.empty&&info.st.locked&&!info.allResolved){
     confirmModal({
