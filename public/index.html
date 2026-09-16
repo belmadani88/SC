@@ -2802,12 +2802,16 @@ function onAddSubmit(){
   if(dup){ $("#dupWarn").innerHTML=dupWarnHTML(dup); toast("Blocked - "+norm+" is already in your CRM.","warn"); return; }
   var info=strikeInfo();
   var goal=info.goal; /* the strike's own frozen size, not the settings default */
-  /* the external executive-function boundary: a completed strike is never
-     silently replaced by the next add. START NEXT STRIKE (doNewStrike) is
-     the only lifecycle door to a fresh batch, so adding on top of a
-     resolved strike requires that explicit decision - the same boundary
-     style as the lock and slot stops below. */
-  if(!info.empty&&info.allResolved){
+  /* the external executive-function boundary: STRIKE COMPLETION is a
+     CAPACITY fact, not a member-resolution fact. allResolved with open
+     slots left (occupying < goal) is a MID-STRIKE state - the target
+     simply joins the same strike below. Only a genuinely complete strike
+     (every member resolved AND the configured size reached) is never
+     silently replaced by the next add: START NEXT STRIKE (doNewStrike)
+     stays the only lifecycle door to a fresh batch, so adding on top of
+     a finished strike requires that explicit decision - the same
+     boundary style as the lock and slot stops below. */
+  if(!info.empty&&info.allResolved&&info.occupying>=goal){
     confirmModal({
       title:"STRIKE COMPLETE - "+info.resolved+" / "+info.n+" RESOLVED",
       body:"This strike is finished - "+(info.sent>0?"every target is resolved and the deliveries are out.":"every target is resolved - nothing was delivered.")+" A new target belongs to the NEXT strike, not this finished batch: starting one is an explicit call, never a side effect of the add box. Start the next strike and add "+norm+" as its first target?",
@@ -2824,8 +2828,10 @@ function onAddSubmit(){
     });
     return;
   }
-  /* the external executive-function boundary: enforce the hard stop at strike size */
-  if(!info.empty&&info.st.locked&&!info.allResolved){
+  /* the external executive-function boundary: enforce the hard stop at strike size.
+     The lock holds regardless of member resolution - resolving members never
+     bypasses the acquisition lock while the strike is the current one. */
+  if(!info.empty&&info.st.locked){
     confirmModal({
       title:"STRIKE LOCKED",
       body:"Acquisition is closed - "+info.occupying+" targets occupy the active slots and the protocol says finish before hunting more. Scrolling for one more is the trap this system exists to prevent. Unlock and add anyway?",
@@ -2837,7 +2843,7 @@ function onAddSubmit(){
     });
     return;
   }
-  if(!info.empty&&info.occupying>=goal&&!info.allResolved){
+  if(!info.empty&&info.occupying>=goal){
     confirmModal({
       title:"STRIKE SLOTS FULL - "+info.occupying+" / "+goal+" ACTIVE",
       body:"The protocol says stop acquisition at "+goal+" and run the strike. One more target is not one more opportunity - it is postponed execution of the targets you already have. Add anyway?",
@@ -2892,7 +2898,12 @@ function strikePanelHTML(){
       '<div class="trow"><button type="button" class="btn primary" data-action="focus-add">'+icon("plus","ic-sm")+' START THE STRIKE</button></div>'+
       '</div>';
   }
-  var occ=info.occupying, done=info.allResolved;
+  /* STRIKE COMPLETION = all members resolved AND the configured size
+     reached (same capacity measure as the slots-full stop: NO-GO frees a
+     slot). All members resolved with open slots left is a MID-STRIKE
+     state: the strike keeps its identity, membership and frozen goal,
+     and START NEXT STRIKE stays the explicit door to a fresh one. */
+  var occ=info.occupying, done=info.allResolved&&occ>=goal;
   var flash=done&&info.sent>0&&!prevStrikeDone;
   prevStrikeDone=done&&info.sent>0;
   var built=info.st.date===tk?"BUILT TODAY":(info.st.date?"BUILT "+fmtKey(info.st.date).toUpperCase():"");
