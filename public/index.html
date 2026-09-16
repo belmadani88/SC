@@ -1472,7 +1472,19 @@ var Cloud=(function(){
     onEvt(window,"online",function(){ try{ if(ready) flush(); }catch(e){} });
     httpJson("GET","bootstrap",null,function(err,res){
       ready=true;
-      if(err||!res||!res.ok){ onOffline(err); return; }
+      if(err||!res||!res.ok){
+        /* OFFLINE BOOT CURSOR RESTORE: a browser that boots while the cloud is
+           unreachable must still load its persisted sync cursor, exactly like
+           the connected path below. Without the cursor, every later flush()
+           computes no ops (computeOps returns null for a missing vector) and,
+           because this boot failed, takes the rebootstrapAdopt() branch - which
+           ADOPTS the cloud state unmerged and silently discards the offline
+           work (prospects, events, strike) the moment the connection returns.
+           Restoring the cursor here keeps the normal diff path: pending local
+           edits are computed and pushed once the cloud is reachable again. */
+        if(!vector){ var v0=readVector(); if(v0) vector={gen:Number(v0.gen)||0,sig:(v0.sig||emptySigs())}; }
+        onOffline(err); return;
+      }
       failed=false;
       var gen=Number(res.gen)||0;
       var cloudState=sanitizeState(res.state);
