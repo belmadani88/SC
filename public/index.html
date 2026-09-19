@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>CIP - Strike Cockpit</title>
+<title>Momentum CRM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -320,6 +320,24 @@ main{max-width:1240px;margin:0 auto;padding:24px 20px}
    Clicking the control OR the text works via native label behavior;
    selection state is visible even with all custom CSS degraded. */
 .tcrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:5px 0}
+/* PATCH(4) - ONE email-composer pattern reused by every stage (First
+   Email, Day 3, Day 9, Commercial details message): each copy control
+   sits directly under the field it copies. */
+.cbody{flex:1;min-width:0}
+.cbody .inline-inp{display:block;width:100%}
+.cbody-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px}
+/* PATCH(4) - reply decision cards: one choice = one action = auto-routing */
+.reply-cards{display:flex;flex-direction:column;gap:10px;margin:10px 0 12px}
+.reply-card{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;text-align:left;padding:13px 16px;border:2px solid #C7D0CB;border-radius:10px;background:#FFFFFF;cursor:pointer;min-height:44px}
+.reply-card:hover{border-color:#176B63;background:#F4F9F7}
+.reply-card:focus-visible{outline:2px solid #176B63;outline-offset:2px}
+.reply-card .rc-k{font:700 15px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.05em;color:#1F2933}
+.reply-card .rc-s{font:12.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.03em;color:#7B878D}
+.reply-card.good .rc-k{color:#0E4740}
+.reply-card.danger .rc-k{color:#8A2B2B}
+.reply-card.ghost{border-style:dashed;background:#FAFBFA}
+.reply-card.ghost .rc-k{color:#5A6B66}
+.reply-card.ghost:hover{border-color:#8FA6A0;background:#F4F8F6}
 .tclabel{font:13.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.07em;color:#46545D;width:118px;flex:none}
 .tchips{display:inline-block}
 .tlabel{display:inline-block;padding:7px 12px;border:2px solid #C7D0CB;border-radius:6px;background:#FFFFFF;color:#1F2933;cursor:pointer;font:600 14.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.04em;margin:0 6px 4px 0;white-space:nowrap}
@@ -569,6 +587,12 @@ main{max-width:1240px;margin:0 auto;padding:24px 20px}
 .fu-cell.hot .fu-v{color:#A04000}
 .fu-cell.ok{background:#E5F1ED;border-color:#B8D9D1}
 .fu-cell.ok .fu-v{color:#2F7D6D}
+/* FINAL UX PATCH - Commercial workspace: pending milestone cells are dimmed
+   and completed milestones render as compact summary rows (.cm-done). */
+.fu-cell.todo{opacity:.62}
+.cm-done{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;border:1px solid #B8D9D1;background:#E5F1ED;border-radius:8px;padding:8px 12px;margin:6px 0}
+.cm-done .cm-done-k{font:600 10px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.08em;color:#2F7D6D;flex:none}
+.cm-done .cm-done-v{font:700 12.5px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;color:#1F2933;word-wrap:break-word;overflow-wrap:break-word;min-width:0}
 .fu-outcome{margin-top:16px;padding-top:14px;border-top:1px dashed #C7D0CB}
 .fu-outcome-k{display:block;font:600 10px "IBM Plex Mono","SF Mono","Cascadia Mono",Consolas,"Liberation Mono",monospace;letter-spacing:.08em;color:#7B878D;margin-bottom:10px}
 .fu-outcome .btn{margin:0 8px 8px 0}
@@ -721,6 +745,8 @@ main{max-width:1240px;margin:0 auto;padding:24px 20px}
      instead of forcing horizontal overflow with white-space:nowrap */
   .tlabel{white-space:normal;max-width:100%;font-size:13px;line-height:1.4}
   .tlabel .tradio{vertical-align:-2px}
+  .reply-card{padding:12px 14px}
+  .reply-card .rc-k{font-size:14px}
 }
 @media(max-width:380px){
   .mode-switch button{padding:7px 4px;font-size:10px;letter-spacing:0}
@@ -760,7 +786,7 @@ main{max-width:1240px;margin:0 auto;padding:24px 20px}
 <header class="topbar">
   <div class="brand" title="Conversion Inversion Protocol">
     <svg class="ic"><use xlink:href="#i-mark" href="#i-mark"/></svg>
-    <div class="brand-text"><span>CONVERSION INVERSION</span><b>STRIKE COCKPIT</b></div>
+    <div class="brand-text"><span>CONVERSION INVERSION</span><b>MOMENTUM CRM</b></div>
   </div>
   <nav class="mode-switch">
     <button data-action="mode" data-mode="execute" class="active">EXECUTE</button>
@@ -784,10 +810,10 @@ main{max-width:1240px;margin:0 auto;padding:24px 20px}
   <!-- ============ MODE A: EXECUTE - "WHAT DO I DO NOW?" ============ -->
   <section id="viewExecute">
     <div class="panel addbar">
-      <div class="execute-intro"><h1>WHAT DO I DO NOW?</h1><p>Find a business with a real signal, evaluate the opportunity, run a 5-min diagnosis, write the plain-text first message, follow up Day 3 + Day 9, then stop. Reply -> proof -> call -> proposal.</p></div>
+      <div class="execute-intro"><h1>WHAT DO I DO NOW?</h1><p>Find a business with a real signal, run the 5-minute diagnosis, write the plain-text first email, follow up Day 3 + Day 9, then stop. Reply -> commercial (details, meeting, proposal, payment).</p></div>
       <form id="addForm" class="addrow">
         <input id="addInput" type="text" placeholder="Paste a website URL and press Enter - the first five that qualify, then stop" autocomplete="off" spellcheck="false">
-        <button class="btn primary" type="submit"><svg class="ic ic-sm"><use xlink:href="#i-plus" href="#i-plus"/></svg> ADD TARGET</button>
+        <button class="btn primary" type="submit"><svg class="ic ic-sm"><use xlink:href="#i-plus" href="#i-plus"/></svg> ADD PROSPECT</button>
       </form>
       <div id="dupWarn"></div>
     </div>
@@ -973,7 +999,7 @@ function daysBetween(aKey,bKey){
   return Math.round((b-a)/86400000);
 }
 function fmtKey(k){ var d=parseKey(k); if(!validDate(d)) return "-"; var y=d.getFullYear()!==new Date().getFullYear(); return MONTHS[d.getMonth()]+" "+d.getDate()+(y?", "+d.getFullYear():""); }
-function fmtTs(ts){ var d=new Date(ts); if(!validDate(d)) return "-"; return fmtKey(d); }
+function fmtTs(ts){ var d=new Date(ts); if(!validDate(d)) return "-"; return fmtKey(localYmd(d)); }
 function mondayOf(d){ var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); var wd=(x.getDay()+6)%7; x.setDate(x.getDate()-wd); return x; }
 function group(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,","); }
 function fmtNum(v){ v=Math.round(Number(v)||0); return v>=1000?group(v):String(v); }
@@ -1676,7 +1702,7 @@ var STATUS_LABEL={NEW:"New",FIRST_OUTREACH:"First email sent",FOLLOWUP_1:"Follow
   FOLLOWUP_2:"Follow-up 2 (Day 9)",FOLLOWUP_3:"Follow-up 3 (legacy - not scheduled)",REPLIED:"Replied",
   CALL_BOOKED:"Mapping call booked",WON:"Won",LOST:"Lost",DORMANT:"Dormant",
   QUALIFIED:"Qualified",DIAGNOSED:"Diagnosed",PROOF:"Proof in progress",
-  PROOF_SENT:"Proof sent",CALL_COMPLETED:"Mapping call done",PROPOSAL:"Proposal sent",
+  PROOF_SENT:"Details sent - waiting for response",CALL_COMPLETED:"Mapping call done",PROPOSAL:"Proposal sent",
   DEPOSIT_RECEIVED:"Deposit received",STOP:"STOP / opt-out"};
 var ACTIVE=[S.NEW,S.QUALIFIED,S.DIAGNOSED,S.FO,S.F1,S.F2,S.F3,S.REPLIED,S.PROOF,S.PROOF_SENT,S.CALL,S.CALL_COMPLETED,S.PROPOSAL,S.DEPOSIT_RECEIVED];
 var VALID_STATUS={NEW:1,FIRST_OUTREACH:1,FOLLOWUP_1:1,FOLLOWUP_2:1,FOLLOWUP_3:1,REPLIED:1,CALL_BOOKED:1,WON:1,LOST:1,DORMANT:1,
@@ -1688,12 +1714,14 @@ var VALID_VIDEO={not_required:1,not_started:1,recording:1,recorded:1,sent:1,bypa
    categories preserved verbatim; new categories added as additive aliases.
    POSITIVE_REPLY_TYPES expanded so CURIOUS and REFERRAL open the proof
    workflow (per PDF: "treat vague positives as yes"; "We already have an
-   agency" -> ~1 in 10 forwards it and comes back, so it's a positive signal). */
+   agency" -> ~1 in 10 forwards it and comes back, so it's a positive signal).
+   PATCH(4.1): MAYBE is NOT positive - it parks with not-now, matching the
+   MAYBE / NOT NOW operator card. */
 var REPLY_TYPES=[
   ["positive","POSITIVE"],
   ["curious","CURIOUS (vague positive - treat as yes)"],
   ["question","QUESTION (asks for the write-up)"],
-  ["maybe","MAYBE"],
+  ["maybe","MAYBE (parks like NOT NOW)"],
   ["referral","REFERRAL ('we already have an agency' - forward-worthy)"],
   ["not_now","NOT NOW (park, no proof)"],
   ["objection","OBJECTION (price / timing / scope)"],
@@ -1705,7 +1733,7 @@ var REPLY_TYPES=[
   ["suspicious","SUSPICIOUS (asked 'is this a scam?')"],
   ["other","OTHER"]
 ];
-var POSITIVE_REPLY_TYPES=["positive","curious","question","maybe","referral"];
+var POSITIVE_REPLY_TYPES=["positive","curious","question","referral"];
 var STOP_REPLY_TYPES=["stop","opt_out","hostile"];
 /* LEGACY segment / destination-type / impression-band taxonomies REMOVED from
    the active workflow (website-agnostic, technology-neutral operation - the
@@ -1724,22 +1752,22 @@ var DEFAULT_PROPOSAL_VALUE=1500;
    proof effort is the operator's judgment, never a tracked time budget. */
 /* protocol phases: P1 target | P2 audit | P3 record | P4 deliver | P5 follow-up | P6 reply | P7 mapping | P8 close
    0 = NO-GO (rejected, on file) | -1 = dormant */
-/* CIP V2.1 queues (spec section 23). Old X-RAY/RECORD/AUDIT queue names are
-   preserved as legacy aliases inside groupOf but the visible labels now reflect
-   the new pipeline. */
+/* CIP V2.1 queues. PATCH(4): no EVALUATE queue - a fresh target lands in
+   DIAGNOSIS immediately. Legacy aliases inside groupOf are preserved but
+   the visible labels reflect the operator pipeline. */
 var GROUPS=[
   ["overdue","FOLLOW-UPS OVERDUE","red"],
   ["due","FOLLOW-UP DUE TODAY","amber"],
-  ["proof_due","REPLY - PROOF REQUIRED","hot"],
-  ["proof_inprogress","PROOF IN PROGRESS",""],
-  ["proof_ready","PROOF READY TO SEND","amber"],
-  ["mapping","MAPPING CALL",""],
-  ["proposal","PROPOSAL",""],
+  /* PATCH(4): recorded replies awaiting manual handling */
+  ["proof_due","REPLIES TO HANDLE","hot"],
+  /* PATCH(4): the commercial pipeline in operator language */
+  ["proof","COMMERCIAL - SEND DETAILS","hot"],
+  ["mapping","MEETING",""],
+  ["proposal","DECISION / PROPOSAL",""],
   ["payment","PAYMENT",""],
   ["move","YOUR MOVE - REPLIES AND DECISIONS","hot"],
   ["first_contact","FIRST CONTACT READY",""],
   ["diagnosis","DIAGNOSIS",""],
-  ["target","EVALUATE",""],
   ["waiting","WAITING FOR REPLY",""],
   ["dormant","DORMANT",""]
 ];
@@ -1748,8 +1776,8 @@ var GROUP_SORT={
   due:function(a,b){ return String(a.outreach.lastOutreachDate).localeCompare(String(b.outreach.lastOutreachDate)); },
   move:function(a,b){ return String(b.updatedAt).localeCompare(String(a.updatedAt)); },
   proof_due:function(a,b){ return String(b.updatedAt).localeCompare(String(a.updatedAt)); },
-  proof_inprogress:function(a,b){ return String(b.updatedAt).localeCompare(String(a.updatedAt)); },
-  proof_ready:function(a,b){ return String(b.updatedAt).localeCompare(String(a.updatedAt)); },
+  /* FINAL UX PATCH: one PROOF group - the readiness split is gone */
+  proof:function(a,b){ return String(b.updatedAt).localeCompare(String(a.updatedAt)); },
   mapping:function(a,b){ return String(b.updatedAt).localeCompare(String(a.updatedAt)); },
   proposal:function(a,b){ return String(b.updatedAt).localeCompare(String(a.updatedAt)); },
   payment:function(a,b){ return String(b.updatedAt).localeCompare(String(a.updatedAt)); },
@@ -1758,7 +1786,6 @@ var GROUP_SORT={
   record:function(a,b){ return String(a.createdAt).localeCompare(String(b.createdAt)); },
   audit:function(a,b){ return String(a.createdAt).localeCompare(String(b.createdAt)); },
   diagnosis:function(a,b){ return String(a.createdAt).localeCompare(String(b.createdAt)); },
-  target:function(a,b){ return String(a.createdAt).localeCompare(String(b.createdAt)); },
   waiting:function(a,b){ return String(a.outreach.nextFollowUpDate).localeCompare(String(b.outreach.nextFollowUpDate)); },
   dormant:function(a,b){ return String(b.updatedAt).localeCompare(String(a.updatedAt)); }
 };
@@ -1781,10 +1808,10 @@ var METRICS={
 var RANGES=[["day","DAY"],["week","WEEK"],["month","MONTH"],["year","YEAR"],["all","ALL"]];
 var METRIC_LIST=[["outreach","DELIVERED"],["touches","TOUCHES"],["replies","REPLIES"],["calls","CALLS"],["wins","WINS"],["revenue","REVENUE"]];
 var FILTER_EMPTY={
-  queue:"No prospects yet. Paste a website above - fill the strike, then stop.",
+  queue:"No prospects yet. Paste a website above - fill today's focus, then stop.",
   due:"No follow-ups due. Your queue is clear.",
-  strike:"The pipeline is empty. Paste a target above to build the strike.",
-  move:"No replies waiting. The strike is running.",
+  strike:"The pipeline is empty. Paste a website above to build today's focus.",
+  move:"No replies waiting. The workflow is running.",
   won:"Nothing marked Won yet. Your first close will show up here.",
   all:"The database is empty - nothing on file yet. Add your first website above."
 };
@@ -1793,9 +1820,12 @@ var MULTI_TLDS=["co.uk","org.uk","ac.uk","gov.uk","com.au","net.au","co.nz","co.
    self-check compares the DOM against this set and warns about orphans.
    (Plain object, NOT a Set: Set does not exist in the target browsers.) */
  var KNOWN_ACTIONS={"mode":1,"open-settings":1,"guide":1,"start-first-strike":1,"continue-workflow":1,"continue-to-contact":1,"continue-to-proof":1,"continue-to-email":1,"workflow-back":1,"open":1,
-   "copy-first-email":1,"reset-email-draft":1,
+   "reset-email-draft":1,
+  /* FINAL UX PATCH - per-field copy buttons + settings template tabs */
+  "copy-email-subject":1,"copy-email-body":1,"copy-followup-subject":1,"copy-followup-body":1,
+  "copy-proof-subject":1,"copy-proof-body":1,"tpl-tab":1,
   /* CIP V2.1 operator pass - follow-up composers + proof message */
-  "copy-followup":1,"reset-followup-draft":1,"mail-followup":1,"copy-proof":1,"reset-proof-draft":1,
+  "reset-followup-draft":1,"reset-proof-draft":1,
   /* CIP V2.1 diagnosis (replaces old X-ray start/record for new prospects) */
   "start-diagnosis":1,"complete-diagnosis":1,"diagnosis-restart-timer":1,"diagnosis-reset":1,
   /* legacy X-ray actions preserved for historical records (kept off the primary UI) */
@@ -1807,7 +1837,7 @@ var MULTI_TLDS=["co.uk","org.uk","ac.uk","gov.uk","com.au","net.au","co.nz","co.
   "followup":1,"send-linkedin":1,"mail-link":1,"linkedin-link":1,"phone-link":1,"focus-contact":1,
   "copy-email":1,"copy-loom":1,"copy-phone":1,
   /* CIP V2.1 reply classification */
-  "classify-reply":1,"set-reply-type":1,"mark-replied":1,
+  "reply-card":1,"set-reply-type":1,"mark-replied":1,"commercial-deal":1,"commercial-nodeal":1,
   /* CIP V2.1 post-reply proof workflow */
   "start-proof":1,"complete-proof":1,"send-proof":1,"record-video":1,"set-video-not-required":1,
   /* CIP V2.1 mapping call: booked (already exists), new completed state */
@@ -1838,7 +1868,7 @@ function reportError(err,label){
   if(now-lastErrToast<10000) return; /* rate-limited so error storms don't spam the UI */
   lastErrToast=now;
   try{
-    toast("The cockpit hit an unexpected error. Your last successfully saved data has not been intentionally deleted. Reload the page if anything looks off.",
+    toast("Momentum CRM hit an unexpected error. Your last successfully saved data has not been intentionally deleted. Reload the page if anything looks off.",
       {type:"warn",actionLabel:"RELOAD",onAction:function(){ location.reload(); }});
   }catch(e){}
 }
@@ -1851,7 +1881,7 @@ function showBootError(err){
     document.body.innerHTML=
       '<div style="max-width:620px;margin:70px auto;padding:30px 34px;font-family:Consolas,monospace;color:#1F2933;background:#FFFFFF;border:1px solid #DCE2DE;border-radius:12px;">'+
       '<div style="font-size:16px;letter-spacing:.14em;color:#A33F3F;font-weight:700;margin-bottom:14px;">CIP INITIALIZATION ERROR</div>'+
-      '<p style="color:#46545D;font-size:15px;line-height:1.65;margin:0 0 16px;">The cockpit could not start. Your data has <b style="color:#1F2933">not</b> been deleted - it is still in this browser\'s local storage. Try reloading. If the error repeats, download your raw data below and keep it safe.</p>'+
+      '<p style="color:#46545D;font-size:15px;line-height:1.65;margin:0 0 16px;">Momentum CRM could not start. Your data has <b style="color:#1F2933">not</b> been deleted - it is still in this browser\'s local storage. Try reloading. If the error repeats, download your raw data below and keep it safe.</p>'+
       '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">'+
       '<button id="cipReload" style="font:600 14px Consolas,monospace;padding:10px 16px;border-radius:6px;border:1px solid #176B63;background:#176B63;color:#FFFFFF;cursor:pointer;">RELOAD</button>'+
       (raw?'<button id="cipRaw" style="font:600 14px Consolas,monospace;padding:10px 16px;border-radius:6px;border:1px solid #C7D0CB;background:#F0F3F0;color:#1F2933;cursor:pointer;">DOWNLOAD RAW DATA</button>':"")+
@@ -1920,7 +1950,14 @@ function rollbackNotice(){
    return { settings:{strikeGoal:5, fu1:3, fu2:4, fu3:7,
       followup1Days:3, followup2Days:9, dailyTarget:DAILY_TARGET,
       currency:"USD",globalToolCost:0,globalOutreachCost:0,globalOtherCost:0,hourlyCost:0,
-      operatorName:"", operatorCompany:"", operatorWebsite:"", operatorAddress:""},
+      operatorName:"", operatorCompany:"", operatorWebsite:"", operatorAddress:"",
+      /* FINAL UX PATCH - global email templates (defaults; '' = built-in suggestion).
+         Prospect-specific drafts are LOCAL OVERRIDES and are never overwritten
+         when these change (the stored draft always wins in the composers). */
+      tplFirstSubject:"",tplFirstBody:"",
+      tplFu1Subject:"",tplFu1Body:"",
+      tplFu2Subject:"",tplFu2Body:"",
+      tplProofSubject:"",tplProofBody:""},
     prospects:[], events:[], learnings:[],
     strike:{date:"", locked:false, ids:[], goal:0},
      metadata:{createdAt:new Date().toISOString(), lastBackup:null, lastBackupEvents:0, version:DATA_VERSION,onboardingComplete:false} };
@@ -1972,6 +2009,8 @@ function sanitizeProspect(p){
     followup2Subject:"",followup2Body:"",
     /* CIP V2.1 operator pass - the proposed fix that anchors the proof message */
     proofProposedFix:"",
+    /* FINAL UX PATCH - subject of the proof / mapping-invitation email */
+    proofSubject:"",
     /* CIP V2.1 post-reply proof fields (adaptive evidence) */
     proofStartedAt:null,proofCompletedAt:null,proofSentAt:null,proofSent:false,
     writtenProofUrl:"",screenshot1Url:"",screenshot2Url:"",wireframeUrl:"",
@@ -1982,6 +2021,11 @@ function sanitizeProspect(p){
     videoIncluded:false,videoUrl:"",videoReason:"",
     /* CIP V2.1 mapping call */
     mappingCallBookedAt:null,mappingCallCompletedAt:null,mappingCallNotes:"",
+    /* BUSINESS-FLOW FIX: explicit prospect agreement to meet - recorded by
+       actMeetingAgreed while PROOF_SENT. Required before the meeting may be
+       booked (an invitation sent is NOT an agreement). Rides in extra_json
+       through cloud sync; no schema change. */
+    meetingAgreedAt:null,
     /* CIP V2.1 reply classification */
     replyType:"",replyDate:"",replyNote:""
   },p.strike||{});
@@ -2024,7 +2068,7 @@ function sanitizeProspect(p){
     impressionBand:(typeof p.impressionBand==="string")?p.impressionBand:"unknown",
     minutesSpent:Number(p.minutesSpent)||0,
     company:mixObj({name:"",niche:"",source:"",adUrl:"",adDiscoveryDate:"",adLaunchDate:""},p.company||{}),
-    contact:mixObj({name:"",role:"",email:"",linkedin:"",phone:""},p.contact||{}),
+    contact:mixObj({name:"",role:"",email:"",linkedin:"",phone:"",otherInfo:""},p.contact||{}),
     testing:mixObj({status:"not_tested",qualification:"",testedAt:"",note:""},p.testing||{}),
     strike:st,
     outreach:o,
@@ -2163,6 +2207,7 @@ function sanitizeState(d){
     if(p.strike.proofCompletedAt&&!validDate(new Date(p.strike.proofCompletedAt))){ p.strike.proofCompletedAt=null; fixes++; }
     if(p.strike.proofSentAt&&!validDate(new Date(p.strike.proofSentAt))){ p.strike.proofSentAt=null; fixes++; }
     if(p.strike.mappingCallBookedAt&&!validDate(new Date(p.strike.mappingCallBookedAt))){ p.strike.mappingCallBookedAt=null; fixes++; }
+    if(p.strike.meetingAgreedAt&&!validDate(new Date(p.strike.meetingAgreedAt))){ p.strike.meetingAgreedAt=null; fixes++; }
     if(p.strike.mappingCallCompletedAt&&!validDate(new Date(p.strike.mappingCallCompletedAt))){ p.strike.mappingCallCompletedAt=null; fixes++; }
     if(p.commercial.proposalSentAt&&!validDate(new Date(p.commercial.proposalSentAt))){ p.commercial.proposalSentAt=null; fixes++; }
     if(p.commercial.depositReceivedAt&&!validDate(new Date(p.commercial.depositReceivedAt))){ p.commercial.depositReceivedAt=null; fixes++; }
@@ -2233,6 +2278,15 @@ function commitState(fn){
 /* UI runtime state (not persisted) */
 var ui={mode:"execute",filter:"queue",search:"",limit:150,drawerId:null,
   editOpen:false,wonPrompt:false,learningShowAll:false,batchPhase:null,drawerStage:null,
+  /* PATCH(4) runtime-only keys (never persisted):
+     replyDraft - THEY REPLIED opens the Reply page directly; the flag self-disarms
+       the moment the status leaves the follow-up states (classification, lost, stop).
+     commercialDeal - DEAL chosen after the meeting: reveals the proposal form
+       inside the commercial workspace for THIS prospect until the drawer is
+       reopened or the status advances (navigation only - never persisted,
+       never a second state machine).
+     tplTab - which email template is being edited in Settings. */
+  replyDraft:null,tplTab:"first",lastShownStage:null,commercialDeal:null,
   chart:{range:"month",metric:"outreach",cumulative:false},
   learnShow:{rail:false,review:false},
   prospects:{search:"",status:"all",fu:"all",sort:"updated",dir:"desc",limit:100,detail:null}};
@@ -2278,8 +2332,11 @@ function followState(p){
   return {s:"future",days:-diff,due:due};
 }
 /* THE protocol phase machine - the single source of "where am I in the strike".
-   P1 target check | P2 audit (BOTH leaks required) | P3 record | P4 deliver |
-   P5 follow-up | P6 reply | P7 mapping call | P8 close.
+   PATCH(4): no evaluate phase - the operator path is diagnose | contact |
+   follow-up | reply | commercial. Legacy qualification data is preserved
+   in storage but never gates the active workflow.
+   P2 diagnosis | P3 first contact | P5 follow-up | P6 reply | P7 commercial
+   | P8 close.
    STATE-MACHINE FIX: "sent" is an OUTCOME produced by logging the delivery
    (actLogDelivery sets it), so it is NOT accepted as a P4 prerequisite here.
    Legacy sent-without-evidence records are repaired by sanitizeState above,
@@ -2301,15 +2358,17 @@ function phaseOf(p){
   /* P6 REPLIED */
   if(st===S.REPLIED) return 6;
   if(st===S.NEW){
-    /* P0 NO-GO: failed qualification */
+    /* P0 NO-GO: rejected from the Diagnose screen (legacy: failed
+       qualification). The stored testing fields stay untouched. */
     if(p.testing.qualification==="no_go") return 0;
-    /* P1 TARGET CHECK: not yet qualified */
-    if(p.testing.qualification!=="go") return 1;
-    /* P3 DIAGNOSIS: qualified but primary finding not yet set OR diagnosis
-       not yet saved. The five-minute concept is behavioral guidance, not an
-       app timer: the operator fills the findings and clicks SAVE DIAGNOSIS.
-       The wizard stays on the diagnosis stage until it is saved, even if
-       the primary finding is already filled. */
+    /* PATCH(4): the EVALUATE gate is gone - evaluation happens naturally
+       while researching and diagnosing. A fresh target starts at DIAGNOSIS.
+       Historical qualification values are never consulted for routing. */
+    /* P2 DIAGNOSIS: primary finding not yet set OR diagnosis not yet saved.
+       The five-minute concept is behavioral guidance, not an app timer: the
+       operator fills the findings and clicks SAVE DIAGNOSIS. The wizard
+       stays on the diagnosis stage until it is saved, even if the primary
+       finding is already filled. */
     if(!p.strike.primaryFinding || !p.strike.diagnosisCompletedAt) return 2;
     /* P4 FIRST CONTACT READY: diagnosis complete but first email not logged.
        CIP V2.1: NO X-ray recording prerequisite - the first email is plain
@@ -2327,26 +2386,16 @@ function groupOf(p){
   if(g===-2) return "dormant"; /* STOP/opt-out parked with dormant for queue purposes */
   if(g===6) return "proof_due"; /* P6 REPLIED -> proof required (positive reply) or your move */
   if(g===7){
-    /* P7-P9: distinguish proof-in-progress / proof-ready / mapping / proposal / payment
-       by outreach.status (set by the new action handlers). */
+    /* PATCH(4): the operator sees ONE Commercial workspace; the queue
+       groups it by the CURRENT step (details / meeting / decision-proposal
+       / payment). */
     var st=p.outreach.status;
-    if(st===S.PROOF){
-      /* CANONICAL PROOF-READINESS RULE (operator-pass fix): proof is READY
-         to send when the prospect-specific evidence requirement is satisfied -
-         at least ONE recorded evidence reference of any kind (see
-         proofEvidenceReady). The legacy fixed 4-asset package
-         (writtenProofUrl + screenshot1Url + screenshot2Url + wireframeUrl)
-         is no longer a requirement ANYWHERE. One rule, used by the queue,
-         the actions and the wizard alike. */
-      return proofEvidenceReady(p)?"proof_ready":"proof_inprogress";
-    }
-    if(st===S.PROOF_SENT) return "mapping";
-    if(st===S.CALL||st===S.CALL_COMPLETED) return "mapping";
-    if(st===S.PROPOSAL) return "proposal";
+    if(st===S.PROOF) return "proof";
+    if(st===S.PROOF_SENT||st===S.CALL) return "mapping";
+    if(st===S.CALL_COMPLETED||st===S.PROPOSAL) return "proposal";
     if(st===S.DEPOSIT_RECEIVED) return "payment";
     return "mapping";
   }
-  if(g===1) return "target";
   if(g===2) return "diagnosis";
   if(g===3) return "first_contact";
   if(g===4) return "first_contact"; /* legacy: also first_contact now (no X-ray) */
@@ -2374,7 +2423,7 @@ function nextProspect(id){
 }
 function haystack(p){
   return [p.company.name,p.domain,p.company.niche,p.company.source,p.contact.name,p.contact.role,
-    p.contact.email,p.contact.linkedin,p.contact.phone,p.notes,p.testing.note,
+    p.contact.email,p.contact.linkedin,p.contact.phone,p.contact.otherInfo,p.notes,p.testing.note,
     p.strike.leak1,p.strike.leak2,p.strike.loomUrl,
     p.strike.primaryFinding,p.strike.secondaryFinding,p.strike.videoUrl,
     p.strike.writtenProofUrl,p.strike.wireframeUrl,p.strike.mappingCallNotes,
@@ -2433,6 +2482,7 @@ function shortEventLabel(e){
     case "proposal": return "Proposal sent"+(e.value?(" - "+fmtMoney(e.value)):"");
     case "deposit": return "Deposit received"+(e.value?(" - "+fmtMoney(e.value)):"");
     case "balance": return "Balance received"+(e.value?(" - "+fmtMoney(e.value)):"");
+    case "meeting": return e.subtype==="agreed"?"Meeting agreed":"Meeting";
     case "stop": return "STOP / opt-out";
     case "won": return "Won "+fmtMoney(e.value||0);
     case "lost": return "Lost";
@@ -2474,7 +2524,8 @@ function strikeInfo(){
     if(isSent) sent++;
     if(p.outreach.status===S.WON||p.outreach.status===S.LOST){ closed++; resolved++; return; }
     if(isSent){ inFlight++; resolved++; return; }
-    if(p.testing.qualification!=="go"){ unq++; return; }
+    /* PATCH(4): unq counts nothing anymore - evaluation is not a strike
+       phase. A fresh, undiagnosed member is work for the DIAGNOSE phase. */
     if(!p.strike.primaryFinding||!p.strike.diagnosisCompletedAt){ unaud++; return; }
     if(p.strike.videoStatus!=="recorded"&&p.strike.videoStatus!=="sent"&&p.strike.videoStatus!=="bypassed"){ unrec++; return; }
     undel++;
@@ -2486,24 +2537,25 @@ function strikeInfo(){
     allResolved:resolved===members.length};
 }
 function strikePhaseWord(info){
-  if(info.unq>0) return "CHECK";
+  /* PATCH(4): two strike phases remain - DIAGNOSE, then FIRST EMAIL. The
+     CHECK (evaluate) and RECORD (legacy X-ray) phases are gone; unq/unrec
+     stay computed for the resolution counters only. */
   if(info.unaud>0) return "AUDIT";
-  if(info.unrec>0) return "RECORD";
   if(info.undel>0) return "DELIVER";
   return null;
 }
 function strikePhaseText(info){
   var w=strikePhaseWord(info);
-  /* CIP V2.1 terminology: CHECK / DIAGNOSE / (no RECORD) / FIRST EMAIL / FOLLOW-UP */
-  if(w==="CHECK") return "PHASE: EVALUATE - "+info.unq+" PROSPECT"+(info.unq===1?"":"S")+" TO EVALUATE";
+  /* PATCH(4) terminology: DIAGNOSE / FIRST EMAIL / FOLLOW-UP */
   if(w==="AUDIT") return "PHASE: DIAGNOSE - "+info.unaud+" NEED"+(info.unaud===1?"":"S")+" 5-MIN DIAGNOSIS (1 PRIMARY + 1 SECONDARY)";
-  if(w==="RECORD") return "PHASE: DIAGNOSE - "+info.unrec+" DIAGNOSIS"+(info.unrec===1?"":"S")+" IN PROGRESS";
   if(w==="DELIVER") return "PHASE: FIRST EMAIL - "+info.undel+" READY TO WRITE AND SEND (PLAIN TEXT, NO LINK/IMAGE/VIDEO)";
   return "PHASE: IN FLIGHT - "+info.inFlight+" IN THE DAY 3 / DAY 9 FOLLOW-UP SEQUENCE";
 }
 /* batch execution: the first member still needing a phase IS the user's place */
 function firstMemberNeeding(word){
-  var phMap={CHECK:1,AUDIT:2,RECORD:3,DELIVER:4};
+  /* PATCH(4): AUDIT = phase 2 (diagnosis), DELIVER = phase 3 (first email
+     ready). CHECK/RECORD are gone with the evaluate phase and the X-ray. */
+  var phMap={AUDIT:2,DELIVER:3};
   var ph=phMap[word];
   if(!ph) return null;
   var ids=(state.strike&&Array.isArray(state.strike.ids))?state.strike.ids:[];
@@ -2532,14 +2584,14 @@ function nextInContext(){
    advance automatically to the next member needing it. */
 function batchAutoAdvance(p){
   if(!ui.batchPhase) return;
-  var phMap={CHECK:1,AUDIT:2,RECORD:3,DELIVER:4};
+  var phMap={AUDIT:2,DELIVER:3};
   var ph=phMap[ui.batchPhase];
   if(!ph||phaseOf(p)===ph) return; /* prospect still needs this phase - stay put */
   var nx=firstMemberNeeding(ui.batchPhase);
   if(nx){ openDrawer(nx.id); }
   else{
     var w=ui.batchPhase; ui.batchPhase=null; safeRender();
-    toast(w+" STRIKE COMPLETE - "+strikePhaseText(strikeInfo()),"ok");
+    toast(w+" FOCUS COMPLETE - "+strikePhaseText(strikeInfo()),"ok");
   }
 }
 
@@ -2758,8 +2810,9 @@ function actFollowUp(p){
 }
 /* CIP V2.1 REPLY HANDLING (spec sections 13-14). Reply is classified into
    one of: positive / question / maybe / negative / stop / out_of_office /
-   hostile / suspicious / other. Positive (incl. question/maybe) opens the
-   post-reply proof workflow. STOP/hostile halt all outreach. */
+   hostile / suspicious / other. Positive (incl. curious / question /
+   referral) opens the post-reply commercial workflow; maybe parks with
+   not-now. STOP/hostile halt all outreach. */
 function actReply(p){
   /* LEGACY: actReply still functions for old "MARK REPLIED" buttons that did
      not carry a replyType. It records the reply as 'other' (uncategorized)
@@ -2769,31 +2822,61 @@ function actReply(p){
 function actClassifyReply(p,type,note){
   if(!p) return;
   if(!type) type="other";
-  /* CIP V2.1 guardrail 3: any reply stops follow-ups. */
-  var wasInFollowup = !!p.outreach.nextFollowUpDate;
-  /* CIP V2.1 guardrail 2: no further follow-up after any reply (already implied
-     by clearing nextFollowUpDate, but explicit for clarity). */
+  /* CIP V2.1 guardrail 3: any reply stops follow-ups (nextFollowUpDate
+     is cleared below for every type). */
   var isPositive = POSITIVE_REPLY_TYPES.indexOf(type)>=0;
   var isStop = STOP_REPLY_TYPES.indexOf(type)>=0;
+  /* PATCH(4) sections 10-14 (PATCH(4.1) section 11): the classification and
+     the state transition happen coherently inside ONE business action + ONE
+     mutation:
+     - positive (incl. curious / question / referral) -> the
+       commercial workspace opens automatically (status PROOF, exactly what
+       actStartProof performs, including its proof:started event);
+     - not_now and maybe -> parked (DORMANT, revivable);
+     - negative -> closed lost (reply + lost events, mirroring the STOP
+       pattern of a terminal marker event alongside the reply);
+     - stop family -> terminal STOP (unchanged);
+     - everything else (other / objection / out-of-office / suspicious) ->
+       recorded (REPLIED) for manual handling on the Reply page.
+     No confirmation step, no second event, no UI-only state machine. */
+  var isNotNow = (type==="not_now"||type==="maybe");
+  var isNegative = (type==="negative");
   var msg;
   if(isStop){
     msg = "Reply: "+type.toUpperCase()+" - all outreach halted. This prospect will not be contacted again.";
   } else if(isPositive){
-    msg = "Positive reply logged - proof workflow now available. Build the post-reply proof.";
+    msg = "Positive reply logged - commercial is open: send more details and invite them to the short meeting.";
+  } else if(isNotNow){
+    msg = "Reply logged ("+(type==="maybe"?"maybe":"not now")+") - parked. Revive it anytime.";
+  } else if(isNegative){
+    msg = "Reply logged (not interested) - marked lost.";
   } else {
-    msg = "Reply logged ("+type+") - follow-up cleared.";
+    msg = "Reply logged ("+type+") - choose the outcome on the Reply page.";
   }
   if(!mutate(p,msg,function(push){
-    p.outreach.status = isStop ? S.STOP : S.REPLIED;
+    if(isStop){ p.outreach.status = S.STOP; }
+    else if(isPositive){
+      /* exactly what actStartProof performs - single mutation, so the
+         double-fire guard can never block the automatic transition */
+      p.outreach.status = S.PROOF;
+      p.strike.proofStartedAt = new Date().toISOString();
+      p.strike.proofSent = false;
+    }
+    else if(isNotNow){ p.outreach.status = S.DORMANT; }
+    else if(isNegative){ p.outreach.status = S.LOST; }
+    else { p.outreach.status = S.REPLIED; }
     p.outreach.nextFollowUpDate = "";
     p.strike.replyType = type;
     p.strike.replyDate = new Date().toISOString();
     p.strike.replyNote = note||"";
     push({prospectId:p.id,type:"reply",subtype:type,note:note});
-    if(isStop){
-      push({prospectId:p.id,type:"stop"});
-    }
+    if(isStop){ push({prospectId:p.id,type:"stop"}); }
+    if(isNegative){ push({prospectId:p.id,type:"lost"}); }
+    if(isPositive){ push({prospectId:p.id,type:"proof",subtype:"started"}); }
   }, isPositive?"ok":(isStop?"info":"info"))) return;
+  /* PATCH(4): classification recorded - the reply-page routing flag has
+     served its purpose (the status itself now drives the stage). */
+  ui.replyDraft=null;
   batchAutoAdvance(p);
 }
 /* CIP V2.1 MAPPING CALL (spec section 19). 15-minute call. Separate states:
@@ -2803,11 +2886,41 @@ function actCall(p){
      actBookMappingCall; the existing data-action "call-booked" still works. */
   actBookMappingCall(p);
 }
+/* BUSINESS-FLOW FIX: MEETING AGREED - the explicit prospect agreement that
+   separates "invitation sent" from "meeting agreed". A real business event:
+   recorded once (idempotent) while PROOF_SENT, stored on the prospect
+   (strike.meetingAgreedAt) and in the event log (type "meeting", subtype
+   "agreed"). It books nothing - the meeting is still booked only by
+   actBookMappingCall, which requires this agreement first. */
+function actMeetingAgreed(p){
+  if(!p) return;
+  if(p.outreach.status!==S.PROOF_SENT){
+    toast("NOT WAITING ON A RESPONSE - only a sent invitation can be agreed to.",{type:"warn"});
+    return;
+  }
+  if(p.strike.meetingAgreedAt){
+    toast("MEETING AGREEMENT ALREADY RECORDED - book the meeting next.",{type:"info"});
+    return;
+  }
+  mutate(p,"They agreed to the meeting - book it now.",function(push){
+    p.strike.meetingAgreedAt=new Date().toISOString();
+    push({prospectId:p.id,type:"meeting",subtype:"agreed"});
+  });
+}
 function actBookMappingCall(p){
   /* CIP V2.1 guardrail 4: cannot book mapping call before proof is sent
      (with explicit override). Enforced here: only allow booking from
      PROOF_SENT (or from REPLIED/PROOF as a deliberate override). */
   var st=p.outreach.status;
+  /* BUSINESS-FLOW FIX (meeting-agreed gate): an invitation sent is NOT an
+     agreement to meet. While the prospect has not agreed
+     (no strike.meetingAgreedAt), PROOF_SENT is a waiting state - booking is
+     locked and no call_booked event can be created. Legacy REPLIED / PROOF
+     override paths are preserved verbatim (no active UI reaches them). */
+  if(st===S.PROOF_SENT && !p.strike.meetingAgreedAt){
+    toast("WAITING FOR RESPONSE - record that they agreed to the meeting first.",{type:"warn"});
+    return;
+  }
   if(st!==S.PROOF_SENT && st!==S.REPLIED && st!==S.PROOF){
     toast("CANNOT BOOK MAPPING CALL - send the post-reply proof first (CIP V2.1 guardrail 4).",{type:"warn"});
     return;
@@ -2852,7 +2965,7 @@ function actStartProof(p){
     toast("CANNOT START PROOF - reply is not classified as positive (current type: "+(p.strike.replyType||"uncategorized")+").",{type:"warn"});
     return;
   }
-  mutate(p,"Proof workflow opened - record the simplest evidence that shows the problem.",function(push){
+  mutate(p,"Commercial opened - send the details and invite them to the short meeting.",function(push){
     p.outreach.status=S.PROOF;
     p.strike.proofStartedAt=new Date().toISOString();
     p.strike.proofSent=false;
@@ -2887,13 +3000,11 @@ function actSendProof(p){
     toast("NOT IN PROOF STAGE - complete the proof first.",{type:"warn"});
     return;
   }
-  /* CIP V2.1 corrective pass: the smallest proof package that clearly
-     demonstrates the problem - at least ONE evidence reference, of whatever
-     kind the operator selected. No fixed 4-asset requirement. */
-  if(!proofEvidenceReady(p)){
-    toast("CANNOT SEND PROOF - record at least one piece of evidence first (a URL or a note).",{type:"warn",life:8000});
-    return;
-  }
+  /* FINAL UX PATCH (sections 16-18): the proof link / reference is
+     OPTIONAL. The operator decides whether and what evidence to attach -
+     sending the commercial message is never blocked by an asset-production
+     ceremony. Event semantics unchanged: exactly one proof:sent event,
+     recorded only by this explicit action, never by rendering. */
   mutate(p,"Proof sent - book the 15-minute mapping call next.",function(push){
     p.outreach.status=S.PROOF_SENT;
     p.strike.proofSentAt=new Date().toISOString();
@@ -3043,7 +3154,7 @@ function doNewStrike(){
   })) return;
   ui.batchPhase=null;
   safeRender();
-  toast("Fresh strike - find "+state.settings.strikeGoal+", then stop.","info");
+  toast("New focus started - find "+state.settings.strikeGoal+", then stop.","info");
 }
 /* an unresolved strike is never abandoned by one accidental click */
 function actNewStrike(){
@@ -3051,10 +3162,10 @@ function actNewStrike(){
   if(!info.empty&&!info.allResolved){
     var needing=info.unq+info.unaud+info.unrec+info.undel;
     confirmModal({
-      title:"CURRENT STRIKE IS NOT RESOLVED",
-      body:(needing===1?"1 prospect still needs":needing+" prospects still need")+" work (evaluate | diagnose | contact). Starting a new strike now removes this one from the active cockpit - the prospects stay in the database. Finish this strike instead?",
-      cancelLabel:"BACK TO STRIKE",
-      confirmLabel:"START NEW STRIKE",
+      title:"CURRENT FOCUS IS NOT RESOLVED",
+      body:(needing===1?"1 prospect still needs":needing+" prospects still need")+" work (diagnose | contact). Starting a new focus now clears today's active list - the prospects stay in the database. Finish this focus instead?",
+      cancelLabel:"BACK TO FOCUS",
+      confirmLabel:"START NEW FOCUS",
       onConfirm:doNewStrike,
       onCancel:function(){ setFilter("strike"); }
     });
@@ -3243,7 +3354,7 @@ function exportCSV(){
      stored untouched for historical-record compatibility; system timestamps
      stay in the export. */
   var head=["Company","Website","Domain",
-    "Niche","Source","Contact","Role","Email","LinkedIn","Phone",
+    "Niche","Source","Contact","Role","Email","LinkedIn","Phone","Other info",
     "Active ad","Ad age (days)","Primary finding","Secondary finding","Screens before action",
     "Diagnosis started","Diagnosis completed",
     "Reply type","Reply date","Reply note",
@@ -3256,7 +3367,7 @@ function exportCSV(){
   var rows=state.prospects.map(function(p){
     return [p.company.name,p.website,p.domain,
       p.company.niche,p.company.source,p.contact.name,p.contact.role,
-      p.contact.email,p.contact.linkedin,p.contact.phone,
+      p.contact.email,p.contact.linkedin,p.contact.phone,p.contact.otherInfo||"",
       p.strike.activeAd||"",p.strike.adAge||"",
       p.strike.primaryFinding,p.strike.secondaryFinding,p.strike.screensBeforePrimaryAction,
       p.strike.diagnosisStartedAt?fmtTs(p.strike.diagnosisStartedAt):"",
@@ -3290,7 +3401,7 @@ function exportCSV(){
 function resetFlow(){
   confirmModal({
     title:"RESET ALL DATA",
-    body:"This permanently removes your local CRM data - every prospect, strike, event, learning and setting, plus any retained recovery copy. Export a backup first; there is no undo after this point.",
+    body:"This permanently removes your local CRM data - every prospect, focus list, event, learning and setting, plus any retained recovery copy. Export a backup first; there is no undo after this point.",
     confirmLabel:"RESET EVERYTHING",danger:true,
     onConfirm:function(){
       var before=JSON.stringify(state);
@@ -3323,6 +3434,36 @@ function backupStatus(){
   if((Date.now()-new Date(lb).getTime())>14*86400000&&since>0) return {ok:false,warn:true,txt:"BACKUP RECOMMENDED"};
   return {ok:true,warn:false,txt:"BACKUP "+fmtAgo(lb).toUpperCase()};
 }
+/* FINAL UX PATCH - EMAIL TEMPLATES editor (Settings). One tab visible at a
+   time so Settings stays compact. Tabs are runtime UI state (ui.tplTab), not
+   persisted data. Saving a template only changes FUTURE suggested drafts -
+   prospect drafts already edited by the operator are never overwritten. */
+function emailTemplatesSettingsHTML(){
+  var s=state.settings;
+  var tabs=[
+    ["first","FIRST EMAIL",s.tplFirstSubject,s.tplFirstBody],
+    ["fu1","DAY 3 FOLLOW-UP",s.tplFu1Subject,s.tplFu1Body],
+    ["fu2","DAY 9 FOLLOW-UP",s.tplFu2Subject,s.tplFu2Body],
+    ["proof","PROOF / MAPPING",s.tplProofSubject,s.tplProofBody]
+  ];
+  var cur="first";
+  for(var i=0;i<tabs.length;i++){ if(tabs[i][0]===ui.tplTab){ cur=tabs[i][0]; break; } }
+  var active=null;
+  for(var j=0;j<tabs.length;j++){ if(tabs[j][0]===cur) active=tabs[j]; }
+  var keys={first:["tplFirstSubject","tplFirstBody"],fu1:["tplFu1Subject","tplFu1Body"],
+    fu2:["tplFu2Subject","tplFu2Body"],proof:["tplProofSubject","tplProofBody"]};
+  var k=keys[cur];
+  return '<div><span class="label">EMAIL TEMPLATES - GLOBAL DEFAULTS</span>'+
+    '<div class="s-info dim" style="margin:5px 0 8px">These seed the suggested draft for prospects that do not have an edited message yet. A draft you already edited is never overwritten. Leave a field empty to keep the built-in suggestion.</div>'+
+    '<div class="q-chips" style="margin:0 0 10px">'+tabs.map(function(t){
+      return '<button type="button" class="chip'+(t[0]===cur?" active":"")+'" data-action="tpl-tab" data-val="'+t[0]+'">'+t[1]+'</button>';
+    }).join("")+'</div>'+
+    '<label class="s-field"><span class="label">SUBJECT'+(active&&active[1]==="PROOF / MAPPING"?' (supports {{proof_link}})':'')+'</span>'+
+    '<input type="text" maxlength="200" value="'+esc(active?active[2]||"":"")+'" data-setting="'+k[0]+'" placeholder="Leave empty to keep the built-in suggestion" spellcheck="false"></label>'+
+    '<label class="s-field"><span class="label">BODY</span>'+
+    '<textarea rows="8" data-setting="'+k[1]+'" placeholder="Leave empty to keep the built-in suggestion" spellcheck="false">'+esc(active?active[3]||"":"")+'</textarea></label>'+
+    '<div class="s-info dim">Placeholders: {{first_name}} {{company}} {{domain}} {{primary_finding}} {{secondary_finding}} {{proof_link}} {{operator_name}} {{operator_company}} {{operator_website}} {{operator_address}}</div></div>';
+}
 function openSettings(){
   var s=state.settings;
   var kb=Math.round(JSON.stringify(state).length/1024);
@@ -3348,8 +3489,8 @@ function openSettings(){
     '<div class="m-head"><span class="m-title">SETTINGS</span>'+
     '<button type="button" class="icon-btn" data-action="modal-close">'+icon("x")+'</button></div>'+
     '<div class="m-body">'+
-      '<label class="s-field"><span class="label">STRIKE SIZE - DEFAULT FOR THE NEXT STRIKE</span><input type="number" min="1" max="20" step="1" value="'+s.strikeGoal+'" data-setting="strikeGoal"></label>'+
-      (activeSize?'<div class="s-info">ACTIVE STRIKE SIZE: '+activeSize+' - FROZEN UNTIL THE STRIKE RESOLVES</div>':'')+
+      '<label class="s-field"><span class="label">FOCUS SIZE - DEFAULT FOR THE NEXT FOCUS</span><input type="number" min="1" max="20" step="1" value="'+s.strikeGoal+'" data-setting="strikeGoal"></label>'+
+      (activeSize?'<div class="s-info">ACTIVE FOCUS SIZE: '+activeSize+' - FROZEN UNTIL THE FOCUS RESOLVES</div>':'')+
       '<div><span class="label">FOLLOW-UP CADENCE - DAYS FROM FIRST EMAIL</span>'+
       '<div class="s-info dim" style="margin:5px 0 8px">The sequence is exactly THREE messages: Day 0 first email, Day 3 follow-up 1, Day 9 follow-up 2. Then STOP. No fourth message is scheduled.</div>'+
       '<div class="s-grid two" style="margin-top:6px">'+
@@ -3357,7 +3498,7 @@ function openSettings(){
         '<label class="s-field"><span class="label">FOLLOW-UP 2 (DAY)</span><input type="number" min="1" step="1" value="'+s.followup2Days+'" data-setting="followup2Days"></label>'+
       '</div></div>'+
       '<div><span class="label">DAILY TARGET</span>'+
-      '<div class="s-info dim" style="margin:5px 0 8px">Default 20 prospects / working day. Delivery mode targets 10/day minimum.</div>'+
+      '<div class="s-info dim" style="margin:5px 0 8px">Default 20 prospects / working day. Delivery mode: 10 sends per day minimum.</div>'+
       '<label class="s-field"><span class="label">DAILY TARGET</span><input type="number" min="1" max="40" step="1" value="'+s.dailyTarget+'" data-setting="dailyTarget"></label></div>'+
       '<div><span class="label">OPERATOR SIGNATURE BLOCK (FIRST-EMAIL FOOTER)</span>'+
       '<div class="s-info dim" style="margin:5px 0 8px">Required by CAN-SPAM. Auto-included in every first-email body. If blank, the email uses bracketed placeholders that you replace before sending.</div>'+
@@ -3365,6 +3506,7 @@ function openSettings(){
       '<label class="s-field"><span class="label">COMPANY</span><input type="text" maxlength="80" value="'+esc(s.operatorCompany||"")+'" data-setting="operatorCompany" placeholder="Your company"></label>'+
       '<label class="s-field"><span class="label">WEBSITE</span><input type="text" maxlength="120" value="'+esc(s.operatorWebsite||"")+'" data-setting="operatorWebsite" placeholder="yourdomain.com"></label>'+
       '<label class="s-field"><span class="label">FULL PHYSICAL POSTAL ADDRESS</span><textarea rows="2" data-setting="operatorAddress" placeholder="Street, City, State ZIP, Country">'+esc(s.operatorAddress||"")+'</textarea></label></div>'+
+      emailTemplatesSettingsHTML()+
       '<label class="s-field"><span class="label">CURRENCY</span><select data-setting="currency">'+
         currencies.map(function(c){ return '<option '+(c===s.currency?"selected":"")+'>'+c+'</option>'; }).join("")+'</select></label>'+
        '<div class="settings-econ"><span class="label">OPTIONAL ACQUISITION ECONOMICS</span>'+
@@ -3384,7 +3526,7 @@ function openSettings(){
         '<button type="button" class="btn" data-action="export-csv">'+icon("download","ic-sm")+' EXPORT CSV</button>'+
         '<button type="button" class="btn" data-action="restore">'+icon("upload","ic-sm")+' RESTORE BACKUP</button>'+
       '</div>'+
-      '<div class="s-info dim">JSON restores everything - prospects, contacts, strikes, leaks, videos, events, reminders, learnings, revenue and settings. CSV is a human-readable prospect list. Browser storage can be wiped when clearing browser data, so treat backups as your safety net.</div></div>'+
+      '<div class="s-info dim">JSON restores everything - prospects, contacts, diagnoses, leaks, videos, events, reminders, learnings, revenue and settings. CSV is a human-readable prospect list. Browser storage can be wiped when clearing browser data, so treat backups as your safety net.</div></div>'+
       '<div><span class="label lbl-danger">DANGER ZONE</span>'+
       '<div style="margin-top:8px"><button type="button" class="btn danger" data-action="reset-data">'+icon("trash","ic-sm")+' RESET ALL DATA</button></div></div>'+
     '</div>');
@@ -3408,7 +3550,7 @@ function newProspect(domain){
   return { id:uid(),website:domain,domain:domain,
     segment:"",destinationType:"",impressionBand:"unknown",minutesSpent:0,
     company:{name:deriveCompany(domain),niche:"",source:"",adUrl:"",adDiscoveryDate:"",adLaunchDate:""},
-    contact:{name:"",role:"",email:"",linkedin:"",phone:""},
+    contact:{name:"",role:"",email:"",linkedin:"",phone:"",otherInfo:""},
     testing:{status:"not_tested",qualification:"",testedAt:"",note:""},
     strike:{adSource:"",activeAd:"",adAge:"",visibleLeak:"",leak1:"",leak2:"",loomUrl:"",videoStatus:"not_started",xrayStartedAt:null,
       primaryFinding:"",secondaryFinding:"",screensBeforePrimaryAction:"",
@@ -3420,7 +3562,7 @@ function newProspect(domain){
       writtenProofMinutes:0,screenshotMinutes:0,wireframeMinutes:0,videoMinutes:0,proofTotalMinutes:0,
       proofProposedTime1:"",proofProposedTime2:"",
       videoIncluded:false,videoUrl:"",videoReason:"",
-      mappingCallBookedAt:null,mappingCallCompletedAt:null,mappingCallNotes:"",
+      mappingCallBookedAt:null,mappingCallCompletedAt:null,mappingCallNotes:"",meetingAgreedAt:null,
       replyType:"",replyDate:"",replyNote:""},
     outreach:{status:"NEW",firstOutreachDate:"",lastOutreachDate:"",nextFollowUpDate:"",touches:0,channels:[]},
     commercial:{dealValue:0,wonDate:"",
@@ -3480,7 +3622,7 @@ function createProspect(norm){
   var inp=$("#addInput"); inp.value=""; $("#dupWarn").innerHTML="";
   safeRender();
   var occ=strikeInfo().occupying, goal=strikeInfo().goal;
-  toast("Target locked in - "+occ+"/"+goal+" active slots. Capture the contact while you research.","ok");
+  toast("Prospect added - "+occ+"/"+goal+" active slots. Diagnose it while it is fresh.","ok");
   openDrawer(p.id);
   setTimeout(function(){ var el=$("#drawer .inline-inp"); if(el) el.focus(); },60);
 }
@@ -3493,7 +3635,7 @@ function onAddSubmit(){
          Duplicate protection and persistence are NOT relaxed. */
       var t=String(inp.value||"").trim().toLowerCase().replace(/\s+/g,"");
       norm=t||("test-target-"+uid()+".example");
-      toast("TEST MODE - target added with relaxed URL validation: "+norm,{type:"info"});
+      toast("TEST MODE - prospect added with relaxed URL validation: "+norm,{type:"info"});
     } else {
       toast("That doesn't look like a website URL - paste something like \"acmeclinic.com\" or a full URL.","warn");
       return;
@@ -3514,10 +3656,10 @@ function onAddSubmit(){
      boundary style as the lock and slot stops below. */
   if(!info.empty&&info.allResolved&&info.occupying>=goal){
     confirmModal({
-      title:"STRIKE COMPLETE - "+info.resolved+" / "+info.n+" RESOLVED",
-      body:"This strike is finished - "+(info.sent>0?"every target is resolved and the deliveries are out.":"every target is resolved - nothing was delivered.")+" A new target belongs to the NEXT strike, not this finished batch: starting one is an explicit call, never a side effect of the add box. Start the next strike and add "+norm+" as its first target?",
-      cancelLabel:"BACK TO STRIKE",
-      confirmLabel:"START NEXT STRIKE AND ADD",
+      title:"FOCUS COMPLETE - "+info.resolved+" / "+info.n+" RESOLVED",
+      body:"This focus is finished - "+(info.sent>0?"every prospect is resolved and the deliveries are out.":"every prospect is resolved - nothing was delivered.")+" A new prospect belongs to the NEXT focus, not this finished batch: starting one is an explicit call, never a side effect of the add box. Start the next focus and add "+norm+" as its first prospect?",
+      cancelLabel:"BACK TO FOCUS",
+      confirmLabel:"START NEXT FOCUS AND ADD",
       onConfirm:function(){
         ui.batchPhase=null;
         if(!commitState(function(){
@@ -3534,8 +3676,8 @@ function onAddSubmit(){
      bypasses the acquisition lock while the strike is the current one. */
   if(!info.empty&&info.st.locked){
     confirmModal({
-      title:"STRIKE LOCKED",
-      body:"Acquisition is closed - "+info.occupying+" targets occupy the active slots and the protocol says finish before hunting more. Scrolling for one more is the trap this system exists to prevent. Unlock and add anyway?",
+      title:"FOCUS LOCKED",
+      body:"Acquisition is closed - "+info.occupying+" prospects occupy the active slots and the protocol says finish before hunting more. Scrolling for one more is the trap this system exists to prevent. Unlock and add anyway?",
       confirmLabel:"UNLOCK AND ADD",
       onConfirm:function(){
         if(!commitState(function(){ state.strike.locked=false; })) return;
@@ -3546,9 +3688,9 @@ function onAddSubmit(){
   }
   if(!info.empty&&info.occupying>=goal){
     confirmModal({
-      title:"STRIKE SLOTS FULL - "+info.occupying+" / "+goal+" ACTIVE",
-      body:"The protocol says stop acquisition at "+goal+" and run the strike. One more target is not one more opportunity - it is postponed execution of the targets you already have. Add anyway?",
-      cancelLabel:"RUN THE STRIKE",
+      title:"FOCUS SLOTS FULL - "+info.occupying+" / "+goal+" ACTIVE",
+      body:"The protocol says stop acquisition at "+goal+" and run the focus. One more prospect is not one more opportunity - it is postponed execution of the prospects you already have. Add anyway?",
+      cancelLabel:"BACK TO FOCUS",
       confirmLabel:"ADD ANYWAY",
       onConfirm:function(){ createProspect(norm); },
       onCancel:function(){ setFilter("strike"); }
@@ -3594,12 +3736,12 @@ function strikePanelHTML(){
   /* CIP V2.1 strike panel header */
   var dailyTarget=state.settings.dailyTarget||DAILY_TARGET;
   var todaySent=(dayIdx[tk]||{}).deliv||0;
-  var head='<div class="p-head"><span class="label">TODAY\'S STRIKE</span><span class="p-note">FIND | EVALUATE | 5-MIN DIAGNOSIS | PLAIN-TEXT EMAIL | DAY 3 / 9</span></div>';
+  var head='<div class="p-head"><span class="label">TODAY\'S FOCUS</span><span class="p-note">FIND | 5-MIN DIAGNOSIS | PLAIN-TEXT EMAIL | DAY 3 / 9</span></div>';
   if(info.empty){
     return head+'<div class="today-body">'+
       '<div class="tnumrow"><span class="tnum">0</span><span class="tgoal">/ '+goal+' ACTIVE SLOTS</span></div>'+
       '<div class="tnote">Paste prospects above - fill the '+goal+' active slots, then stop.</div>'+
-      '<div class="trow"><button type="button" class="btn primary" data-action="focus-add">'+icon("plus","ic-sm")+' START THE STRIKE</button></div>'+
+      '<div class="trow"><button type="button" class="btn primary" data-action="focus-add">'+icon("plus","ic-sm")+' START TODAY\'S FOCUS</button></div>'+
       '</div>';
   }
   /* STRIKE COMPLETION = all members resolved AND the configured size
@@ -3625,34 +3767,34 @@ function strikePanelHTML(){
   var dtHTML='<div class="tnote micro" style="margin-top:6px">DAILY TARGET: '+todaySent+' / '+dailyTarget+' SENDS TODAY</div>';
   var body='<div class="today-body">'+numRow+slots+dtHTML;
   if(done){
-    if(info.sent>0) body+='<div class="tnote done">'+icon("check","ic-sm")+' STRIKE COMPLETE - ALL DELIVERIES OUT</div>';
-    else body+='<div class="tnote">Strike resolved - nothing delivered.</div>';
-    body+='<div class="trow"><button type="button" class="btn primary" data-action="new-strike">'+icon("zap","ic-sm")+' START NEXT STRIKE</button></div>';
+    if(info.sent>0) body+='<div class="tnote done">'+icon("check","ic-sm")+' FOCUS COMPLETE - ALL DELIVERIES OUT</div>';
+    else body+='<div class="tnote">Focus resolved - nothing delivered.</div>';
+    body+='<div class="trow"><button type="button" class="btn primary" data-action="new-strike">'+icon("zap","ic-sm")+' START NEXT FOCUS</button></div>';
   } else {
     if(occ>=goal){
-      body+='<div class="tnote warn">'+icon("alert","ic-sm")+' STRIKE SLOTS FULL - '+occ+' / '+goal+' ACTIVE | STOP ACQUISITION</div>';
+      body+='<div class="tnote warn">'+icon("alert","ic-sm")+' FOCUS SLOTS FULL - '+occ+' / '+goal+' ACTIVE | STOP ACQUISITION</div>';
     } else {
       body+='<div class="tnote">'+(goal-occ)+' open slot'+(goal-occ===1?"":"s")+' to fill'+
         (info.noGo?' | '+info.noGo+' parked as not-an-opportunity':'')+'</div>';
     }
     body+='<div class="tnote warn">'+esc(strikePhaseText(info))+'</div>';
-    body+='<div class="tnote micro">SELECTED '+info.n+' | ADVANCED '+info.qualified+' | NOT AN OPPORTUNITY '+info.noGo+
+    body+='<div class="tnote micro">SELECTED '+info.n+' | NOT AN OPPORTUNITY '+info.noGo+
       ' | DIAGNOSED '+info.leaks+' | FIRST EMAILS '+info.sent+
       (info.closed?' | CLOSED '+info.closed:"")+'</div>';
     var word=strikePhaseWord(info);
     body+='<div class="trow">';
     if(word){
-      var lbl={CHECK:"EVALUATE STRIKE",AUDIT:"DIAGNOSE STRIKE",RECORD:"DIAGNOSE STRIKE",DELIVER:"SEND FIRST EMAILS"}[word];
+      var lbl={AUDIT:"DIAGNOSE THE FOCUS",DELIVER:"SEND FIRST EMAILS"}[word];
       body+='<button type="button" class="btn primary" data-action="batch" data-phase="'+word+'">'+icon("chevron","ic-sm")+' '+lbl+'</button>';
     } else {
       body+='<button type="button" class="btn" data-action="filter" data-filter="strike">VIEW PIPELINE</button>';
     }
-    if(!info.st.locked&&occ>=goal) body+='<button type="button" class="linkish" data-action="lock-strike">lock the strike</button>';
+    if(!info.st.locked&&occ>=goal) body+='<button type="button" class="linkish" data-action="lock-strike">lock the focus</button>';
     if(info.st.locked) body+='<button type="button" class="linkish" data-action="unlock-strike">unlock</button>';
     body+='</div>';
   }
   body+='<div class="tnote micro">DELIVERED TODAY: '+todayDeliv+(built?" | "+built:"")+
-    (done?"":' | <button type="button" class="linkish quiet" data-action="new-strike">fresh strike</button>')+'</div>';
+    (done?"":' | <button type="button" class="linkish quiet" data-action="new-strike">fresh focus</button>')+'</div>';
   return head+body+'</div>';
 }
 function dueHTML(){
@@ -3802,15 +3944,20 @@ function phaseChip(p){
   if(ph===6) return '<span class="chip-status st-hot">REPLIED</span>';
   if(ph===7){
     var st=p.outreach.status;
-    if(st===S.PROOF) return '<span class="chip-status st-hot">PROOF IN PROGRESS</span>';
-    if(st===S.PROOF_SENT) return '<span class="chip-status st-hot">PROOF SENT</span>';
-    if(st===S.CALL) return '<span class="chip-status st-hot">MAPPING CALL BOOKED</span>';
-    if(st===S.CALL_COMPLETED) return '<span class="chip-status st-hot">MAPPING CALL DONE</span>';
+    if(st===S.PROOF) return '<span class="chip-status st-hot">INTERESTED</span>';
+    /* BUSINESS-FLOW FIX: PROOF_SENT is a waiting state, not a meeting stage.
+       Once the agreement is recorded, the chip says so until the meeting is
+       booked. */
+    if(st===S.PROOF_SENT) return p.strike.meetingAgreedAt
+      ?'<span class="chip-status st-hot">MEETING AGREED</span>'
+      :'<span class="chip-status st-hot">WAITING FOR RESPONSE</span>';
+    if(st===S.CALL) return '<span class="chip-status st-hot">MEETING BOOKED</span>';
+    if(st===S.CALL_COMPLETED) return '<span class="chip-status st-hot">DECISION</span>';
     if(st===S.PROPOSAL) return '<span class="chip-status st-hot">PROPOSAL SENT</span>';
     if(st===S.DEPOSIT_RECEIVED) return '<span class="chip-status st-hot">DEPOSIT RECEIVED</span>';
-    return '<span class="chip-status st-hot">POST-REPLY</span>';
+    return '<span class="chip-status st-hot">COMMERCIAL</span>';
   }
-  return '<span class="chip-status">'+["","TO EVALUATE","DIAGNOSIS","FIRST CONTACT","FIRST CONTACT"][ph]+'</span>';
+  return '<span class="chip-status">'+["","","DIAGNOSIS","FIRST CONTACT","FIRST CONTACT"][ph]+'</span>';
 }
 function nextActionText(p){
   var ph=phaseOf(p), fs=followState(p);
@@ -3820,20 +3967,23 @@ function nextActionText(p){
     ?{cls:"ok",text:"WON - "+fmtMoney(p.commercial.dealValue)}
     :{cls:"bad",text:"LOST - ARCHIVED"};
   if(ph===-1) return {cls:"",text:"DORMANT - REVIVE OR KILL"};
-  if(ph===6) return {cls:"warn",text:"YOUR MOVE - CLASSIFY REPLY, BUILD PROOF"};
+  if(ph===6) return {cls:"warn",text:"YOUR MOVE - CLASSIFY REPLY"};
   if(ph===7){
     var st=p.outreach.status;
     if(st===S.PROOF){
-      return proofEvidenceReady(p)?{cls:"warn",text:"PROOF READY - SEND IT"}:{cls:"warn",text:"BUILD POST-REPLY PROOF"};
+      return {cls:"warn",text:"COMMERCIAL - SEND DETAILS + INVITE"};
     }
-    if(st===S.PROOF_SENT) return {cls:"warn",text:"BOOK THE 15-MIN MAPPING CALL"};
-    if(st===S.CALL) return {cls:"warn",text:"COMPLETE THE 15-MIN MAPPING CALL"};
-    if(st===S.CALL_COMPLETED) return {cls:"warn",text:"SEND "+fmtMoney(p.commercial.proposalValue||DEFAULT_PROPOSAL_VALUE)+" FIXED-SCOPE PROPOSAL"};
-    if(st===S.PROPOSAL) return {cls:"warn",text:"AWAIT 50% DEPOSIT"};
-    if(st===S.DEPOSIT_RECEIVED) return {cls:"warn",text:"AWAIT BALANCE - THEN MARK WON"};
-    return {cls:"warn",text:"CLOSE - MARK WON OR LOST"};
+    /* BUSINESS-FLOW FIX: PROOF_SENT waits for the prospect's response.
+       Booking language returns only after the recorded agreement. */
+    if(st===S.PROOF_SENT) return p.strike.meetingAgreedAt
+      ?{cls:"warn",text:"BOOK THE MEETING"}
+      :{cls:"",text:"WAITING FOR RESPONSE"};
+    if(st===S.CALL) return {cls:"warn",text:"COMPLETE THE MEETING"};
+    if(st===S.CALL_COMPLETED) return {cls:"warn",text:"DECIDE - DEAL OR NO DEAL"};
+    if(st===S.PROPOSAL) return {cls:"warn",text:"AWAIT DEPOSIT"};
+    if(st===S.DEPOSIT_RECEIVED) return {cls:"warn",text:"AWAIT BALANCE - THEN WON"};
+    return {cls:"warn",text:"CLOSE - WON OR LOST"};
   }
-  if(ph===1) return {cls:"warn",text:"EVALUATE - IS THIS OPPORTUNITY WORTH DIAGNOSING?"};
   if(ph===2) return p.strike.diagnosisStartedAt
     ?{cls:"warn",text:"FINISH THE 5-MIN DIAGNOSIS"}
     :{cls:"warn",text:"RUN THE 5-MIN DIAGNOSIS"};
@@ -3858,9 +4008,12 @@ function rowActionLine(p){
 }
 function testingChip(p){
   var t=p.testing;
+  /* PATCH(4): historical qualification only. GO / NOT AN OPPORTUNITY stay
+     visible for records that carry them; a fresh target shows nothing -
+     its next action is the diagnosis, carried by the phase chip. */
   if(t.qualification==="go") return '<span class="mini go">GO</span>';
   if(t.qualification==="no_go") return '<span class="mini nogo">NOT AN OPPORTUNITY</span>';
-  return '<span class="mini nt">EVALUATE</span>';
+  return "";
 }
 function rowButton(p){
   var ph=phaseOf(p), id=p.id;
@@ -3884,16 +4037,20 @@ function rowButton(p){
     if(fs.s==="future") return "";
     return btn("LOG FOLLOW-UP","followup",true);
   }
-  if(ph===1) return btn("EVALUATE","open",false);
   if(ph===6) return btn("CLASSIFY REPLY","open",true);
   if(ph===7){
     var st=p.outreach.status;
     if(st===S.PROOF){
-      return proofEvidenceReady(p)?btn("SEND PROOF","open",true):btn("BUILD PROOF","open",true);
+      return btn("SEND DETAILS","open",true);
     }
-    if(st===S.PROOF_SENT) return btn("BOOK CALL","open",true);
-    if(st===S.CALL) return btn("COMPLETE CALL","open",true);
-    if(st===S.CALL_COMPLETED) return btn("SEND PROPOSAL","open",true);
+    /* BUSINESS-FLOW FIX: no booking button while waiting for the response.
+       The non-primary WAITING button is the row's standard "open" action -
+       it mutates nothing; the agreement is recorded in the workspace. */
+    if(st===S.PROOF_SENT) return p.strike.meetingAgreedAt
+      ?btn("BOOK MEETING","open",true)
+      :btn("WAITING","open",false);
+    if(st===S.CALL) return btn("COMPLETE MEETING","open",true);
+    if(st===S.CALL_COMPLETED) return btn("DECIDE","open",true);
     if(st===S.PROPOSAL) return btn("LOG DEPOSIT","open",true);
     if(st===S.DEPOSIT_RECEIVED) return btn("LOG BALANCE","open",true);
     return btn("OPEN","open",false);
@@ -3956,7 +4113,7 @@ function renderQueue(){
   }).join("")+'</div>';
   var title,note;
   if(ui.filter==="queue"){ title="DO THIS NOW"; note="AUTO-SORTED - OVERDUE FIRST | THEN YOUR MOVE | THEN THE PIPELINE"; }
-  else if(ui.filter==="strike"){ title="THE PIPELINE"; note="CHECK | AUDIT | RECORD | DELIVER - TOP TO BOTTOM"; }
+  else if(ui.filter==="strike"){ title="THE PIPELINE"; note="DIAGNOSIS -> CONTACT -> FIRST EMAIL - TOP TO BOTTOM"; }
   else if(ui.filter==="all"){ title="PROSPECT DATABASE"; note="EVERYTHING ON FILE | SEARCH TO NARROW"; }
   else if(ui.filter==="due"){ title="DUE NOW"; note="FOLLOW-UPS OVERDUE AND DUE TODAY"; }
   else if(ui.filter==="move"){ title="YOUR MOVE"; note="REPLIES AND DECISIONS WAITING ON YOU"; }
@@ -3989,7 +4146,7 @@ function renderQueue(){
     }
     body=html;
     if(!total) empty=P.length
-      ?"No active targets right now - everything is won, lost or dormant."
+      ?"No active prospects right now - everything is won, lost or dormant."
       :FILTER_EMPTY.queue;
   } else {
     head.innerHTML='<span class="q-title">'+title+'</span><span class="q-note">'+note+'</span>'+chipsHTML;
@@ -4012,7 +4169,7 @@ function renderQueue(){
    ===================================================== */
 /* CIP V2.1 - extended prospect filter list with new pipeline states */
 var PV_STATUS_OPTS=[
-  ["all","ALL STATUSES"],["active","ACTIVE"],["new","NEW - TO EVALUATE"],
+  ["all","ALL STATUSES"],["active","ACTIVE"],["new","NEW - TO DIAGNOSE"],
   ["delivered","FIRST EMAIL SENT"],["followup","IN FOLLOW-UP (DAY 3 / 9)"],
   ["replied","REPLIED"],["proof","POST-REPLY PROOF"],
   ["call","MAPPING CALL"],["proposal","PROPOSAL SENT"],
@@ -4127,7 +4284,7 @@ function renderProspects(){
   var body=shown.length?shown.map(pvCardHTML).join(""):
     '<div class="panel empty">'+icon("search","ic-lg")+'<p>'+esc(all.length
       ?"No prospects match the current filters. Adjust or clear them to see all "+all.length+" records."
-      :"No prospects yet. Add targets in EXECUTE - every record stays addressable here, including won, lost and dormant.")+'</p></div>';
+      :"No prospects yet. Add prospects in EXECUTE - every record stays addressable here, including won, lost and dormant.")+'</p></div>';
   var more=res.length-f.limit;
   if(more>0) body+='<div class="showmore"><button type="button" class="btn" data-action="prospects-more">'+icon("chevron","ic-sm")+' SHOW MORE ('+more+' LEFT)</button></div>';
   listEl.innerHTML=body;
@@ -4221,7 +4378,8 @@ function pvDetailHTML(p){
       pvField("ROLE",esc(p.contact.role))+
       (p.contact.email?pvField("EMAIL",esc(p.contact.email)+pvCopyBtn("copy-email",p.id)):"")+
       (p.contact.linkedin?pvField("LINKEDIN",pvLink(p.contact.linkedin)):"")+
-      (p.contact.phone?pvField("PHONE",esc(p.contact.phone)+pvCopyBtn("copy-phone",p.id)):""))+
+      (p.contact.phone?pvField("PHONE",esc(p.contact.phone)+pvCopyBtn("copy-phone",p.id)):"")+
+      (p.contact.otherInfo?pvField("OTHER INFO",esc(p.contact.otherInfo)):""))+
     (p.strike.adSource||p.strike.activeAd||p.company.adUrl||p.company.adDiscoveryDate||p.company.adLaunchDate||age!==null
       ?sec("SIGNAL RECORD (HISTORICAL)",
         pvField("ACTIVE AD",p.strike.activeAd==="yes"?"YES - LIVE":(p.strike.activeAd==="no"?"NO":""))+
@@ -4241,7 +4399,8 @@ function pvDetailHTML(p){
       pvField("PRIMARY FINDING",esc(p.strike.primaryFinding))+
       pvField("SECONDARY FINDING",esc(p.strike.secondaryFinding))+
       pvField("EVIDENCE / NOTES",esc(p.strike.diagnosisEvidence))+
-      pvField("SCREENS BEFORE PRIMARY ACTION (OPTIONAL)",esc(p.strike.screensBeforePrimaryAction))+
+      /* PATCH(4): SCREENS BEFORE PRIMARY ACTION is preserved in storage and
+         CSV but no longer shown as an operator-facing record field. */
       pvField("DIAGNOSIS STARTED",p.strike.diagnosisStartedAt?fmtTs(p.strike.diagnosisStartedAt):"-")+
       pvField("DIAGNOSIS COMPLETED",p.strike.diagnosisCompletedAt?fmtTs(p.strike.diagnosisCompletedAt):"-")+
       (p.strike.leak1?pvField("LEGACY LEAK 1",esc(p.strike.leak1)):"")+
@@ -4338,7 +4497,8 @@ function contactHTML(p){
     f("ROLE","contact.role",c.role,"e.g. Founder / Marketing Director")+
     f("EMAIL","contact.email",c.email,"name@"+p.domain+" - paste it while researching",true)+
     f("LINKEDIN","contact.linkedin",c.linkedin,"linkedin.com/in/...",true)+
-    f("PHONE","contact.phone",c.phone,"optional",true);
+    f("PHONE","contact.phone",c.phone,"optional",true)+
+    f("OTHER INFO","contact.otherInfo",c.otherInfo,"Facebook / Instagram / TikTok / X, alternate contact, other useful info");
 }
 /* LEGACY: radioGroup rendered the removed ACQUISITION SIGNAL selection
    (source / still-active / age). Preserved verbatim for historical
@@ -4587,6 +4747,9 @@ function diagnosisHTML(p){
     return '<div class="crow"><span class="clabel">'+label+'</span>'+
     '<textarea class="inline-inp" data-field="strike.'+field+'" rows="2" placeholder="'+esc(ph)+'" spellcheck="false">'+esc(s[field]||"")+'</textarea></div>';
   };
+  /* FINAL UX PATCH (section 8): SCREENS BEFORE PRIMARY ACTION is no
+     longer an active operator-facing diagnosis field. The stored value is
+     preserved for legacy records (storage, detail view, CSV). */
   var clock="";
   /* timer removal (spec section 9): no session clock - the five-minute
      concept is behavioral guidance, never an app stopwatch. Only the
@@ -4597,8 +4760,7 @@ function diagnosisHTML(p){
   return clock+
     inp("primaryFinding","PRIMARY FINDING","the clearest problem you would mention first")+
     ta("secondaryFinding","SECONDARY FINDING","a different supporting problem that may be useful later")+
-    ta("diagnosisEvidence","EVIDENCE / NOTES","anything that helps you remember exactly what you observed")+
-    inp("screensBeforePrimaryAction","SCREENS BEFORE PRIMARY ACTION","e.g. 4 - the booking form is the 5th screen",true);
+    ta("diagnosisEvidence","EVIDENCE / NOTES","anything that helps you remember exactly what you observed");
 }
 /* CIP V2.1 - FIRST EMAIL advice screen. Four areas:
    1. EMAIL GUIDANCE (short text block)
@@ -4606,10 +4768,44 @@ function diagnosisHTML(p){
    3. EMAIL COMPOSER (SUBJECT + BODY, editable; a suggested draft is seeded and
       can be reset; the stored draft is what mailto / copy use)
    4. BEFORE SENDING (compact advisory - guidance, never a gate) */
+/* FINAL UX PATCH - global template placeholder system. The operator's
+   global templates (Settings > EMAIL TEMPLATES) are DEFAULTS: they seed the
+   suggested draft for any prospect that has no stored, operator-edited draft.
+   A prospect-specific stored draft (strike.emailSubject etc.) always wins -
+   editing a global template never overwrites an edited prospect draft. */
+function tplVars(p){
+  var st=state.settings;
+  /* the proof reference: the recorded evidence field, seeded from legacy
+     asset URLs when present. Empty means no link - it must render as
+     nothing, never "undefined" or "null". */
+  var ev=(p.strike.proofOtherEvidence||p.strike.writtenProofUrl||p.strike.screenshot1Url||p.strike.wireframeUrl||p.strike.videoUrl||"");
+  return {
+    first_name:(p.contact.name||"").split(" ")[0]||"",
+    company:p.company.name||p.domain||"",
+    domain:p.domain||"",
+    primary_finding:p.strike.primaryFinding||"",
+    secondary_finding:p.strike.secondaryFinding||"",
+    proof_link:String(ev||"").trim(),
+    operator_name:st.operatorName||"",
+    operator_company:st.operatorCompany||"",
+    operator_website:st.operatorWebsite||"",
+    operator_address:st.operatorAddress||""
+  };
+}
+function fillTemplate(t,p){
+  var v=tplVars(p);
+  var out=String(t||"").replace(/\{\{(\w+)\}\}/g,function(m,k){
+    return Object.prototype.hasOwnProperty.call(v,k)?v[k]:m;
+  });
+  /* an empty proof link must not leave stacked blank lines behind */
+  out=out.replace(/\n[ \t]*\n[ \t]*\n+/g,"\n\n").replace(/[ \t]+\n/g,"\n");
+  return out;
+}
 function firstEmailDraft(p){
   /* Suggested draft - truthful, specific, concise, permission-oriented.
      It NEVER fabricates an ad interaction, a click, a date, or a paid click;
-     it works with any acquisition/discovery path. */
+     it works with any acquisition/discovery path. Global operator template
+     (Settings) wins over the built-in suggestion when one is saved. */
   var finding=p.strike.primaryFinding||"[the specific observable problem you saw]";
   var company=p.company.name||p.domain||"[company]";
   var first=(p.contact.name||"").split(" ")[0]||"[First name]";
@@ -4624,7 +4820,15 @@ function firstEmailDraft(p){
     "I put together a short breakdown of what I'd change. Want me to send it?"+"\n\n"+
     sigName+"\n"+sigCompany+" - "+sigSite+"\n"+sigAddr+"\n"+
     "Don't want to hear from me again? Reply \"stop\" and you won't.";
-  return {subject:subject,body:body};
+  /* GLOBAL TEMPLATE DEFAULT: an operator template (Settings) replaces the
+     built-in suggestion PER FIELD - an empty template field keeps the
+     built-in. The stored prospect draft still wins over both (see the
+     composers: they use this only when no stored draft exists). */
+  var t=state.settings;
+  return {
+    subject:t.tplFirstSubject?fillTemplate(t.tplFirstSubject,p):subject,
+    body:t.tplFirstBody?fillTemplate(t.tplFirstBody,p):body
+  };
 }
 function firstEmailText(p){
   /* The exact text COPY EMAIL copies and mailto opens: the operator's stored
@@ -4635,25 +4839,28 @@ function firstEmailText(p){
   return "Subject: "+subject+"\n\n"+body;
 }
 function firstEmailHTML(p){
+  /* FINAL UX PATCH (section 10): a compact professional writing workspace -
+     the finding it is built on, then SUBJECT with COPY SUBJECT and BODY with
+     COPY BODY. The COPY EMAIL / OPEN MAIL APP buttons and the three-step
+     send ceremony are gone; MARK AS SENT is the single explicit
+     outreach-confirmation action. */
   var s=p.strike;
   var d=firstEmailDraft(p);
   var subject=s.emailSubject||d.subject;
   var body=s.emailBody||d.body;
-  return '<div class="wizard-guidance"><b>FIRST EMAIL</b>'+
-    '<p>Keep it short, specific, and based on something you actually observed.</p>'+
-    '<p>Mention one strong finding. Explain briefly why it matters. Do not invent metrics or claims you cannot verify. Give the prospect an easy reason to reply.</p>'+
-    '<p>The goal is to open a conversation, not explain the entire diagnosis.</p></div>'+
-    '<div class="crow"><span class="clabel">PRIMARY FINDING</span>'+
+  /* PATCH(4): the ONE composer pattern - the copy control sits directly
+     under the field it copies, identical in every stage. */
+  return '<div class="crow"><span class="clabel">PRIMARY FINDING</span>'+
     '<input class="inline-inp" data-field="strike.primaryFinding" type="text" value="'+esc(s.primaryFinding||"")+'" placeholder="the clearest problem you would mention first" spellcheck="false"></div>'+
-    '<div class="crow-note" style="margin-top:4px">This is the finding the first email is built on.</div>'+
-    '<div class="crow-note" style="margin-top:14px">EMAIL</div>'+
+    '<div class="crow-note" style="margin-top:12px">FIRST EMAIL - PLAIN TEXT</div>'+
     '<div class="crow"><span class="clabel">SUBJECT</span>'+
-    '<input class="inline-inp" data-field="strike.emailSubject" type="text" value="'+esc(subject)+'" placeholder="'+esc(d.subject)+'" spellcheck="false"></div>'+
+    '<input class="inline-inp" data-field="strike.emailSubject" type="text" value="'+esc(subject)+'" placeholder="'+esc(d.subject)+'" spellcheck="false">'+
+    '<button type="button" class="btn" data-action="copy-email-subject" data-id="'+p.id+'">'+icon("copy","ic-sm")+' COPY SUBJECT</button></div>'+
     '<div class="crow"><span class="clabel">BODY</span>'+
-    '<textarea class="inline-inp" data-field="strike.emailBody" rows="10" spellcheck="false">'+esc(body)+'</textarea></div>'+
-    '<div class="wizard-actions"><button type="button" class="linkish quiet" data-action="reset-email-draft" data-id="'+p.id+'">reset to suggested draft</button></div>'+
-    '<div class="wizard-guidance" style="margin-top:14px"><b>BEFORE SENDING</b>'+
-    '<p>One real observation and a clear reason it matters. No invented metrics or claims. Short and natural. An easy, permission-based next step. Your contact and compliance details where applicable. Plain text - no links, images, or attachments in this first message.</p></div>';
+    '<div class="cbody"><textarea class="inline-inp" data-field="strike.emailBody" rows="10" spellcheck="false">'+esc(body)+'</textarea>'+
+    '<div class="cbody-bar">'+
+    '<button type="button" class="btn" data-action="copy-email-body" data-id="'+p.id+'">'+icon("copy","ic-sm")+' COPY BODY</button>'+
+    '<button type="button" class="linkish quiet" data-action="reset-email-draft" data-id="'+p.id+'">reset to suggested draft</button></div></div></div>';
 }
 /* CIP V2.1 operator pass - FOLLOW-UP DRAFTS, generated from what the CRM
    already knows: the stored findings, the first-email draft and the operator
@@ -4691,7 +4898,16 @@ function followUpDraft(p,fu){
       sigName+"\n"+sigCompany+" - "+sigSite+"\n"+sigAddr+"\n"+
       "Don't want to hear from me again? Reply \"stop\" and you won't.";
   }
-  return {subject:subject,body:body};
+  /* GLOBAL TEMPLATE DEFAULT - same rule as the first email: the operator's
+     template replaces the built-in suggestion per field; an empty template
+     field keeps the built-in; a stored prospect draft always wins. */
+  var t=state.settings;
+  var ts=n===1?t.tplFu1Subject:t.tplFu2Subject;
+  var tb=n===1?t.tplFu1Body:t.tplFu2Body;
+  return {
+    subject:ts?fillTemplate(ts,p):subject,
+    body:tb?fillTemplate(tb,p):body
+  };
 }
 /* The exact text COPY EMAIL copies and the mailto opens for a follow-up:
    the operator's stored draft when one exists, otherwise the suggestion. */
@@ -4722,12 +4938,34 @@ function replyClassifierHTML(p){
     '<div class="crow" style="margin-top:6px"><span class="clabel">REPLY NOTE (optional)</span>'+
     '<input class="inline-inp" data-field="strike.replyNote" type="text" value="'+esc(p.strike.replyNote||"")+'" placeholder="paste reply excerpt or note" spellcheck="false"></div>';
 }
-/* FINAL PATCH (guide-first proof): the asset-type selection ceremony is gone.
-   The proof step now reads like the operator's own checklist - WHAT I FOUND
-   (stored diagnosis, read-only), SHOW IT (ONE optional evidence reference),
-   WHAT I WOULD CHANGE, MESSAGE (seeded, editable, copyable). The stored
-   proofAssets array stays in the data model for legacy records; nothing in
-   the active workflow reads or writes it anymore. */
+/* PATCH(4) sections 10-11: the five operator-facing response cards. Each
+   card IS the business action (reply-card -> actClassifyReply) - selecting
+   the response records it exactly once and routes automatically. The
+   granular REPLY_TYPES above remain available on the recorded page for
+   precise relabeling (no event) and for historical values. */
+var REPLY_CARDS=[
+  ["positive","INTERESTED / CURIOUS","sure · send it · interested · what did you find?","good"],
+  ["not_now","MAYBE / NOT NOW","Revisit later.",""],
+  ["negative","NOT INTERESTED","not interested · no thanks","danger"],
+  ["stop","STOP / OPT OUT","stop · do not contact again · hostile","danger"],
+  ["other","OTHER","Anything else - record it, then refine below.","ghost"]
+];
+function replyCardsHTML(p){
+  var cards=REPLY_CARDS.map(function(c){
+    return '<button type="button" class="reply-card '+c[3]+'" data-action="reply-card" data-type="'+c[0]+'" data-id="'+p.id+'">'+
+      '<span class="rc-k">'+c[1]+'</span><span class="rc-s">'+c[2]+'</span></button>';
+  }).join("");
+  return '<div class="crow-note">HOW DID THEY RESPOND?</div>'+
+    '<div class="reply-cards">'+cards+'</div>'+
+    '<div class="crow"><span class="clabel">REPLY NOTE (optional)</span>'+
+    '<input class="inline-inp" data-field="strike.replyNote" type="text" value="'+esc(p.strike.replyNote||"")+'" placeholder="paste the reply excerpt (kept on the record)" spellcheck="false"></div>';
+}
+/* PATCH(4.1) section 7: composer-first details message - the MESSAGE
+   (seeded, editable, copyable - the details + the meeting invitation in
+   one email) comes FIRST, then the optional context below it (stored
+   diagnosis recap, the change note, ONE optional evidence reference).
+   The stored proofAssets array stays in the data model for legacy records;
+   nothing in the active workflow reads or writes it anymore. */
 function proofEvidenceReady(p){
   /* at least one recorded evidence reference (URL or note) for a sendable proof */
   var s=p.strike;
@@ -4735,11 +4973,6 @@ function proofEvidenceReady(p){
 }
 function proofHTML(p){
   var s=p.strike;
-  /* Guide-first proof: sections 1-2 DISPLAY the stored diagnosis (read-only
-     recap - editing stays on the diagnosis screen), sections 3-4 are the two
-     things the operator writes. Readiness remains the ONE canonical adaptive
-     rule (proofEvidenceReady: any single recorded reference), so existing and
-     legacy records keep working unchanged. */
   var ta=function(field,label,ph){
     return '<div class="crow"><span class="clabel">'+label+'</span>'+
     '<textarea class="inline-inp" data-field="strike.'+field+'" rows="4" placeholder="'+esc(ph)+'" spellcheck="false">'+esc(s[field]||"")+'</textarea></div>';
@@ -4751,38 +4984,70 @@ function proofHTML(p){
   /* SHOW IT - ONE optional evidence reference. Seeded with whatever evidence
      the record already holds (the stored value wins; legacy asset fields stay
      in storage untouched and remain visible on the record detail view). */
+  /* FINAL UX PATCH (sections 16-17): the proof email IS the mapping-call
+     invitation - ONE message, not two. PATCH(4.1) section 7: the MESSAGE
+     with SUBJECT + COPY SUBJECT and BODY + COPY BODY comes first; the
+     stored diagnosis recap, WHAT I WOULD CHANGE and ONE optional
+     PROOF LINK / REFERENCE follow below it as clearly-optional context.
+     No asset-type ceremony, no per-asset forms, no minutes, no meeting
+     times; the reference may stay empty and the send is never blocked
+     by it. Seeding: the stored value wins; legacy asset URLs seed the
+     reference; legacy fields remain in storage untouched. */
   var evidence=s.proofOtherEvidence||s.writtenProofUrl||s.screenshot1Url||s.wireframeUrl||s.videoUrl||"";
   var msg=s.proofMessage||proofSuggestedMessage(p);
-  return '<div class="crow-note">1. WHAT I FOUND</div>'+
-    '<div class="wizard-footer-note" style="margin:0 0 6px">From your diagnosis - restate it, do not re-research it.</div>'+
+  var subj=s.proofSubject||proofSuggestedSubject(p);
+  /* PATCH(4) sections 18-20: the commercial details message = useful
+     additional detail + the meeting invitation, in ONE composer using the
+     same pattern as every other stage. */
+  /* PATCH(4.1) section 7: COMPOSER FIRST. The first Commercial screen reads
+     THEIR RESPONSE -> NEXT STEP -> this message -> MARK AS SENT. The
+     diagnosis recap, the change note and the optional reference follow
+     BELOW the composer as clearly-optional context - none of them blocks
+     the send and none of them competes with it visually. */
+  return '<div class="crow-note" style="margin-top:0">MESSAGE - THE DETAILS + THE MEETING INVITATION</div>'+
+    '<div class="wizard-footer-note" style="margin:0 0 6px">Seeded from your diagnosis. It already carries the details and the 15-minute meeting invitation - review it, copy it, send it from your own email client, then MARK AS SENT.</div>'+
+    '<div class="crow"><span class="clabel">SUBJECT</span>'+
+    '<input class="inline-inp" data-field="strike.proofSubject" type="text" value="'+esc(subj)+'" placeholder="'+esc(proofSuggestedSubject(p))+'" spellcheck="false">'+
+    '<button type="button" class="btn" data-action="copy-proof-subject" data-id="'+p.id+'">'+icon("copy","ic-sm")+' COPY SUBJECT</button></div>'+
+    '<div class="crow"><span class="clabel">BODY</span>'+
+    '<div class="cbody"><textarea class="inline-inp" data-field="strike.proofMessage" rows="8" spellcheck="false">'+esc(msg)+'</textarea>'+
+    '<div class="cbody-bar">'+
+    '<button type="button" class="btn" data-action="copy-proof-body" data-id="'+p.id+'">'+icon("copy","ic-sm")+' COPY BODY</button>'+
+    '<button type="button" class="linkish quiet" data-action="reset-proof-draft" data-id="'+p.id+'">reset to suggested message</button></div></div></div>'+
+    '<div class="crow-note" style="margin-top:14px">CONTEXT - OPTIONAL</div>'+
+    '<div class="wizard-footer-note" style="margin:0 0 6px">The message above is seeded from these. Adjust anything useful, then RESET TO SUGGESTED MESSAGE above to re-seed it. Nothing here blocks the send.</div>'+
     found("PRIMARY FINDING",s.primaryFinding)+
     found("SECONDARY FINDING",s.secondaryFinding)+
-    found("SCREENS BEFORE PRIMARY ACTION",s.screensBeforePrimaryAction)+
-    '<div class="crow-note" style="margin-top:12px">2. SHOW IT</div>'+
-    '<div class="wizard-footer-note" style="margin:0 0 6px">The simplest evidence that makes the problem obvious for THIS prospect: a live page or write-up, a screenshot, an annotated screenshot, a short recording - whatever shows it best. One reference is enough; motion only matters when the problem itself moves.</div>'+
-    '<div class="crow"><span class="clabel">EVIDENCE</span>'+
-    '<textarea class="inline-inp" data-field="strike.proofOtherEvidence" rows="2" placeholder="where the proof lives - a link, a file name, or a one-line note" spellcheck="false">'+esc(evidence)+'</textarea></div>'+
-    '<div class="crow-note" style="margin-top:12px">3. WHAT I WOULD CHANGE</div>'+
-    '<div class="wizard-footer-note" style="margin:0 0 6px">The structural correction you would make - it anchors the message below.</div>'+
-    ta("proofProposedFix","CHANGE","the concise correction you would make")+
-    '<div class="crow-note" style="margin-top:14px">4. MESSAGE</div>'+
-    '<div class="wizard-footer-note" style="margin:0 0 6px">Seeded from the diagnosis and the fix above. Review it, copy it, send it.</div>'+
-    '<div class="crow"><span class="clabel">MESSAGE</span>'+
-    '<textarea class="inline-inp" data-field="strike.proofMessage" rows="7" spellcheck="false">'+esc(msg)+'</textarea></div>'+
-    '<div class="wizard-actions"><button type="button" class="linkish quiet" data-action="reset-proof-draft" data-id="'+p.id+'">reset to suggested message</button></div>';
+    ta("proofProposedFix","WHAT I WOULD CHANGE","the concise correction you would make")+
+    '<div class="crow"><span class="clabel">PROOF LINK / REFERENCE</span>'+
+    '<textarea class="inline-inp" data-field="strike.proofOtherEvidence" rows="2" placeholder="where the proof lives - may stay empty" spellcheck="false">'+esc(evidence)+'</textarea></div>';
 }
-/* Suggested proof message - generated from the stored diagnosis and the
-   proposed fix. A suggestion until edited; the stored message wins after. */
+/* Suggested proof email. The proof message IS the mapping-call invitation
+   (one email, not two). Subject + body both support the global template
+   (Settings > EMAIL TEMPLATES > PROOF / MAPPING), including {{proof_link}}.
+   A blank proof link resolves to nothing - never "undefined" or "null". */
+function proofSuggestedSubject(p){
+  var t=state.settings;
+  if(t.tplProofSubject) return fillTemplate(t.tplProofSubject,p);
+  return "What I found on "+(p.company.name||p.domain||"[company]");
+}
 function proofSuggestedMessage(p){
+  var t=state.settings;
+  if(t.tplProofBody) return fillTemplate(t.tplProofBody,p);
   var company=p.company.name||p.domain||"[company]";
   var first=(p.contact.name||"").split(" ")[0]||"[First name]";
   var finding=p.strike.primaryFinding||"[the problem you observed]";
   var fix=p.strike.proofProposedFix||"[what you would change]";
-  return first+" - as promised, the short version of what I found on "+company+":"+"\n\n"+
+  /* PATCH(4.1) sections 5-6: the commercial message MATCHES the UI action.
+     The details are IN this email, so it never asks permission to send
+     them; it states the finding, the fix, where to see the evidence when
+     one exists, and invites the short mapping call. */
+  var link=String(p.strike.proofOtherEvidence||p.strike.writtenProofUrl||p.strike.screenshot1Url||p.strike.wireframeUrl||p.strike.videoUrl||"").trim();
+  return first+" - thanks for getting back to me. Here is the short version of what I found on "+company+":"+"\n\n"+
     finding+"\n\n"+
     "What I would change: "+fix+"\n\n"+
-    "The full breakdown is ready - want me to send it over?"+"\n\n"+
-    "If you would rather talk it through, I am happy to jump on a short call. If not, no worries at all.";
+    (link?"Where to see it: "+link+"\n\n":"")+
+    "If you would like to talk it through, the natural next step is a short 15-minute call - I will walk you through the details and exactly how I would fix it. Would sometime this week or next work for you?";
 }
 /* CIP V2.1 - sequence line (Day 0 / Day 3 / Day 9 - NO Day 12). */
 /* Operator pass - OUTREACH SEQUENCE timeline. Replaces the old three
@@ -5020,7 +5285,7 @@ function editFormHTML(p){
 }
 function eventLabel(e){
   switch(e.type){
-    case "prospect_added": return "Target added"+(e.note?" - "+e.note:"");
+    case "prospect_added": return "Prospect added"+(e.note?" - "+e.note:"");
     case "website_tested": return "Website tested";
     case "qualified_go": return "GO"+(e.note?" - "+e.note:"");
     case "qualified_no_go": return "NO-GO"+(e.note?" - "+e.note:"");
@@ -5041,6 +5306,7 @@ function eventLabel(e){
     case "proposal": return "Proposal sent"+(e.value?(" - "+fmtMoney(e.value)):"");
     case "deposit": return "Deposit received"+(e.value?(" - "+fmtMoney(e.value)):"");
     case "balance": return "Balance received"+(e.value?(" - "+fmtMoney(e.value)):"");
+    case "meeting": return e.subtype==="agreed"?"Meeting agreed":"Meeting";
     case "stop": return "STOP / opt-out";
     case "won": return "Won - "+fmtMoney(e.value||0);
     case "lost": return "Lost";
@@ -5064,7 +5330,7 @@ function drawerHTML(p){
   if(ui.batchPhase){
     var idx=(state.strike&&state.strike.ids)?state.strike.ids.indexOf(p.id)+1:0;
     var tot=(state.strike&&state.strike.ids)?state.strike.ids.length:0;
-    parts.push('<div class="batch-strip">'+esc(ui.batchPhase)+' STRIKE - TARGET '+(idx>0?idx:"-")+' OF '+tot+
+    parts.push('<div class="batch-strip">'+esc(ui.batchPhase)+' FOCUS - PROSPECT '+(idx>0?idx:"-")+' OF '+tot+
       ' <button type="button" class="linkish quiet" data-action="batch-exit">exit batch</button></div>');
   }
   parts.push('<div class="drawer-head"><div><div class="d-title">'+esc(p.company.name||p.domain)+'</div>'+
@@ -5181,32 +5447,9 @@ function followUpHint(channel,p){
    on click via data-action=set-reply-type (consistent with the inline
    replyClassifierHTML radios) so the operator sees the selection stick and the
    CONFIRM button simply finalizes the already-selected type. */
-function openReplyClassifier(p){
-  if(!p) return;
-  var cur=p.strike.replyType||"";
-  var radios=REPLY_TYPES.map(function(t){
-    return '<label class="tlabel'+(cur===t[0]?" on":"")+'" style="display:block;margin:4px 0">'+
-      '<input type="radio" class="tradio" name="modalReplyType" value="'+t[0]+'"'+(cur===t[0]?" checked":"")+
-      ' data-action="set-reply-type" data-val="'+t[0]+'" data-id="'+p.id+'">'+t[1]+'</label>';
-  }).join("");
-  openModal('<div class="m-head"><span class="m-title">CLASSIFY REPLY</span>'+
-    '<button type="button" class="icon-btn" data-action="modal-close">'+icon("x")+'</button></div>'+
-    '<div class="m-body">'+
-    '<p class="m-msg">POSITIVE / CURIOUS / QUESTION / MAYBE / REFERRAL -> opens the post-reply proof workflow. STOP / OPT_OUT / HOSTILE -> halts all outreach permanently. NOT_NOW / OBJECTION / NEGATIVE / OUT_OF_OFFICE / SUSPICIOUS / OTHER -> stays in REPLIED state, operator handles.</p>'+
-    '<div style="margin:8px 0">'+radios+'</div>'+
-    '<label class="s-field" style="margin-top:8px"><span class="label">REPLY NOTE (optional)</span>'+
-    '<input id="modalReplyNote" type="text" value="'+esc(p.strike.replyNote||"")+'" placeholder="paste reply excerpt"></label>'+
-    '<div class="m-btns"><button type="button" class="btn" data-action="modal-cancel">CANCEL</button>'+
-    '<button type="button" class="btn primary" data-action="modal-confirm">CONFIRM CLASSIFICATION</button></div></div>');
-  pendingConfirm=function(){
-    /* The radio is committed on click; we just read the current stored
-       replyType (which set-reply-type has already saved) and finalize. */
-    var rt=p.strike.replyType||"other";
-    var noteEl=$("#modalReplyNote");
-    var note=noteEl?noteEl.value.trim():"";
-    actClassifyReply(p,rt,note);
-  };
-}
+/* FINAL UX PATCH (section 14): the reply classifier POPUP was removed.
+   THEY REPLIED now opens the Reply page directly; classification happens
+   exactly once, on that page (see wizardBody stage "reply"). */
 /* (J.2) - old followUpHint / mailHintFollowUp / linkedinHintFollowUp moved
    above (J.1) for consolidation. The mailHintFollowUp / linkedinHintFollowUp
    aliases below remain so the existing call sites keep working. */
@@ -5266,7 +5509,15 @@ onEvt(document,"focusout",function(e){
    ===================================================== */
 function pendingActionCount(){
   var n=0;
-  state.prospects.forEach(function(p){ var g=groupOf(p); if(g&&g!=="waiting"&&g!=="dormant") n++; });
+  state.prospects.forEach(function(p){
+    var g=groupOf(p);
+    if(!g||g==="waiting"||g==="dormant") return;
+    /* BUSINESS-FLOW FIX: an invitation awaiting the prospect's response is
+       a real-world wait, not operator work - it only counts once they agree
+       and the meeting must actually be booked. */
+    if(p.outreach.status===S.PROOF_SENT&&!p.strike.meetingAgreedAt) return;
+    n++;
+  });
   return n;
 }
 function earliestTs(){
@@ -5282,12 +5533,11 @@ function strikePerfHTML(){
   var info=strikeInfo();
   var inner;
   if(info.empty){
-    inner='<div class="empty-inline" style="padding:10px 16px 14px">No active strike - the machine is idle between runs.</div>';
+    inner='<div class="empty-inline" style="padding:10px 16px 14px">No active focus - the machine is idle between runs.</div>';
   } else {
     var items=[
       [String(info.n),"SELECTED"],
       [info.occupying+" / "+info.goal,"ACTIVE SLOTS"],
-      [String(info.qualified),"ADVANCED"],
       [String(info.noGo),"NOT AN OPPORTUNITY"],
       [String(info.leaks),"DIAGNOSED"],
       [String(info.recorded),"RECORDED"],
@@ -5299,7 +5549,7 @@ function strikePerfHTML(){
       return '<div class="stat"><span class="sv mono">'+i[0]+'</span><span class="sl">'+i[1]+'</span></div>';
     }).join("")+'</div>';
   }
-  return '<div class="p-head"><span class="label">STRIKE PERFORMANCE</span><span class="p-note">THIS STRIKE | LIVE</span></div>'+inner;
+  return '<div class="p-head"><span class="label">FOCUS PERFORMANCE</span><span class="p-note">THIS FOCUS | LIVE</span></div>'+inner;
 }
 /* stage funnel computed from EVENTS, deduped by prospect so retests don't inflate counts */
 function leakPointsHTML(){
@@ -5326,7 +5576,7 @@ function leakPointsHTML(){
   var cal=uniqT("call_booked");
   var won=uniqT("won");
   var stages=[
-    ["TARGET -&gt; GO",go,targets],
+    ["PROSPECT -&gt; GO",go,targets],
     ["GO -&gt; DIAGNOSED",rec,go],
     ["DELIVERED -&gt; REPLY",rep,del],
     ["REPLY -&gt; CALL",cal,rep],
@@ -5648,6 +5898,7 @@ function handleAction(a,el,id,p,e){
   switch(a){
     case "mode": setMode(el.getAttribute("data-mode")); break;
     case "open-settings": openSettings(); break;
+     case "tpl-tab": ui.tplTab=el.getAttribute("data-val")||"first"; openSettings(); break;
      case "guide": openGuide(); break;
      case "start-first-strike":
        if(commitState(function(){ state.metadata.onboardingComplete=true; })){
@@ -5690,6 +5941,21 @@ function handleAction(a,el,id,p,e){
       copyText(firstEmailText(p),"Email copied - subject and body");
       break;
     }
+    case "copy-email-subject": {
+      if(!p) break;
+      /* flush the visible subject first (fast edit -> click race) */
+      var csIn=document.querySelector('#drawer [data-field="strike.emailSubject"]');
+      if(csIn&&p.strike.emailSubject!==csIn.value){ commitState(function(){ p.strike.emailSubject=csIn.value; p.updatedAt=new Date().toISOString(); }); }
+      copyText(p.strike.emailSubject||firstEmailDraft(p).subject,"Subject copied");
+      break;
+    }
+    case "copy-email-body": {
+      if(!p) break;
+      var cbIn=document.querySelector('#drawer [data-field="strike.emailBody"]');
+      if(cbIn&&p.strike.emailBody!==cbIn.value){ commitState(function(){ p.strike.emailBody=cbIn.value; p.updatedAt=new Date().toISOString(); }); }
+      copyText(p.strike.emailBody||firstEmailDraft(p).body,"Body copied");
+      break;
+    }
     case "reset-email-draft": {
       if(p&&commitState(function(){
         p.strike.emailSubject=""; p.strike.emailBody=""; p.updatedAt=new Date().toISOString();
@@ -5708,6 +5974,22 @@ function handleAction(a,el,id,p,e){
       if(fSub&&p.strike["followup"+fuN+"Subject"]!==fSub.value){ commitState(function(){ p.strike["followup"+fuN+"Subject"]=fSub.value; p.updatedAt=new Date().toISOString(); }); }
       if(fBody&&p.strike["followup"+fuN+"Body"]!==fBody.value){ commitState(function(){ p.strike["followup"+fuN+"Body"]=fBody.value; p.updatedAt=new Date().toISOString(); }); }
       copyText(followUpText(p,fuN),"Follow-up "+fuN+" copied - subject and body");
+      break;
+    }
+    case "copy-followup-subject": {
+      if(!p) break;
+      var fSIn=document.querySelector('#drawer [data-field="strike.followup'+(parseInt(el.getAttribute("data-fu"),10)||1)+'Subject"]');
+      var fSfu=parseInt(el.getAttribute("data-fu"),10)||1;
+      if(fSIn&&p.strike["followup"+fSfu+"Subject"]!==fSIn.value){ commitState(function(){ p.strike["followup"+fSfu+"Subject"]=fSIn.value; p.updatedAt=new Date().toISOString(); }); }
+      copyText(p.strike["followup"+fSfu+"Subject"]||followUpDraft(p,fSfu).subject,"Subject copied");
+      break;
+    }
+    case "copy-followup-body": {
+      if(!p) break;
+      var fBfu=parseInt(el.getAttribute("data-fu"),10)||1;
+      var fBIn=document.querySelector('#drawer [data-field="strike.followup'+fBfu+'Body"]');
+      if(fBIn&&p.strike["followup"+fBfu+"Body"]!==fBIn.value){ commitState(function(){ p.strike["followup"+fBfu+"Body"]=fBIn.value; p.updatedAt=new Date().toISOString(); }); }
+      copyText(p.strike["followup"+fBfu+"Body"]||followUpDraft(p,fBfu).body,"Body copied");
       break;
     }
     case "reset-followup-draft": {
@@ -5739,9 +6021,32 @@ function handleAction(a,el,id,p,e){
       }
       break;
     }
+    case "copy-proof-subject": {
+      if(!p) break;
+      var pSIn=document.querySelector('#drawer [data-field="strike.proofSubject"]');
+      if(pSIn&&p.strike.proofSubject!==pSIn.value){ commitState(function(){ p.strike.proofSubject=pSIn.value; p.updatedAt=new Date().toISOString(); }); }
+      copyText(p.strike.proofSubject||proofSuggestedSubject(p),"Subject copied");
+      break;
+    }
+    case "copy-proof-body": {
+      if(!p) break;
+      var pBIn=document.querySelector('#drawer [data-field="strike.proofMessage"]');
+      if(pBIn&&p.strike.proofMessage!==pBIn.value){ commitState(function(){ p.strike.proofMessage=pBIn.value; p.updatedAt=new Date().toISOString(); }); }
+      copyText(p.strike.proofMessage||proofSuggestedMessage(p),"Body copied");
+      break;
+    }
     case "reset-proof-draft": {
-      if(p&&commitState(function(){
-        p.strike.proofMessage=""; p.updatedAt=new Date().toISOString();
+      if(!p) break;
+      /* PATCH(4.1): flush the visible context fields first (fast edit ->
+        click race, same guard as the copy actions) - the re-seeded
+        suggestion reads proofProposedFix and the evidence reference, so
+        they must be committed before the draft is cleared. */
+      var rFix=document.querySelector('#drawer [data-field="strike.proofProposedFix"]');
+      var rRef=document.querySelector('#drawer [data-field="strike.proofOtherEvidence"]');
+      if(rFix&&p.strike.proofProposedFix!==rFix.value){ commitState(function(){ p.strike.proofProposedFix=rFix.value; p.updatedAt=new Date().toISOString(); }); }
+      if(rRef&&(p.strike.proofOtherEvidence||"")!==rRef.value){ commitState(function(){ p.strike.proofOtherEvidence=rRef.value; p.updatedAt=new Date().toISOString(); }); }
+      if(commitState(function(){
+        p.strike.proofMessage=""; p.strike.proofSubject=""; p.updatedAt=new Date().toISOString();
       })) safe(renderDrawer);
       break;
     }
@@ -5857,15 +6162,26 @@ function handleAction(a,el,id,p,e){
      case "continue-to-proof":
        if(p){
          if(POSITIVE_REPLY_TYPES.indexOf(p.strike.replyType||"")<0){
-           toast("Classify the reply as POSITIVE / QUESTION / MAYBE first - proof only opens on a positive reply (CIP V2.1 guardrail 1).","warn");
+           toast("Classify the reply as POSITIVE / CURIOUS / QUESTION / REFERRAL first - proof only opens on a positive reply (CIP V2.1 guardrail 1).","warn");
            break;
          }
          actStartProof(p);
        }
        break;
-    /* CIP V2.1 reply classification (replaces old mark-replied) */
+    /* CIP V2.1 reply classification (replaces old mark-replied).
+       FINAL UX PATCH (section 14): THEY REPLIED opens the Reply page
+       directly - NO popup and NO reply event. The single reply event is
+       recorded once, when the operator confirms the classification on the
+       Reply page (classify-reply -> actClassifyReply). */
     case "mark-replied":
-      if(p) openReplyClassifier(p);
+      if(p){
+        ui.replyDraft=p.id;
+        /* explicit navigation (like every other action button) - release the
+           stage lock so the guard follows the move to the Reply page */
+        uiReleaseStageLock();
+        if(ui.drawerId===p.id&&ui.mode==="execute"){ safe(renderDrawer); }
+        else { openDrawer(p.id); }
+      }
       break;
     case "set-reply-type":
       if(p){
@@ -5876,11 +6192,17 @@ function handleAction(a,el,id,p,e){
         }
       }
       break;
-    case "classify-reply":
+    case "reply-card":
       if(p){
-        var rt2=el.getAttribute("data-val")||p.strike.replyType||"other";
-        var note=p.strike.replyNote||"";
-        actClassifyReply(p,rt2,note);
+        /* PATCH(4): the card IS the decision. Flush the note (fast edit ->
+           click race), then run the ONE business action - reply event,
+           state transition and automatic routing all happen inside
+           actClassifyReply. */
+        var rtype=el.getAttribute("data-type");
+        var rnIn=document.querySelector('#drawer [data-field="strike.replyNote"]');
+        var rn=rnIn?rnIn.value.trim():"";
+        if(rnIn&&p.strike.replyNote!==rn){ commitState(function(){ p.strike.replyNote=rn; p.updatedAt=new Date().toISOString(); }); }
+        actClassifyReply(p,rtype,rn);
       }
       break;
     /* CIP V2.1 post-reply proof workflow */
@@ -5891,9 +6213,20 @@ function handleAction(a,el,id,p,e){
     case "set-video-not-required": if(p) actSetVideoNotRequired(p); break;
     /* CIP V2.1 mapping call: booked (legacy call-booked kept) + completed */
     case "call-booked": if(p) actBookMappingCall(p); break;
+    /* BUSINESS-FLOW FIX: explicit prospect agreement to meet */
+    case "meeting-agreed": if(p) actMeetingAgreed(p); break;
     case "complete-call": if(p) actCompleteMappingCall(p); break;
     /* CIP V2.1 proposal + payment */
     case "send-proposal": if(p) actSendProposal(p); break;
+    /* PATCH(4) post-meeting decision: DEAL reveals the proposal form (the
+       deal is consummated by SENDING the proposal - existing action, existing
+       event); NO DEAL uses the existing lost terminal. */
+    case "commercial-deal":
+      if(p){ ui.commercialDeal=p.id; uiReleaseStageLock(); safe(renderDrawer); }
+      break;
+    case "commercial-nodeal":
+      if(p){ ui.commercialDeal=null; actLost(p); }
+      break;
     case "mark-deposit-received": if(p) actMarkDepositReceived(p); break;
     case "mark-balance-received": if(p) actMarkBalanceReceived(p); break;
     /* CIP V2.1 STOP / opt-out */
@@ -5917,7 +6250,7 @@ function handleAction(a,el,id,p,e){
         if(nx.p) openDrawer(nx.p.id);
         else {
           var w=ui.batchPhase; ui.batchPhase=null; safeRender();
-          toast((w?w+" STRIKE COMPLETE":"Batch complete")+" - "+strikePhaseText(strikeInfo()),"ok");
+          toast((w?w+" FOCUS COMPLETE":"Batch complete")+" - "+strikePhaseText(strikeInfo()),"ok");
         }
       } else if(nx.p) openDrawer(nx.p.id);
       break;
@@ -5977,11 +6310,11 @@ function handleAction(a,el,id,p,e){
     case "new-strike": actNewStrike(); break;
     case "lock-strike":
       if(commitState(function(){ state.strike.locked=true; })){
-        toast("Strike locked - acquisition closed. "+strikeInfo().goal+" targets, no more scrolling.","info");
+        toast("Focus locked - acquisition closed. "+strikeInfo().goal+" prospects, no more scrolling.","info");
       }
       break;
     case "unlock-strike":
-      if(commitState(function(){ state.strike.locked=false; })) toast("Strike unlocked.","info");
+      if(commitState(function(){ state.strike.locked=false; })) toast("Focus unlocked.","info");
       break;
     /* data safety */
     case "export-json": exportJSON(); break;
@@ -6080,6 +6413,12 @@ function handleSettingChange(e){
       v=String(v||"").trim();
       okc=commitState(function(){ state.settings[k]=v; });
       el.value=v;
+    } else if(k==="tplFirstSubject"||k==="tplFirstBody"||k==="tplFu1Subject"||k==="tplFu1Body"||
+              k==="tplFu2Subject"||k==="tplFu2Body"||k==="tplProofSubject"||k==="tplProofBody"){
+      /* FINAL UX PATCH - global email templates: text, stored verbatim
+         (no trim - templates may legitimately end with a newline). */
+      v=String(v||"");
+      okc=commitState(function(){ state.settings[k]=v; });
     } else {
        var n=(k==="globalToolCost"||k==="globalOutreachCost"||k==="globalOtherCost"||k==="hourlyCost")
          ?Math.max(0,Math.round((Number(v)||0)*100)/100)
@@ -6230,7 +6569,7 @@ function wireEvents(){
               ui.drawerId=null; ui.filter="queue"; ui.search=""; ui.batchPhase=null;
               var si=$("#searchInput"); if(si) si.value="";
               safeRender();
-              toast("Backup restored - "+state.prospects.length+" prospects back in the cockpit.","ok");
+              toast("Backup restored - "+state.prospects.length+" prospects back in the app.","ok");
             }
           });
         }catch(err){ reportError(err,"restore"); }
@@ -6302,28 +6641,33 @@ function registerErrorHandlers(){
     silently makes the prospect "ready for the first email") from a
     BACKWARD move (an undo returning the prospect to an earlier screen).
     Forward passive moves are held; backward moves are followed. */
+ /* PATCH(4): evaluate is gone - the pipeline is DIAGNOSE -> CONTACT ->
+    FOLLOW UP -> REPLY -> COMMERCIAL. Legacy keys keep their historical
+    ranks so backward moves (undo) are still followed correctly. */
  var STAGE_RANK={find:1,qualify:1,target:1,
    diagnosis:2,xray:2,leaks:2,
    contact:4,first_email:5,deliver:5,
    follow:6,decide:7,reply:8,
-   proof:9,proof_sent:10,call:11,call_completed:12,map:12,
+   commercial:9,proof:9,proof_sent:10,call:11,call_completed:12,map:12,
    proposal:13,propose:13,deposit:14,close:15,dormant:15,nogo:15,stop:15};
  function workflowStage(p){
    var ph=phaseOf(p), st=p.outreach.status;
+   /* FINAL UX PATCH (section 14): THEY REPLIED opens the Reply page directly.
+     Pre-classification the prospect is still in a follow-up state - this
+     transient runtime flag routes the wizard to the Reply page WITHOUT
+     recording anything. It self-disarms the moment the status leaves the
+     follow-up states (classified, lost, stopped, dormant). */
+   if(ui.replyDraft===p.id&&(st===S.FO||st===S.F1||st===S.F2||st===S.F3)) return "reply";
    if(ph===0) return "nogo";
    if(ph===-2) return "stop";
    if(ph===-1) return "dormant";
    if(ph===8) return "close";
    if(ph===6) return "reply";
-   if(ph===7){
-     if(st===S.PROOF) return "proof";
-     if(st===S.PROOF_SENT) return "proof_sent";
-     if(st===S.CALL) return "call";
-     if(st===S.CALL_COMPLETED) return "call_completed";
-     if(st===S.PROPOSAL) return "proposal";
-     if(st===S.DEPOSIT_RECEIVED) return "deposit";
-   }
-   if(ph===1) return "qualify";
+   /* PATCH(4): ONE Commercial workspace. The internal states (proof,
+      proof_sent, call, call_completed, proposal, deposit) are preserved
+      exactly as they were - only the operator-facing screen is unified.
+      The workspace always opens at the current commercial step. */
+   if(ph===7) return "commercial";
    if(ph===2) return "diagnosis";
    /* LEGACY RECORD GUARD: a historical record mid-diagnosis (diagnosisStartedAt
       set, never completed) stays on the diagnosis stage - the operator simply
@@ -6337,22 +6681,22 @@ function registerErrorHandlers(){
    return "follow";
  }
  function stepClass(stage,current){
-   /* 9-step operator pipeline: FIND -> DIAGNOSE -> CONTACT -> FOLLOW UP
-      -> REPLY -> PROVE -> MAP -> PROPOSE -> CLOSE. Both step keys and
-      wizard stages are mapped; adjacent stages share a visible step. */
-   var order={find:1,qualify:1,target:1,diagnosis:2,xray:2,leaks:2,
-     contact:3,first_email:3,deliver:3,follow:4,decide:4,reply:5,
-     proof:6,proof_sent:6,call:7,call_completed:7,map:7,
-     proposal:8,propose:8,deposit:9,close:9,dormant:9,nogo:9,stop:9};
+   /* PATCH(4) - 5-step operator pipeline:
+      DIAGNOSE -> CONTACT -> FOLLOW UP -> REPLY -> COMMERCIAL. The
+      Commercial step covers the details message, meeting, proposal and
+      payment (one workspace). Legacy stage keys map onto the five steps. */
+   var order={find:1,qualify:1,target:1,diagnosis:1,xray:1,leaks:1,
+     contact:2,first_email:2,deliver:2,follow:3,decide:3,reply:4,
+     commercial:5,proof:5,proof_sent:5,call:5,call_completed:5,map:5,
+     proposal:5,propose:5,deposit:5,close:5,dormant:5,nogo:5,stop:5};
    var n=order[stage]||1, c=order[current]||1;
    return n<c?" done":(n===c?" active":"");
  }
  function wizardProgress(stage){
-   /* Operator pipeline: FIND -> DIAGNOSE -> CONTACT -> FOLLOW UP -> REPLY
-      -> PROVE -> MAP -> PROPOSE -> CLOSE. Adjacent wizard stages collapse
-      into one visible step; the detail panel shows the active sub-stage. */
-   var steps=[["1","FIND"],["2","DIAGNOSE"],["3","CONTACT"],["4","FOLLOW UP"],["5","REPLY"],["6","PROVE"],["7","MAP"],["8","PROPOSE"],["9","CLOSE"]];
-   var keys=["find","diagnosis","contact","follow","reply","proof","map","propose","close"];
+   /* PATCH(4) - the visible operator workflow:
+      DIAGNOSE -> CONTACT -> FOLLOW UP -> REPLY -> COMMERCIAL. */
+   var steps=[["1","DIAGNOSE"],["2","CONTACT"],["3","FOLLOW UP"],["4","REPLY"],["5","COMMERCIAL"]];
+   var keys=["diagnosis","contact","follow","reply","commercial"];
    return '<div class="wizard-progress">'+steps.map(function(s,i){
      return '<span class="wizard-step'+stepClass(keys[i],stage)+'"><b>'+s[0]+'</b> '+s[1]+'</span>';
    }).join("")+'</div>';
@@ -6360,26 +6704,24 @@ function registerErrorHandlers(){
  function wizardHead(p,stage,title,purpose){
    /* kicker uses the plain-language step vocabulary and carries the
       "STEP n OF 9" position (the chip strip is desktop-only) */
-   var kick={qualify:"EVALUATE",first_email:"CONTACT",proof_sent:"PROOF SENT",
-     call:"MAPPING CALL",call_completed:"PROPOSE",decide:"DECIDE",
+   var kick={first_email:"CONTACT",commercial:"COMMERCIAL",
+     proof:"COMMERCIAL",proof_sent:"COMMERCIAL",call:"COMMERCIAL",call_completed:"COMMERCIAL",
+     proposal:"COMMERCIAL",deposit:"COMMERCIAL",decide:"DECIDE",
      nogo:"NOT AN OPPORTUNITY",close:"CLOSE"};
-   var stepOrder={find:1,qualify:1,target:1,diagnosis:2,xray:2,leaks:2,
-     contact:3,first_email:3,deliver:3,follow:4,decide:4,reply:5,
-     proof:6,proof_sent:6,call:7,call_completed:7,map:7,
-     proposal:8,propose:8,deposit:9,close:9,dormant:9,nogo:9,stop:9};
+   var stepOrder={find:1,qualify:1,target:1,diagnosis:1,xray:1,leaks:1,
+     contact:2,first_email:2,deliver:2,follow:3,decide:3,reply:4,
+     commercial:5,proof:5,proof_sent:5,call:5,call_completed:5,map:5,
+     proposal:5,propose:5,deposit:5,close:5,dormant:5,nogo:5,stop:5};
    var stepOf=stepOrder[stage]||0;
-   var kickTxt=(kick[stage]||stage.toUpperCase())+(stepOf?' | STEP '+stepOf+' OF 9':'');
-   return '<div class="drawer-head"><div><div class="wizard-kicker">GUIDED STRIKE | '+esc(kickTxt)+'</div>'+
+   var kickTxt=(kick[stage]||stage.toUpperCase())+(stepOf?' | STEP '+stepOf+' OF 5':'');
+   return '<div class="drawer-head"><div><div class="wizard-kicker">GUIDED WORKFLOW | '+esc(kickTxt)+'</div>'+
      '<div class="wizard-title">'+esc(title)+'</div><p class="wizard-purpose">'+esc(purpose)+'</p></div>'+
      '<button type="button" class="icon-btn" data-action="workflow-back" title="Back to queue">'+icon("x")+'</button></div>'+
      '<div class="d-strip"><span class="chip-status st-run">'+esc(p.company.name||p.domain)+'</span><span class="na '+(nextActionText(p).cls||"")+'">'+esc(nextActionText(p).text)+'</span>'+
      '<span class="d-touches">'+(p.outreach.touches||0)+' TOUCH'+((p.outreach.touches||0)===1?"":"ES")+'</span></div>'+
      wizardProgress(stage);
  }
- function qualificationReason(p){
-   if(p.testing.qualification==="no_go") return "Marked not-an-opportunity. It stays on file and its strike slot is free.";
-   return "Nothing on this screen is mandatory. Continue when the opportunity looks worth diagnosing - your judgment decides.";
- }
+/* PATCH(4): qualificationReason removed with the evaluate screen. */
  /* CIP V2.1: contactCard - the next stage is FIRST EMAIL (plain text), not
    X-ray. Legacy label "CONTINUE TO X-RAY" was renamed; data-action unchanged. */
  function contactCard(p){
@@ -6393,19 +6735,122 @@ function registerErrorHandlers(){
     hoisting made it SHADOW the correct CIP V2.1 3-node Day 0 / Day 3 / Day 9
     - THEN STOP definition above. The follow-up stage now renders the true
     three-message cadence. */
+ /* PATCH(4) sections 16-27 - THE COMMERCIAL WORKSPACE. The operator
+    conversation is: INTEREST -> MEETING -> DECISION, with the deeper
+    payment machinery surfacing only after a deal. The internal state
+    machine (proof, proof_sent, call, call_completed, proposal,
+    deposit_received) is untouched and every button maps to an existing
+    business action - only the CURRENT step is expanded, completed history
+    stays compact, and future stages never clutter the screen. No milestone
+    dashboard. */
+ function replyContextLine(p){
+   /* the incoming reply, as context for the commercial workspace */
+   var t=(p.strike.replyType||"other").toUpperCase();
+   var d=p.strike.replyDate?fmtTs(p.strike.replyDate).toUpperCase():"-";
+   var n=String(p.strike.replyNote||"").trim();
+   return "CLASSIFIED "+t+" | "+d+(n?" | "+esc(n):"");
+ }
+ function commercialHTML(p){
+   var s=p.strike, c=p.commercial, st=p.outreach.status, id=p.id;
+   function doneRow(label,val){
+     return '<div class="cm-done"><span class="cm-done-k">'+label+' - DONE</span><span class="cm-done-v">'+esc(val)+'</span></div>';
+   }
+   /* ------------------------------------------------ INTEREST: send the
+      details + invite them to the short meeting (one email, not two). */
+   if(st===S.PROOF){
+     return '<div class="crow-note" style="margin-top:0">THEIR RESPONSE</div>'+
+       '<div class="proof-found">'+replyContextLine(p)+'</div>'+
+       '<div class="crow-note" style="margin-top:12px">NEXT STEP</div>'+
+       '<div class="wizard-instructions" style="margin:0 0 6px"><b>Send the additional details and invite them to the short mapping call.</b> The message below already includes the invitation - review it, copy it, send it from your own email client, then MARK AS SENT.</div>'+
+       proofHTML(p)+
+       '<div class="wizard-actions"><button type="button" class="btn good btn-big" data-action="send-proof" data-id="'+id+'">'+icon("mail")+' MARK AS SENT</button></div>';
+   }
+   /* ------------------------------------------------ WAITING FOR RESPONSE -> agreement -> booking.
+      BUSINESS-FLOW FIX: an invitation sent is NOT an agreement to meet. No
+      BOOK THE MEETING CTA exists until the operator records the prospect's
+      explicit agreement (data-action "meeting-agreed" / actMeetingAgreed);
+      until then this is a real-world waiting state, not an action screen. */
+   if(st===S.PROOF_SENT && !s.meetingAgreedAt){
+     return doneRow("DETAILS","Sent "+(s.proofSentAt?fmtTs(s.proofSentAt).toUpperCase():"-"))+
+       '<div class="crow-note" style="margin-top:12px">WAITING FOR RESPONSE</div>'+
+       '<div class="wizard-instructions"><b>The details and the invitation are with them.</b> Wait for their reply. Once they agree to a time, record it here, then book the 15-minute meeting.</div>'+
+       '<div class="wizard-actions"><button type="button" class="btn good btn-big" data-action="meeting-agreed" data-id="'+id+'">'+icon("check")+' THEY AGREED - RECORD IT</button></div>'+
+       '<div class="wizard-footer-note">No calendar embed - you agree the time manually.</div>';
+   }
+   if(st===S.PROOF_SENT){
+     return doneRow("DETAILS","Sent "+(s.proofSentAt?fmtTs(s.proofSentAt).toUpperCase():"-"))+
+       doneRow("MEETING AGREED",s.meetingAgreedAt?fmtTs(s.meetingAgreedAt).toUpperCase():"-")+
+       '<div class="crow-note" style="margin-top:12px">MEETING - AGREED, NOT YET BOOKED</div>'+
+       '<div class="wizard-instructions"><b>They agreed to meet.</b> Record the booked meeting here - 15 minutes.</div>'+
+       '<div class="wizard-actions"><button type="button" class="btn primary btn-big" data-action="call-booked" data-id="'+id+'">'+icon("check")+' BOOK THE MEETING</button></div>'+
+       '<div class="wizard-footer-note">No calendar embed - you agree the time manually.</div>';
+   }
+   if(st===S.CALL){
+     return doneRow("DETAILS","Sent "+(s.proofSentAt?fmtTs(s.proofSentAt).toUpperCase():"-"))+
+       '<div class="crow-note" style="margin-top:12px">MEETING - SCHEDULED'+(s.mappingCallBookedAt?" | "+fmtTs(s.mappingCallBookedAt).toUpperCase():"")+'</div>'+
+       '<div class="wizard-instructions"><b>Meeting booked.</b> Fifteen minutes: the problem in their words, the proposed solution, the scope, the next step.</div>'+
+       '<div class="wizard-actions"><button type="button" class="btn primary btn-big" data-action="complete-call" data-id="'+id+'">'+icon("check")+' MARK MEETING COMPLETED</button></div>';
+   }
+   /* ------------------------------------------------ THE DECISION after the meeting */
+   if(st===S.CALL_COMPLETED){
+     if(ui.commercialDeal===p.id){
+       var pv=c.proposalValue||DEFAULT_PROPOSAL_VALUE;
+       var tIn=function(field,label,val,ph){
+         return '<div class="crow"><span class="clabel">'+label+'</span>'+
+         '<input class="inline-inp" data-field="'+field+'" type="text" value="'+esc(val||"")+'" placeholder="'+esc(ph)+'" spellcheck="false"></div>';
+       };
+       return doneRow("MEETING","Completed "+(s.mappingCallCompletedAt?fmtTs(s.mappingCallCompletedAt).toUpperCase():"-"))+
+         '<div class="crow-note" style="margin-top:12px">DEAL - WRITE THE PROPOSAL</div>'+
+         '<div class="wizard-instructions"><b>Define the proposal from what you agreed on the call.</b> Scope, exclusions, timeline, price, and payment terms - each field is a suggestion you can edit.</div>'+
+         tIn("commercial.proposalProblem","PROBLEM",c.proposalProblem||s.primaryFinding||"","the diagnosed problem, in their words")+
+         tIn("commercial.proposalSolution","SOLUTION",c.proposalSolution,"","what you will build or change")+
+         tIn("commercial.proposalScope","SCOPE",c.proposalScope,"","what is included - pages, fixes, flows, deliverables")+
+         tIn("commercial.proposalExclusions","EXCLUSIONS (OPTIONAL)",c.proposalExclusions,"","what is explicitly out of scope")+
+         tIn("commercial.proposalTimeline","TIMELINE",c.proposalTimeline,"","e.g. two weeks from deposit")+
+         tIn("commercial.proposalTerms","PAYMENT TERMS",c.proposalTerms,"50% to start + 50% on completion","edit if different")+
+         '<div class="crow" style="margin-top:8px"><span class="clabel">PRICE ('+esc(state.settings.currency)+')</span>'+
+         '<input type="number" min="0" step="50" class="inline-inp mono" id="proposalValueInput" value="'+pv+'" data-field="commercial.proposalValue" data-id="'+p.id+'"></div>'+
+         '<div class="wizard-actions"><button type="button" class="btn primary btn-big" data-action="send-proposal" data-id="'+id+'">'+icon("check")+' SEND '+fmtMoney(pv)+' PROPOSAL</button>'+
+         '<button type="button" class="btn danger" data-action="commercial-nodeal" data-id="'+id+'">NO DEAL</button></div>';
+     }
+     return doneRow("MEETING","Completed "+(s.mappingCallCompletedAt?fmtTs(s.mappingCallCompletedAt).toUpperCase():"-"))+
+       '<div class="crow-note" style="margin-top:12px">DECISION</div>'+
+       '<div class="wizard-instructions"><b>Did the meeting produce a deal?</b></div>'+
+       '<div class="wizard-choice">'+
+       '<button type="button" class="btn good" data-action="commercial-deal" data-id="'+id+'">'+icon("check")+' DEAL</button>'+
+       '<button type="button" class="btn danger" data-action="commercial-nodeal" data-id="'+id+'">NO DEAL</button></div>';
+   }
+   /* ------------------------------------------------ PAYMENT tracking only, no processor */
+   if(st===S.PROPOSAL){
+     var total=c.proposalValue||DEFAULT_PROPOSAL_VALUE;
+     var dep=Math.round(total/2*100)/100;
+     return doneRow("PROPOSAL","Sent "+(c.proposalSentAt?fmtTs(c.proposalSentAt).toUpperCase():"-")+" - "+fmtMoney(c.proposalValue||0))+
+       '<div class="crow-note" style="margin-top:12px">WAITING FOR DEPOSIT</div>'+
+       '<div class="crow"><span class="clabel">DEPOSIT</span>'+
+       '<div class="proof-found">'+fmtMoney(dep)+' - '+(c.depositReceivedAt?"RECEIVED "+fmtTs(c.depositReceivedAt).toUpperCase():"PENDING")+'</div>'+
+       '<button type="button" class="btn good" data-action="mark-deposit-received" data-id="'+id+'">'+icon("check","ic-sm")+' LOG DEPOSIT RECEIVED</button></div>'+
+       '<div class="crow"><span class="clabel">BALANCE</span>'+
+       '<div class="proof-found none">'+fmtMoney(dep)+' - AFTER THE DEPOSIT</div></div>';
+   }
+   if(st===S.DEPOSIT_RECEIVED){
+     var total2=c.proposalValue||DEFAULT_PROPOSAL_VALUE;
+     var dep2=Math.round(total2/2*100)/100;
+     return doneRow("PROPOSAL","Sent "+(c.proposalSentAt?fmtTs(c.proposalSentAt).toUpperCase():"-")+" - "+fmtMoney(c.proposalValue||0))+
+       doneRow("DEPOSIT",fmtMoney(dep2)+" received "+(c.depositReceivedAt?fmtTs(c.depositReceivedAt).toUpperCase():"-"))+
+       '<div class="crow-note" style="margin-top:12px">WAITING FOR BALANCE</div>'+
+       '<div class="crow"><span class="clabel">BALANCE</span>'+
+       '<div class="proof-found">'+fmtMoney(dep2)+' - '+(c.balanceReceivedAt?"RECEIVED "+fmtTs(c.balanceReceivedAt).toUpperCase():"PENDING - ON GO-LIVE")+'</div>'+
+       '<button type="button" class="btn good" data-action="mark-balance-received" data-id="'+id+'">'+icon("check","ic-sm")+' LOG BALANCE RECEIVED</button></div>';
+   }
+   return "";
+ }
  function wizardBody(p,stage){
    var id=p.id, s=p.strike, o=p.outreach, fs=followState(p), parts=[];
-   if(stage==="qualify"){
-     /* FIND + EVALUATE: the rigid G1-G5 gate UI and the ACQUISITION SIGNAL
-        selection form were both removed. One informative OPPORTUNITY SIGNAL
-        text block remains - the operator's judgment drives the continue /
-        not-an-opportunity decision. */
-     parts.push('<div class="wizard-work">'+
-       opportunitySignalHTML(p)+
-       '<div class="wizard-actions"><button type="button" class="btn good btn-big" data-action="qualify" data-q="go" data-id="'+id+'">'+icon("check","ic-sm")+' CONTINUE TO DIAGNOSIS</button>'+
-       '<button type="button" class="btn danger" data-action="qualify" data-q="no_go" data-id="'+id+'">NOT AN OPPORTUNITY</button></div>'+
-       '<div class="wizard-footer-note">'+esc(qualificationReason(p))+'</div></div>');
-   } else if(stage==="diagnosis"){
+   /* PATCH(4): the qualify branch is REMOVED - there is no evaluate screen.
+      A fresh target opens straight on DIAGNOSE; the not-worth-pursuing
+      outcome stays available as a secondary action on the diagnosis screen
+      (existing actQualify business action, unchanged event semantics). */
+   if(stage==="diagnosis"){
      /* CIP V2.1 - DIAGNOSE: works for ANY commercially meaningful problem
         (conversion, messaging, navigation, forms, checkout, booking, mobile,
         performance, trust, technical behavior). The old prescriptive
@@ -6425,36 +6870,28 @@ function registerErrorHandlers(){
        '<div class="wizard-footer-note"><b>STRONG findings are specific:</b> the booking form is the 8th section and asks for 7 fields | the primary action is 4 screens down | the phone number is not tappable | the page breaks at 390px | checkout needs an account before showing a price.</div>'+
        '<div class="wizard-footer-note"><b>WEAK findings (avoid):</b> the design feels dated | the copy is generic | it needs better UX. Name what you saw, where, and why it matters.</div>'+
        '<div class="wizard-actions"><button type="button" class="btn" data-action="continue-to-email" data-id="'+id+'"'+((s.primaryFinding&&s.diagnosisCompletedAt)?"":" disabled")+'>CONTINUE TO FIRST EMAIL'+((s.primaryFinding&&s.diagnosisCompletedAt)?"":" (save the diagnosis first)")+'</button></div>'+
+       '<div class="wizard-actions"><button type="button" class="btn danger" data-action="qualify" data-q="no_go" data-id="'+id+'">NOT AN OPPORTUNITY - REJECT THIS PROSPECT</button></div>'+
        '</div>');   } else if(stage==="contact"){
      parts.push('<div class="wizard-work">'+contactCard(p)+'</div>');
    } else if(stage==="first_email"){
-     /* CIP V2.1 - FIRST EMAIL: professional advice screen.
-        Guidance + ONE primary finding + an editable SUBJECT/BODY composer +
-        a compact BEFORE SENDING advisory + a three-step send workflow
-        (review & copy -> send manually -> confirm). The 16-item checklist
-        was removed - it is guidance now, not a questionnaire. */
+     /* FINAL UX PATCH (section 10): compact workspace - copy the subject,
+        copy the body, send it from your own email client, then MARK AS SENT.
+        Opening an email client is never a sent event; MARK AS SENT is the
+        explicit outreach confirmation (existing log-first-email action and
+        its single outreach event, unchanged). */
      parts.push('<div class="wizard-work">'+
        firstEmailHTML(p)+
-       '<div class="steps"><div><span class="steplbl">STEP 1 - REVIEW AND COPY</span>'+
-       '<div class="wizard-actions">'+
-       '<button type="button" class="btn primary btn-big" data-action="copy-first-email" data-id="'+p.id+'">'+icon("copy")+' COPY EMAIL</button>'+
-       (p.contact.email?'<button type="button" class="btn" data-action="send-first-email" data-id="'+p.id+'">'+icon("mail")+' OPEN MAIL APP</button>':"")+
-       '</div>'+
-       '<div class="wizard-footer-note">Review the email above, edit anything you want, then copy it into your email client.</div></div>'+
-       '<div><span class="steplbl">STEP 2 - SEND</span><div class="wizard-footer-note">Send the message manually from your own email. Opening the mail app or LinkedIn never counts as sent.</div></div>'+
-       '<div><span class="steplbl">STEP 3 - CONFIRM</span>'+
-       '<div class="wizard-actions"><button type="button" class="btn good" data-action="log-first-email" data-id="'+id+'"'+(s.primaryFinding?"":" disabled")+'>'+icon("check")+' I ACTUALLY SENT IT</button></div>'+
-       '<div class="wizard-footer-note">Confirming records the delivery and schedules the Day 3 follow-up automatically. Any reply stops the sequence.</div></div></div>'+
+       '<div class="wizard-actions"><button type="button" class="btn good btn-big" data-action="log-first-email" data-id="'+id+'"'+(s.primaryFinding?"":" disabled")+'>'+icon("check")+' MARK AS SENT</button></div>'+
+       '<div class="wizard-footer-note">Send it from your own email client, then confirm here. Confirming records the delivery and schedules the Day '+state.settings.followup1Days+' follow-up automatically - any reply stops the sequence.</div>'+
        (!s.primaryFinding?'<div class="wizard-warning">First email cannot be sent without a primary finding. Go back to the diagnosis step.</div>':"")+
-       ((p.contact.linkedin||p.contact.phone)&&!p.contact.email?'<div class="wizard-footer-note">Other channels: '+(p.contact.linkedin?'<button type="button" class="linkish" data-action="send-linkedin" data-id="'+id+'">LinkedIn</button> ':"")+(p.contact.phone?'<button type="button" class="linkish" data-action="phone-link" data-id="'+id+'">phone</button>':"")+' - email is unavailable for this prospect.</div>':"")+
+       ((p.contact.linkedin||p.contact.phone)&&!p.contact.email?'<div class="wizard-footer-note">Other channels: '+(p.contact.linkedin?'<button type="button" class="linkish" data-action="linkedin-link" data-id="'+id+'">LinkedIn</button> ':"")+(p.contact.phone?'<button type="button" class="linkish" data-action="phone-link" data-id="'+id+'">phone</button>':"")+' - email is unavailable for this prospect.</div>':"")+
        '</div>');
    } else if(stage==="follow"){
-     /* Operator pass - the follow-up screen is now an EMAIL SCREEN,
-        visually and operationally identical to the First Email screen:
-        sequence timeline -> CURRENT STATUS / NEXT ACTION / WHEN ->
-        SEND ON + SUBJECT + BODY composer -> COPY EMAIL / MARK AS SENT.
-        The draft is auto-generated from the stored findings (editable,
-        never fabricated). One obvious primary action per state. */
+     /* FINAL UX PATCH (section 12): timeline-first. Before the follow-up is
+        due the page shows the OUTREACH TIMELINE + CURRENT STATUS / NEXT
+        ACTION / WHEN - the future email content is NOT presented as
+        actionable. When it is due, the composer appears with COPY SUBJECT /
+        COPY BODY / MARK AS SENT (the First Email visual system). */
      if(o.status!==S.FO&&o.status!==S.F1){
        /* legacy edge (F3 carrying a stale scheduled date): the sequence is
           over - show the DECIDE screen instead of a dead follow-up form */
@@ -6463,113 +6900,94 @@ function registerErrorHandlers(){
      } else {
        var wait=fs.s==="future";
        var fu=(o.status===S.F1)?2:1;
-       var draft=followUpDraft(p,fu);
-       var dSubject=s["followup"+fu+"Subject"]||draft.subject;
-       var dBody=s["followup"+fu+"Body"]||draft.body;
        var dayNo=(fu===1)?state.settings.followup1Days:state.settings.followup2Days;
        var whenTxt=fs.due
          ?(fs.s==="overdue"?"OVERDUE "+fs.days+"D":(fs.s==="due"?"TODAY":fmtKey(fs.due).toUpperCase()))
          :"-";
-       parts.push('<div class="wizard-work">'+
-         sequenceHTML(p)+
+       var tlHead=sequenceHTML(p)+
          '<div class="fu-strip">'+
            '<div class="fu-cell '+(wait?"ok":"hot")+'"><span class="fu-k">CURRENT STATUS</span><span class="fu-v">'+(wait?"WAITING":"NEEDS ACTION")+'</span></div>'+
            '<div class="fu-cell"><span class="fu-k">NEXT ACTION</span><span class="fu-v">FOLLOW-UP '+fu+(fu===2?" - FINAL":"")+'</span></div>'+
            '<div class="fu-cell"><span class="fu-k">WHEN</span><span class="fu-v">'+whenTxt+'</span></div>'+
-         '</div>'+
-         '<div class="crow-note">FOLLOW-UP '+fu+(fu===2?" - FINAL TOUCH":"")+' | SEND ON DAY '+dayNo+(fs.due?" - "+fmtKey(fs.due).toUpperCase():"")+'</div>'+
-         '<div class="crow"><span class="clabel">SUBJECT</span>'+
-         '<input class="inline-inp" data-field="strike.followup'+fu+'Subject" type="text" value="'+esc(dSubject)+'" placeholder="'+esc(draft.subject)+'" spellcheck="false"></div>'+
-         '<div class="crow"><span class="clabel">BODY</span>'+
-         '<textarea class="inline-inp" data-field="strike.followup'+fu+'Body" rows="10" spellcheck="false">'+esc(dBody)+'</textarea></div>'+
-         '<div class="wizard-actions"><button type="button" class="linkish quiet" data-action="reset-followup-draft" data-fu="'+fu+'" data-id="'+id+'">reset to suggested draft</button></div>'+
-         '<div class="steps">'+
-         '<div><span class="steplbl">STEP 1 - REVIEW AND COPY</span>'+
-         '<div class="wizard-actions">'+
-         '<button type="button" class="btn primary btn-big" data-action="copy-followup" data-fu="'+fu+'" data-id="'+id+'">'+icon("copy")+' COPY EMAIL</button>'+
-         (p.contact.email?'<button type="button" class="btn" data-action="mail-followup" data-fu="'+fu+'" data-id="'+id+'">'+icon("mail")+' OPEN MAIL APP</button>':"")+
-         '</div>'+
-         '<div class="wizard-footer-note">'+(wait?'Not due yet - review and edit now, then come back on '+fmtKey(fs.due)+' to send it.':'Review the email above, edit anything you want, then copy it into your email client.')+'</div></div>'+
-         '<div><span class="steplbl">STEP 2 - SEND</span><div class="wizard-footer-note">Send it manually from your own email. Opening the mail app never counts as sent.</div></div>'+
-         '<div><span class="steplbl">STEP 3 - CONFIRM</span>'+
-         '<div class="wizard-actions"><button type="button" class="btn good" data-action="followup" data-id="'+id+'">'+icon("check")+' MARK AS SENT</button></div>'+
-         '<div class="wizard-footer-note">Confirming logs the touch and '+(fu===1?('schedules Follow-up 2 (Day '+state.settings.followup2Days+') automatically.'):'closes the sequence - no fourth message is ever scheduled.')+'</div></div></div>'+
-         ((p.contact.linkedin||p.contact.phone)&&!p.contact.email?'<div class="wizard-footer-note">Other channels: '+(p.contact.linkedin?'<button type="button" class="linkish" data-action="linkedin-link" data-id="'+id+'">LinkedIn</button> ':"")+(p.contact.phone?'<button type="button" class="linkish" data-action="phone-link" data-id="'+id+'">phone</button>':"")+' - email is unavailable for this prospect.</div>':"")+
-         '<div class="fu-outcome"><span class="fu-outcome-k">IF SOMETHING CHANGES BEFORE THEN:</span>'+
+         '</div>';
+       var tlOutcome='<div class="fu-outcome"><span class="fu-outcome-k">IF SOMETHING CHANGES BEFORE THEN:</span>'+
          '<button type="button" class="btn" data-action="mark-replied" data-id="'+id+'">THEY REPLIED</button>'+
          '<button type="button" class="btn danger" data-action="mark-lost" data-id="'+id+'">MARK LOST</button>'+
-         '<button type="button" class="btn danger" data-action="mark-stop" data-id="'+id+'">STOP / OPT-OUT</button></div>'+
-         '<div class="wizard-footer-note">The sequence is exactly three messages: Day 0 first email, Day '+state.settings.followup1Days+' follow-up 1, Day '+state.settings.followup2Days+' follow-up 2 - then stop. Any reply ends the sequence.</div></div>');
+         '<button type="button" class="btn danger" data-action="mark-stop" data-id="'+id+'">STOP / OPT-OUT</button></div>';
+       if(wait){
+         /* NOT DUE: timeline + status only. The draft stays ready behind
+            the scenes and opens on the due date - no future email is shown
+            as if it were actionable today. */
+         parts.push('<div class="wizard-work">'+tlHead+
+           '<div class="wizard-instructions"><b>Not due yet.</b> Follow-up '+fu+' opens on '+fmtKey(fs.due)+' - there is nothing to do until then. The draft will be generated from your diagnosis and ready to edit on the day.</div>'+
+           tlOutcome+
+           '<div class="wizard-footer-note">The sequence is exactly three messages: Day 0 first email, Day '+state.settings.followup1Days+' follow-up 1, Day '+state.settings.followup2Days+' follow-up 2 - then stop. Any reply ends the sequence.</div></div>');
+       } else {
+         var draft=followUpDraft(p,fu);
+         var dSubject=s["followup"+fu+"Subject"]||draft.subject;
+         var dBody=s["followup"+fu+"Body"]||draft.body;
+         parts.push('<div class="wizard-work">'+tlHead+
+           '<div class="crow-note">FOLLOW-UP '+fu+(fu===2?" - FINAL TOUCH":"")+' | SEND ON DAY '+dayNo+(fs.due?" - "+fmtKey(fs.due).toUpperCase():"")+'</div>'+
+           '<div class="crow"><span class="clabel">SUBJECT</span>'+
+           '<input class="inline-inp" data-field="strike.followup'+fu+'Subject" type="text" value="'+esc(dSubject)+'" placeholder="'+esc(draft.subject)+'" spellcheck="false">'+
+           '<button type="button" class="btn" data-action="copy-followup-subject" data-fu="'+fu+'" data-id="'+id+'">'+icon("copy","ic-sm")+' COPY SUBJECT</button></div>'+
+           '<div class="crow"><span class="clabel">BODY</span>'+
+           '<div class="cbody"><textarea class="inline-inp" data-field="strike.followup'+fu+'Body" rows="10" spellcheck="false">'+esc(dBody)+'</textarea>'+
+           '<div class="cbody-bar">'+
+           '<button type="button" class="btn" data-action="copy-followup-body" data-fu="'+fu+'" data-id="'+id+'">'+icon("copy","ic-sm")+' COPY BODY</button>'+
+           '<button type="button" class="linkish quiet" data-action="reset-followup-draft" data-fu="'+fu+'" data-id="'+id+'">reset to suggested draft</button></div></div></div>'+
+           '<div class="wizard-actions"><button type="button" class="btn good btn-big" data-action="followup" data-id="'+id+'">'+icon("check")+' MARK AS SENT</button></div>'+
+           '<div class="wizard-footer-note">Send it from your own email client, then confirm here. Confirming logs the touch and '+(fu===1?('schedules Follow-up 2 (Day '+state.settings.followup2Days+') automatically.'):'closes the sequence - no fourth message is ever scheduled.')+'</div>'+
+           ((p.contact.linkedin||p.contact.phone)&&!p.contact.email?'<div class="wizard-footer-note">Other channels: '+(p.contact.linkedin?'<button type="button" class="linkish" data-action="linkedin-link" data-id="'+id+'">LinkedIn</button> ':"")+(p.contact.phone?'<button type="button" class="linkish" data-action="phone-link" data-id="'+id+'">phone</button>':"")+' - email is unavailable for this prospect.</div>':"")+
+           tlOutcome+'</div>');
+       }
      }
    } else if(stage==="decide"){
      parts.push('<div class="wizard-work"><div class="wizard-complete">DAY 9 SEQUENCE COMPLETE</div><div class="wizard-instructions"><b>Decide what happens next.</b> The follow-up sequence (Day 0 / 3 / 9) is complete and no reply arrived. Choose a real outcome - no fourth follow-up.</div>'+
        '<div class="wizard-choice"><button type="button" class="btn" data-action="mark-replied" data-id="'+id+'">REPLIED (LATE)</button><button type="button" class="btn" data-action="mark-dormant" data-id="'+id+'">DORMANT</button><button type="button" class="btn danger" data-action="mark-lost" data-id="'+id+'">MARK LOST</button><button type="button" class="btn danger" data-action="mark-stop" data-id="'+id+'">STOP / OPT-OUT</button></div></div>');
    } else if(stage==="reply"){
-     /* CIP V2.1 P6 - REPLY CLASSIFICATION */
-     parts.push('<div class="wizard-work"><div class="wizard-kicker">THEY REPLIED</div><div class="wizard-instructions"><b>Classify the reply.</b> Positive (incl. question/maybe) opens the proof workflow. STOP halts all outreach permanently. Hostile -> also stops. Other categories remain in REPLIED state for the operator to handle.</div>'+
-       replyClassifierHTML(p)+
-       '<div class="wizard-footer-note">Positive replies: Sure / Send it / Interested / What did you find? / Can you send it? / Maybe / interesting. Vague positives are treated as positive.</div>'+
-       '<div class="wizard-actions"><button type="button" class="btn primary btn-big" data-action="continue-to-proof" data-id="'+id+'"'+(POSITIVE_REPLY_TYPES.indexOf(s.replyType||"")>=0?"":" disabled")+'>'+icon("chevron","ic-sm")+' BUILD POST-REPLY PROOF'+(POSITIVE_REPLY_TYPES.indexOf(s.replyType||"")>=0?"":" (classify as positive first)")+'</button></div>'+
-       '<div class="wizard-actions"><button type="button" class="btn" data-action="mark-stop" data-id="'+id+'">STOP / OPT-OUT</button><button type="button" class="btn danger" data-action="mark-lost" data-id="'+id+'">MARK LOST</button></div></div>');
-   } else if(stage==="proof"){
-     /* Operator pass - POST-REPLY PROOF: a guide, not an administrative form.
-        The fixed 4-asset package is gone, the minutes field is gone, the
-        proposed-times block is gone. The screen answers four questions:
-        WHAT AM I SHOWING / WHAT IS THE FIX / WHAT DO I SEND / SEND IT.
-        Proof readiness is the ONE canonical adaptive rule
-        (proofEvidenceReady) - at least one recorded evidence reference. */
-     parts.push('<div class="wizard-work"><div class="wizard-kicker">POST-REPLY PROOF</div>'+
-       '<div class="wizard-instructions"><b>They replied - now make the diagnosis obvious.</b> The findings are already in; pick the simplest evidence that shows the problem, say what you would change, and send the short message below. Do not create unnecessary assets - the smallest thing that demonstrates THIS problem is the right proof.</div>'+
-       '<div class="wizard-script"><div><b>1. WHAT I FOUND</b>The problem, from your diagnosis.</div><div><b>2. SHOW IT</b>The simplest evidence that makes it obvious.</div><div><b>3. WHAT I WOULD CHANGE</b>The structural correction.</div><div><b>4. MESSAGE</b>Review, copy, send.</div></div>'+
-       proofHTML(p)+
-       '<div class="wizard-actions">'+
-       (!s.proofStartedAt?'<button type="button" class="btn primary btn-big" data-action="start-proof" data-id="'+id+'">'+icon("zap")+' START PROOF</button>':'')+
-       (s.proofStartedAt?'<button type="button" class="btn" data-action="copy-proof" data-id="'+id+'">'+icon("copy")+' COPY MESSAGE</button>'+
-         '<button type="button" class="btn good btn-big" data-action="send-proof" data-id="'+id+'">'+icon("mail")+' SEND PROOF</button>':'')+
-       '</div>'+
-       '<div class="wizard-footer-note">A proof page - when you write one - has four sections: WHAT I FOUND | WHAT HAPPENS NOW | WHAT I\'D CHANGE | WHAT IT WOULD TAKE. The last one describes the actual implementation scope you would agree. No invented ROI, no fake testimonials, no unsupported revenue-loss numbers, no aggressive sales copy. Video stays optional - use it only when motion is the point.</div></div>');
-   } else if(stage==="proof_sent"){
-     parts.push('<div class="wizard-work"><div class="wizard-kicker">PROOF SENT</div><div class="wizard-instructions"><b>Proof is with the prospect.</b> If you want a call, agree a time in your reply - then book it here.</div>'+
-       '<div class="wizard-actions"><button type="button" class="btn primary btn-big" data-action="call-booked" data-id="'+id+'">'+icon("check")+' BOOK 15-MIN MAPPING CALL</button></div>'+
-       '<div class="wizard-footer-note">No calendar embed - you agree the time manually.</div></div>');
-   } else if(stage==="call"){
-     /* CIP V2.1 P8 - 15-MINUTE MAPPING CALL (booked) */
-     parts.push('<div class="wizard-work"><div class="wizard-kicker">15-MIN MAPPING CALL</div><div class="wizard-instructions"><b>Use this short conversation to map the problem you diagnosed to the implementation you would build.</b> Fifteen minutes, diagnostic not theatrical: 0-1 frame, 1-4 confirm, 4-8 map, 8-12 rebuild, 12-14 scope, 14-15 next step.</div>'+
-       '<div class="wizard-script"><div><b>PROBLEM</b>What you found, in their words.</div><div><b>PROPOSED SOLUTION</b>What you would change and why.</div><div><b>SCOPE</b>What is in - and what is out.</div><div><b>NEXT STEP</b>The proposal, terms, and timing.</div></div>'+
-       '<div class="wizard-actions"><button type="button" class="btn primary btn-big" data-action="complete-call" data-id="'+id+'">'+icon("check")+' MARK CALL COMPLETED</button></div>'+
-       '<div class="wizard-footer-note">The CRM provides the checklist only - the call happens in your own meeting tool.</div></div>');
-   } else if(stage==="call_completed"){
-     /* CIP V2.1 corrective pass: the proposal is no longer hardcoded to
-        "one focused, responsive landing page" with a $1,200-$2,400 range.
-        The scope reflects the actual diagnosed problem; every element is
-        editable; the amount is fully configurable. */
-     var pv = p.commercial.proposalValue || DEFAULT_PROPOSAL_VALUE;
-     var c=p.commercial;
-     var tIn=function(field,label,val,ph){
-       return '<div class="crow"><span class="clabel">'+label+'</span>'+
-       '<input class="inline-inp" data-field="'+field+'" type="text" value="'+esc(val||"")+'" placeholder="'+esc(ph)+'" spellcheck="false"></div>';
-     };
-     parts.push('<div class="wizard-work"><div class="wizard-kicker">MAPPING CALL COMPLETE</div><div class="wizard-instructions"><b>Define the proposal from what you agreed on the call.</b> Scope, exclusions, timeline, price, and payment terms - each field is a suggestion you can edit. Nothing here is fixed to one kind of project.</div>'+
-       '<div class="crow-note" style="margin-top:10px">PROPOSAL</div>'+
-       tIn("commercial.proposalProblem","PROBLEM",c.proposalProblem||p.strike.primaryFinding||"","the diagnosed problem, in their words")+
-       tIn("commercial.proposalSolution","SOLUTION",c.proposalSolution,"","what you will build or change")+
-       tIn("commercial.proposalScope","SCOPE",c.proposalScope,"","what is included - pages, fixes, flows, deliverables")+
-       tIn("commercial.proposalExclusions","EXCLUSIONS (OPTIONAL)",c.proposalExclusions,"","what is explicitly out of scope")+
-       tIn("commercial.proposalTimeline","TIMELINE",c.proposalTimeline,"","e.g. two weeks from deposit")+
-       tIn("commercial.proposalTerms","PAYMENT TERMS",c.proposalTerms,"50% to start + 50% on completion","edit if different")+
-       '<div class="crow" style="margin-top:8px"><span class="clabel">PRICE ('+esc(state.settings.currency)+')</span>'+
-       '<input type="number" min="0" step="50" class="inline-inp mono" id="proposalValueInput" value="'+pv+'" data-field="commercial.proposalValue" data-id="'+p.id+'"></div>'+
-       '<div class="wizard-actions"><button type="button" class="btn primary btn-big" data-action="send-proposal" data-id="'+id+'">'+icon("check")+' SEND '+fmtMoney(pv)+' PROPOSAL</button></div></div>');
-   } else if(stage==="proposal"){
-     parts.push('<div class="wizard-work"><div class="wizard-kicker">PROPOSAL SENT</div><div class="wizard-instructions"><b>Proposal is with the prospect.</b> Awaiting the deposit. The CRM tracks payment status only - no payment processor.</div>'+
-       '<div class="wizard-actions"><button type="button" class="btn primary btn-big" data-action="mark-deposit-received" data-id="'+id+'">'+icon("check")+' LOG DEPOSIT RECEIVED</button></div></div>');
-   } else if(stage==="deposit"){
-     parts.push('<div class="wizard-work"><div class="wizard-kicker">DEPOSIT RECEIVED</div><div class="wizard-instructions"><b>Project can begin.</b> Awaiting balance on go-live, then mark WON.</div>'+
-       '<div class="wizard-actions"><button type="button" class="btn good btn-big" data-action="mark-balance-received" data-id="'+id+'">'+icon("check")+' LOG BALANCE - MARK WON</button></div></div>');
+     /* PATCH(4) sections 10-15: the Reply page is a DECISION, not a form.
+        THEY REPLIED opens this page directly. One card selection records the
+        reply exactly once (actClassifyReply) and routes automatically -
+        no CONFIRM CLASSIFICATION button, no OPEN COMMERCIAL button, no
+        duplicate events. The recorded page keeps the granular type chips
+        (relabel only, never a second event) plus manual outcome buttons. */
+     var preClassified=[S.FO,S.F1,S.F2,S.F3].indexOf(o.status)>-1;
+     var posSel=POSITIVE_REPLY_TYPES.indexOf(s.replyType||"")>=0;
+     if(preClassified){
+       parts.push('<div class="wizard-work"><div class="wizard-kicker">THEY REPLIED</div>'+
+         '<div class="wizard-instructions"><b>How did they respond?</b> One choice records the reply and takes you straight to the right next step.</div>'+
+         replyCardsHTML(p)+
+         '<div class="wizard-footer-note">Vague positives count as interested. The reply is recorded exactly once, with the note if you paste one.</div></div>');
+     } else {
+       parts.push('<div class="wizard-work"><div class="wizard-kicker">REPLY RECORDED - '+(s.replyType||"other").toUpperCase()+'</div>'+
+         '<div class="wizard-instructions">'+(posSel
+           ?'<b>A positive reply is on file.</b> Continue into commercial: send more details and invite them to the short meeting.'
+           :'<b>The reply is recorded.</b> Refine the exact type below if useful, then choose the outcome. Positive types continue into commercial.')+'</div>'+
+         replyClassifierHTML(p)+
+         (posSel?'<div class="wizard-actions"><button type="button" class="btn primary btn-big" data-action="continue-to-proof" data-id="'+id+'">'+icon("chevron","ic-sm")+' SEND MORE DETAILS + INVITE TO MEETING</button></div>':"")+
+         '<div class="wizard-actions"><button type="button" class="btn" data-action="mark-dormant" data-id="'+id+'">PARK IT</button><button type="button" class="btn danger" data-action="mark-lost" data-id="'+id+'">MARK LOST</button><button type="button" class="btn danger" data-action="mark-stop" data-id="'+id+'">STOP / OPT-OUT</button></div></div>');
+     }
+   } else if(stage==="commercial"){
+     /* PATCH(4) sections 16-27: THE COMMERCIAL WORKSPACE - one page that
+        follows the conversation: INTEREST (details + meeting invitation) ->
+        MEETING (not scheduled / scheduled / completed) -> DECISION (deal or
+        no deal) -> PROPOSAL -> DEPOSIT -> BALANCE -> WON. Internal states
+        unchanged; only the CURRENT step is expanded. */
+     parts.push('<div class="wizard-work">'+commercialHTML(p)+'</div>');
    } else if(stage==="close"){
+     /* FINAL UX PATCH (section 22): WON is a simple completed state -
+        project value, deposit received, balance received. */
      var won=o.status===S.WON;
-     parts.push('<div class="wizard-work"><div class="wizard-complete">'+(won?"WON":"LOST")+'</div><div class="wizard-instructions">'+(won?"Project value recorded as "+fmtMoney(p.commercial.dealValue)+".":"This opportunity is finished and remains in the database.")+'</div>'+
-       (!won?'<div class="wizard-actions"><button type="button" class="btn primary" data-action="workflow-back">BACK TO QUEUE</button></div>':"")+
+     parts.push('<div class="wizard-work"><div class="wizard-complete">'+(won?"WON":"LOST")+'</div>'+
+       (won
+         ?'<div class="fu-strip">'+
+           '<div class="fu-cell ok"><span class="fu-k">PROJECT VALUE</span><span class="fu-v">'+fmtMoney(p.commercial.dealValue)+'</span></div>'+
+           '<div class="fu-cell ok"><span class="fu-k">DEPOSIT RECEIVED</span><span class="fu-v">'+(p.commercial.depositReceivedAt?fmtTs(p.commercial.depositReceivedAt).toUpperCase():"-")+'</span></div>'+
+           '<div class="fu-cell ok"><span class="fu-k">BALANCE RECEIVED</span><span class="fu-v">'+(p.commercial.balanceReceivedAt?fmtTs(p.commercial.balanceReceivedAt).toUpperCase():"-")+'</span></div>'+
+           '</div>'
+         :'<div class="wizard-instructions">This opportunity is finished and remains in the database.</div>'+
+       (!won?'<div class="wizard-actions"><button type="button" class="btn primary" data-action="workflow-back">BACK TO QUEUE</button></div>':""))+
        '</div>');
    } else if(stage==="dormant"){
      parts.push('<div class="wizard-work"><div class="wizard-complete">DORMANT</div><div class="wizard-instructions"><b>Dormant</b> means do not actively pursue it now, but keep it available for later revival. Lost means the opportunity is finished.</div>'+
@@ -6577,49 +6995,37 @@ function registerErrorHandlers(){
    } else if(stage==="stop"){
      parts.push('<div class="wizard-work"><div class="wizard-complete">STOP / OPT-OUT</div><div class="wizard-instructions"><b>This prospect opted out (or sent a hostile reply).</b> All outreach halted permanently. Do not contact again.</div></div>');
    } else {
-     parts.push('<div class="wizard-work"><div class="wizard-complete">NO-GO</div><div class="wizard-instructions">This prospect was marked NOT AN OPPORTUNITY. It is preserved as history and its strike slot is free.</div></div>');
+     parts.push('<div class="wizard-work"><div class="wizard-complete">NO-GO</div><div class="wizard-instructions">This prospect was marked NOT AN OPPORTUNITY. It is preserved as history and its focus slot is free.</div></div>');
    }
    return parts.join("");
  }
  function wizardHTML(p,stageOverride){
    var stage=stageOverride||workflowStage(p), title={
-     qualify:"STEP 1 - FIND AND EVALUATE",
-     diagnosis:"STEP 2 - INSPECT AND DIAGNOSE",
-     contact:"STEP 3 - FIND THE CONTACT",
-     first_email:"STEP 3 - CONTACT: WRITE THE FIRST MESSAGE",
-     follow:"STEP 4 - FOLLOW UP (DAY 3 / DAY 9)",
+     diagnosis:"STEP 1 - DIAGNOSE",
+     contact:"STEP 2 - CONTACT: WHO TO REACH",
+     first_email:"STEP 2 - CONTACT: WRITE THE FIRST EMAIL",
+     follow:"STEP 3 - FOLLOW UP (DAY 3 / DAY 9)",
      decide:"DECIDE WHAT HAPPENS NEXT",
-     reply:"STEP 5 - REPLY: CLASSIFY THE RESPONSE",
-     proof:"STEP 6 - PROVE: POST-REPLY PROOF",
-     proof_sent:"PROOF SENT - BOOK THE MAPPING CALL",
-     call:"STEP 7 - MAP: 15-MIN MAPPING CALL",
-     call_completed:"MAPPING CALL DONE - SEND THE PROPOSAL",
-     proposal:"STEP 8 - PROPOSE: AWAIT THE DEPOSIT",
-     deposit:"STEP 9 - PROJECT: AWAIT THE BALANCE",
+     reply:"STEP 4 - REPLY: HOW DID THEY RESPOND?",
+     commercial:"STEP 5 - COMMERCIAL: INTEREST TO DEAL",
      close:"CLOSED - WON / LOST",
      dormant:"PARKED FOR LATER",
      nogo:"NOT AN OPPORTUNITY",
      stop:"STOP / OPT-OUT"
-   }[stage]||"STRIKE WORKFLOW";
+   }[stage]||"PROSPECT WORKFLOW";
    var purpose={
-     qualify:"Find a business with a real opportunity signal, then decide whether the problem looks commercially meaningful. Next: inspect the customer's journey with the 5-minute diagnosis.",
-     diagnosis:"Open the destination at phone width and follow the visitor's path. Record ONE primary finding (the strongest observable problem) and ONE secondary finding for the follow-up. Next: prepare the first message.",
-     contact:"Record a real person you can legitimately reach - the person who can decide. Next: write the plain-text first message.",
-     first_email:"Plain text only - no link, image, attachment, or tracking. Name the actual signal and the actual finding, then ask permission to send the write-up. Next: wait for a reply (Day 3 / Day 9 follow-ups are scheduled automatically).",
-     follow:"The follow-up email is written for you from the diagnosis - review it, edit it, copy it, send it, then mark it sent. Day 0 first email, Day 3 follow-up 1, Day 9 follow-up 2 - then stop. Next: classify any reply that arrives.",
+     diagnosis:"Open the destination at phone width and follow the visitor's path. Record ONE primary finding (the strongest observable problem) and ONE secondary finding for the follow-up. Next: write the first email.",
+     contact:"Record a real person you can legitimately reach - the person who can decide. Next: write the plain-text first email.",
+     first_email:"Plain text only - no link, image, attachment, or tracking. Name the actual finding, then ask permission to send the write-up. Copy, send from your own email, then MARK AS SENT. Next: the Day 3 / Day 9 follow-ups are scheduled automatically.",
+     follow:"Before the follow-up is due, this page shows only the timeline and the next action. When it is due, the draft appears - copy the subject and body, send it from your own email, then MARK AS SENT. Day 0, Day 3, Day 9 - then stop.",
      decide:"The sequence is complete and no reply arrived. Choose the real outcome: a late reply, park it, mark lost, or stop.",
-     reply:"Understand and classify the response. Positive replies open the proof workflow; stop/opt-out halts all outreach. Next: if positive, build the post-reply proof.",
-     proof:"The prospect replied positively. Build the smallest proof that makes the problem and the proposed solution obvious - only the evidence that fits this problem. Next: send the proof and book the mapping call.",
-     proof_sent:"Proof is with the prospect. Agree a time and book the 15-minute mapping call. Next: run the call.",
-     call:"Fifteen minutes, screen-share: frame, confirm, map the journey, rebuild the page in boxes, scope, and agree the next step. Next: send the proposal.",
-     call_completed:"The call is done. Send the fixed-scope proposal with the agreed value. Next: track the deposit.",
-     proposal:"The proposal is with the prospect. The CRM tracks payment status only - no payment processor. Next: log the deposit when it arrives.",
-     deposit:"Deposit received - the project can begin. Next: log the balance on go-live, then mark WON.",
+     reply:"THEY REPLIED opened this page directly. Choose how they responded - the reply is recorded once and the right next step opens automatically.",
+     commercial:"They are interested. Send the additional details and invite them to the short meeting; after the meeting, decide - deal or no deal. A deal continues into the proposal and the deposit / balance tracking through to WON. Only the current step is shown.",
      close:"The outcome is recorded. The record stays in the database for later review.",
      dormant:"Not pursuing now, but kept for later revival.",
      nogo:"Marked not-an-opportunity. On file, not in the active queue.",
      stop:"The prospect opted out. All outreach halted permanently."
-   }[stage]||"Move through the strike one clear step at a time.";
+   }[stage]||"Move through the workflow one clear step at a time.";
    /* transient render marker: the stage THIS wizard render shows. Read by the
       inline-save stage guard so a blur-triggered refresh cannot silently
       advance the visible step (contact/leaks) past what the user is doing. */
@@ -6647,24 +7053,29 @@ function registerErrorHandlers(){
    var show=!state.prospects.length&&!state.metadata.onboardingComplete;
    setHidden(el,!show);
    if(!show) return;
-   el.innerHTML='<div class="guide-kicker">CONVERSION INVERSION PROTOCOL V2.1</div><div class="guide-title">A finite strike, executed one decision at a time.</div>'+
-     '<p class="guide-copy">Find businesses with real customer-acquisition signals - any platform, any technology. Evaluate whether the problem looks commercially meaningful, then inspect the customer journey with a 5-MINUTE DIAGNOSIS (one primary + one secondary finding). Write and send the FIRST PLAIN-TEXT MESSAGE, follow up on DAY 3 and DAY 9, then stop. On reply: classify it, build the smallest POST-REPLY PROOF that demonstrates the problem (choose the evidence that fits), book the 15-MIN MAPPING CALL, send the PROPOSAL, track DEPOSIT + BALANCE, mark WON. No expensive asset before a reply. No fourth message.</p>'+
-     '<ol class="guide-sequence"><li><strong>1</strong>Find</li><li><strong>2</strong>Diagnose</li><li><strong>3</strong>Contact</li><li><strong>4</strong>Follow up</li><li><strong>5</strong>Reply</li><li><strong>6</strong>Prove</li><li><strong>7</strong>Map</li><li><strong>8</strong>Propose</li><li><strong>9</strong>Close</li></ol>'+
-     '<button type="button" class="btn primary btn-big" data-action="start-first-strike">'+icon("zap","ic-sm")+' START FIRST STRIKE</button>';
+   el.innerHTML='<div class="guide-kicker">CONVERSION INVERSION PROTOCOL V2.1</div><div class="guide-title">A finite daily focus, executed one decision at a time.</div>'+
+     '<p class="guide-copy">Find businesses with real customer-acquisition signals - any platform, any technology. Add the prospect and inspect the customer journey with a 5-MINUTE DIAGNOSIS (one primary + one secondary finding). Write and send the FIRST PLAIN-TEXT EMAIL, follow up on DAY 3 and DAY 9, then stop. On a positive reply, the COMMERCIAL WORKSPACE takes over: send the details and the meeting invitation, hold the 15-MINUTE MEETING, then run the PROPOSAL and the DEPOSIT + BALANCE tracking through to WON. No expensive asset before a reply. No fourth message.</p>'+
+     '<ol class="guide-sequence"><li><strong>1</strong>Diagnose</li><li><strong>2</strong>Contact</li><li><strong>3</strong>Follow up</li><li><strong>4</strong>Reply</li><li><strong>5</strong>Commercial</li></ol>'+
+     '<button type="button" class="btn primary btn-big" data-action="start-first-strike">'+icon("zap","ic-sm")+' START TODAY\'S FOCUS</button>';
  }
  function openGuide(){
-   openModal('<div class="m-head"><span class="m-title">HOW THE COCKPIT WORKS</span><button type="button" class="icon-btn" data-action="modal-close">'+icon("x")+'</button></div>'+
+   openModal('<div class="m-head"><span class="m-title">HOW MOMENTUM CRM WORKS</span><button type="button" class="icon-btn" data-action="modal-close">'+icon("x")+'</button></div>'+
      '<div class="m-body"><p class="m-msg">EXECUTE answers "what do I do now?" Review answers "is the acquisition machine working?"</p>'+
-     '<p class="m-msg">A strike is deliberately finite. Add prospects until the active slots are full, then finish the work: evaluate each opportunity, run the 5-minute diagnosis, find a contact, send the plain-text first message, and follow the scheduled Day 3 / Day 9 sequence.</p>'+
+     '<p class="m-msg">A daily focus is deliberately finite. Add prospects until the active slots are full, then finish the work: run the 5-minute diagnosis on each prospect, find a contact, send the plain-text first message, and follow the scheduled Day 3 / Day 9 sequence.</p>'+
      '<p class="m-msg">Opening email or LinkedIn never counts as sent. Delivery, follow-ups, replies, calls, wins, and revenue are recorded only by explicit actions.</p>'+
-     '<div class="m-btns"><button type="button" class="btn primary" data-action="modal-close">BACK TO COCKPIT</button></div></div>');
+     '<div class="m-btns"><button type="button" class="btn primary" data-action="modal-close">BACK TO WORK</button></div></div>');
  }
  function openDrawer(id){
+   if(ui.replyDraft!==id) ui.replyDraft=null; /* reply-page flag belongs to ONE prospect */
+   if(ui.commercialDeal!==id) ui.commercialDeal=null; /* deal flag belongs to ONE prospect */
    ui.drawerId=id; ui.editOpen=false; ui.wonPrompt=false; ui.mode="execute"; ui.drawerStage=null;
    safe(render);
+   /* FINAL UX PATCH (section 12): entering a prospect opens the page at the
+      top. Field edits, saves and re-renders never scroll (see renderDrawer). */
+   try{ window.scrollTo(0,0); }catch(eScroll){}
  }
  function closeDrawer(){
-   ui.drawerId=null; ui.drawerStage=null;
+   ui.drawerId=null; ui.drawerStage=null; ui.replyDraft=null; ui.commercialDeal=null; ui.lastShownStage=null;
    var host=$("#wizardHost"); if(host) setHidden(host,true);
    var view=$("#viewExecute"); if(view) remCls(view,"workflow-open");
    /* the queue and rail were last rendered BEFORE the wizard's inline fields
@@ -6697,12 +7108,21 @@ function registerErrorHandlers(){
      var natRank=STAGE_RANK[natural]||0;
      if(natRank>heldRank) showStage=ui.drawerStage; /* passive forward jump - stay put */
    }
+   /* FINAL UX PATCH (section 12): scroll to the top ONLY when the wizard
+      genuinely moved to a different stage through an explicit action. The
+      comparison uses lastShownStage - a marker that survives the stage-lock
+      release every mutation performs - while the stage-keep guard above
+      already holds passive re-renders on the same stage. Typing, blur-saves
+      and background refreshes never scroll. */
+   var prevShownStage=ui.lastShownStage;
    setHidden(host,false);
    addCls($("#viewExecute"),"workflow-open");
    el.innerHTML=wizardHTML(p,showStage);
    bindRadioHandlers(); /* FIX: rebind the target-check radios after every wizard render */
    bindAgeInput(); /* AD AGE hardening: direct change/blur bindings after every wizard render */
    bindLoomInput(); /* LOOM URL hardening: dedicated immediate/deferred commit bindings */
+   ui.lastShownStage=showStage;
+   if(prevShownStage&&prevShownStage!==showStage){ try{ window.scrollTo(0,0); }catch(eScroll){} }
  }
  function uniqueEventCount(pred){
    var seen={};
@@ -6719,14 +7139,19 @@ function registerErrorHandlers(){
  function reviewMetricCard(value,label,cls){
    return '<div class="metric-card '+(cls||"")+'"><span class="metric-value">'+esc(String(value))+'</span><span class="metric-label">'+label+'</span></div>';
  }
+ function reviewDiagnosedProspects(){
+   /* PATCH(4): diagnosed = a recorded finding (primary, or the legacy leak
+      pair) - the removed qualification gate is never consulted. */
+   return state.prospects.filter(function(p){ return p.strike.primaryFinding||(p.strike.leak1&&p.strike.leak2); }).length;
+ }
  function reviewFunnelHTML(T){
-   /* CIP V2.1 funnel (spec section 25): PROSPECTS -> QUALIFIED -> DIAGNOSED
-      -> FIRST EMAIL SENT -> FOLLOW-UP 1 -> FOLLOW-UP 2 -> TOTAL REPLIES ->
-      POSITIVE REPLIES -> PROOFS SENT -> CALLS BOOKED -> CALLS COMPLETED
-      -> PROPOSALS -> WON -> LOST */
+   /* PATCH(4) funnel: PROSPECTS -> DIAGNOSED -> FIRST EMAIL -> FOLLOW-UP 1
+      -> FOLLOW-UP 2 -> TOTAL REPLIES -> POSITIVE REPLIES -> PROOFS SENT ->
+      CALLS BOOKED -> CALLS COMPLETED -> PROPOSALS -> WON. The separate
+      qualification step is gone from the operator workflow, so the funnel
+      is re-anchored on the diagnosis. */
    var targets=reviewTargets();
-   var go=reviewGo();
-   var diagnosed=state.prospects.filter(function(p){ return p.testing.qualification==="go"&&p.strike.primaryFinding; }).length;
+   var diagnosed=reviewDiagnosedProspects();
    var del=reviewFirstDeliveries();
    var fu1=uniqueEventCount(function(e){ return e.type==="outreach"&&e.subtype==="followup_1"; });
    var fu2=uniqueEventCount(function(e){ return e.type==="outreach"&&e.subtype==="followup_2"; });
@@ -6743,8 +7168,7 @@ function registerErrorHandlers(){
    var won=reviewWins();
    var rows=[
      ["PROSPECTS",targets,targets],
-     ["ADVANCED",go,targets],
-     ["DIAGNOSED",diagnosed,go],
+     ["DIAGNOSED",diagnosed,targets],
      ["FIRST EMAIL",del,diagnosed],
      ["FU 1 (Day 3)",fu1,del],
      ["FU 2 (Day 9)",fu2,fu1],
@@ -6824,37 +7248,38 @@ function registerErrorHandlers(){
      '<div class="economics-note">'+(e.has?"Cost basis: "+fmtMoney(e.global)+" global costs + "+fmtMoney(e.direct)+" direct prospect costs.":"No acquisition cost data has been entered yet, so cost-per-project and ROI cannot be calculated.")+'</div>';
  }
  function diagnosticHTML(T){
-   var stages=[["TARGET -> GO",reviewGo(),reviewTargets()],["GO -> DIAGNOSED",reviewXrays(),reviewGo()],["DELIVERED -> REPLY",reviewReplies(),reviewFirstDeliveries()],["REPLY -> CALL",reviewCalls(),reviewReplies()],["CALL -> WIN",reviewWins(),reviewCalls()]];
+   var stages=[["PROSPECT -> GO",reviewGo(),reviewTargets()],["GO -> DIAGNOSED",reviewXrays(),reviewGo()],["DELIVERED -> REPLY",reviewReplies(),reviewFirstDeliveries()],["REPLY -> CALL",reviewCalls(),reviewReplies()],["CALL -> WIN",reviewWins(),reviewCalls()]];
    var weak=null;
    stages.forEach(function(s){ var r=safeDiv(s[1],s[2]); if(r!=null&&(weak===null||r<weak.rate)) weak={label:s[0],rate:r}; });
    if(!weak) return '<div class="diagnostic"><b>WHERE TO IMPROVE</b><p>NOT ENOUGH DATA - complete more stages before choosing an experiment.</p></div>';
    var why=weak.label==="DELIVERED -> REPLY"?"You are reaching prospects, but comparatively few are engaging.":weak.label==="CALL -> WIN"?"Calls are happening, but fewer are becoming projects.":"This is the lowest measured conversion in the current funnel and likely needs investigation.";
-   var next=weak.label==="DELIVERED -> REPLY"?"Review the finding hook, perceived relevance, and delivery message.":weak.label==="GO -> DIAGNOSED"?"Reduce friction in the 5-minute diagnosis step.":"Inspect the handoff at this stage before changing the whole machine.";
+   var next=weak.label==="DELIVERED -> REPLY"?"Review the finding hook, perceived relevance, and delivery message.":weak.label==="TARGET -> DIAGNOSED"?"Reduce friction in the 5-minute diagnosis step.":"Inspect the handoff at this stage before changing the whole machine.";
    return '<div class="diagnostic"><b>WEAKEST STAGE: '+esc(weak.label)+' | CURRENT RATE: '+fmtPct(weak.rate)+'</b><p><b>WHY IT MATTERS</b>'+esc(why)+'</p><p><b>NEXT EXPERIMENT</b>'+esc(next)+'</p><p class="economics-note">This is an assistive recommendation from recorded event counts, not proof of cause.</p></div>';
  }
  function currentStrikeReviewHTML(){
    var i=strikeInfo();
-   if(i.empty) return '<div class="empty-inline">No active strike yet. Start a strike from Execute.</div>';
-   var vals=[[i.n,"SELECTED"],[i.qualified,"ADVANCED"],[i.noGo,"NO-GO"],[i.leaks,"DIAGNOSED"],[i.sent,"FIRST EMAILS"],[i.inFlight,"IN FOLLOW-UP"],[i.closed,"CLOSED"]];
+   if(i.empty) return '<div class="empty-inline">No active focus yet. Start today\'s focus from EXECUTE.</div>';
+   /* PATCH(4): no ADVANCED count - the evaluation step is gone. */
+   var vals=[[i.n,"SELECTED"],[i.noGo,"NO-GO"],[i.leaks,"DIAGNOSED"],[i.sent,"FIRST EMAILS"],[i.inFlight,"IN FOLLOW-UP"],[i.closed,"CLOSED"]];
    var ids={}; i.members.forEach(function(p){ ids["k"+p.id]=1; });
    var rep=0,cal=0,won=0;
    state.events.forEach(function(e){ if(e.prospectId&&ids["k"+e.prospectId]){ if(e.type==="reply") rep++; else if(e.type==="call_booked") cal++; else if(e.type==="won") won++; } });
-   var stages=[["TARGET -> GO",i.qualified,i.n],["GO -> DIAGNOSED",i.leaks,i.qualified],["DIAGNOSED -> FIRST EMAIL",i.sent,i.leaks],["FIRST EMAIL -> REPLY",rep,i.sent],["REPLY -> CALL",cal,rep],["CALL -> WIN",won,cal]];
+   var stages=[["PROSPECT -> DIAGNOSED",i.leaks,i.n],["DIAGNOSED -> FIRST EMAIL",i.sent,i.leaks],["FIRST EMAIL -> REPLY",rep,i.sent],["REPLY -> CALL",cal,rep],["CALL -> WIN",won,cal]];
    var weak=null; stages.forEach(function(s){ var r=safeDiv(s[1],s[2]); if(r!=null&&(weak===null||r<weak.rate)) weak={label:s[0],rate:r}; });
-   var bottleneck=weak?'<div class="diagnostic"><b>CURRENT BOTTLENECK: '+esc(weak.label)+' | '+fmtPct(weak.rate)+'</b><p>Use this conversion as the next place to investigate in the current strike.</p></div>':'';
+   var bottleneck=weak?'<div class="diagnostic"><b>CURRENT BOTTLENECK: '+esc(weak.label)+' | '+fmtPct(weak.rate)+'</b><p>Use this conversion as the next place to investigate in the current focus.</p></div>':'';
    return '<div class="metric-cards">'+vals.map(function(v){ return reviewMetricCard(v[0],v[1],v[1]==="FIRST EMAILS"?"good":""); }).join("")+'</div>'+
      '<div class="section-note">'+esc(strikePhaseText(i))+'</div>'+bottleneck;
  }
  function strikeCompareHTML(){
    var i=strikeInfo(), info=i.empty?null:i, target=info?info.n:0, go=info?info.qualified:0, xr=info?info.recorded:0,del=info?info.sent:0;
-   if(!info) return '<div class="empty-inline">No strike history is available yet.</div>';
+   if(!info) return '<div class="empty-inline">No focus history is available yet.</div>';
    var ids={}; info.members.forEach(function(p){ ids["k"+p.id]=1; });
    var rep=0,cal=0,won=0,rev=0;
    state.events.forEach(function(e){ if(e.prospectId&&ids["k"+e.prospectId]){ if(e.type==="reply") rep++; else if(e.type==="call_booked") cal++; else if(e.type==="won"){ won++; rev+=Number(e.value)||0; } } });
    var strikeCost=0; info.members.forEach(function(p){ strikeCost+=Number(p.economics&&p.economics.directCost)||0; });
-   return '<div class="strike-compare"><table class="analytics-table"><thead><tr><th>STRIKE</th><th>TARGETS</th><th>GO RATE</th><th>DIAGNOSED</th><th>DELIVERY</th><th>REPLY</th><th>CALL</th><th>WIN</th><th>REVENUE</th><th>COST / WIN</th></tr></thead><tbody>'+
+   return '<div class="strike-compare"><table class="analytics-table"><thead><tr><th>FOCUS</th><th>PROSPECTS</th><th>GO RATE</th><th>DIAGNOSED</th><th>DELIVERY</th><th>REPLY</th><th>CALL</th><th>WIN</th><th>REVENUE</th><th>COST / WIN</th></tr></thead><tbody>'+
      '<tr><td>CURRENT - '+esc(info.st.date?fmtKey(info.st.date):"ACTIVE")+'</td><td>'+target+'</td><td>'+fmtPct(safeDiv(go,target))+'</td><td>'+fmtPct(safeDiv(xr,go))+'</td><td>'+fmtPct(safeDiv(del,xr))+'</td><td>'+fmtPct(safeDiv(rep,del))+'</td><td>'+fmtPct(safeDiv(cal,rep))+'</td><td>'+fmtPct(safeDiv(won,cal))+'</td><td>'+fmtMoney(rev)+'</td><td>'+((strikeCost>0&&won>0)?fmtMoney(strikeCost/won):"-")+'</td></tr></tbody></table></div>'+
-     '<div class="economics-note">Historical strike IDs are not present in the existing event model, so previous-strike comparisons are not fabricated. Current-strike delivery and outcome detail remains available from the recorded events.</div>';
+     '<div class="economics-note">Historical focus IDs are not present in the existing event model, so previous-focus comparisons are not fabricated. Current-focus delivery and outcome detail remains available from the recorded events.</div>';
  }
  function renderAnalytics(){
    var el=$("#viewAnalytics"), T=allTimeTotals(), pending=pendingActionCount();
@@ -6883,9 +7308,8 @@ function registerErrorHandlers(){
    var proofSent=uniqueEventCount(function(e){ return e.type==="proof"&&e.subtype==="sent"; });
    var calComp=uniqueEventCount(function(e){ return e.type==="call_completed"; });
    var proposals=uniqueEventCount(function(e){ return e.type==="proposal"; });
-   var cards=reviewMetricCard(reviewTargets(),"TARGETS")
-     +reviewMetricCard(reviewGo(),"ADVANCED","good")
-     +reviewMetricCard(state.prospects.filter(function(p){ return p.testing.qualification==="go"&&p.strike.primaryFinding; }).length,"DIAGNOSED","good")
+   var cards=reviewMetricCard(reviewTargets(),"PROSPECTS")
+     +reviewMetricCard(reviewDiagnosedProspects(),"DIAGNOSED","good")
      +reviewMetricCard(sends,"SENDS (FIRST EMAILS)","good")
      +reviewMetricCard(T.replies,"TOTAL REPLIES","warn")
      +reviewMetricCard(posRep,"POSITIVE REPLIES","good")
@@ -6899,8 +7323,7 @@ function registerErrorHandlers(){
      +reviewMetricCard(waiting,"WAITING FOR REPLY")
      +reviewMetricCard(fmtMoney(pipelineValue),"PIPELINE VALUE","warn")
      +reviewMetricCard(stopped,"STOPPED / LOST");
-   var rates=reviewMetricCard(fmtPct(safeDiv(reviewGo(),reviewTargets())),"ADVANCE RATE")
-     +reviewMetricCard(fmtPct(safeDiv(T.replies,T.delivered)),"REPLY RATE")
+   var rates=reviewMetricCard(fmtPct(safeDiv(T.replies,T.delivered)),"REPLY RATE")
      +reviewMetricCard(fmtPct(safeDiv(posRep,T.replies)),"POSITIVE REPLY RATE")
      +reviewMetricCard(fmtPct(safeDiv(proofSent,posRep)),"PROOF RATE")
      +reviewMetricCard(fmtPct(safeDiv(T.calls,proofSent)),"CALL BOOKED RATE")
@@ -6921,13 +7344,13 @@ function registerErrorHandlers(){
    el.innerHTML='<div class="an-head"><span class="an-title">IS THE ACQUISITION MACHINE WORKING?</span><span class="an-sub">REVIEW IS DIAGNOSTICS, NOT A SECOND CRM LIST</span></div>'+gate+
      '<div class="panel analytics-section"><h2>ACTIVITY AND OUTCOMES</h2><p class="section-note">Counts come from logged events. A follow-up is a touch, never a first delivery. Day 3 / Day 9 cadence (no Day 12).</p><div class="metric-cards">'+cards+'</div><div class="metric-cards">'+pipelineCards+'</div><div class="metric-cards">'+rates+'</div></div>'+
      '<div class="panel analytics-section"><h2>VALIDATION / KILL-SWITCH CHECKPOINTS</h2><p class="section-note">The operator decides. The CRM surfaces the numbers, never decides automatically.</p><div class="metric-cards">'+cpHTML+'</div></div>'+
-     '<div class="panel analytics-section"><h2>CURRENT STRIKE</h2><p class="section-note">Live performance for the finite strike now in Execute.</p>'+currentStrikeReviewHTML()+'</div>'+
+     '<div class="panel analytics-section"><h2>CURRENT FOCUS</h2><p class="section-note">Live performance for the finite focus now in Execute.</p>'+currentStrikeReviewHTML()+'</div>'+
      '<div class="panel analytics-section"><h2>PIPELINE CONVERSION</h2><p class="section-note">Unique prospects at each recorded stage. A dash means the denominator is zero.</p>'+reviewFunnelHTML(T)+'</div>'+
      '<div class="panel analytics-section"><h2>WHERE TO IMPROVE</h2>'+diagnosticHTML(T)+'</div>'+
      '<div class="analytics-grid"><div class="analytics-card"><div class="analytics-section"><h2>FOLLOW-UP PERFORMANCE</h2><p class="section-note">Day 3 and Day 9 touches, with reply association.</p>'+followupTableHTML()+'</div></div><div class="analytics-card"><div class="analytics-section"><h2>TIME TO FIRST REPLY</h2><p class="section-note">Median is used for the middle response time; only timestamped pairs are included.</p>'+replyTimeHTML()+'</div></div></div>'+
      '<div class="panel analytics-section"><h2>ACQUISITION ECONOMICS</h2><p class="section-note">Actual recorded costs only - no operator-time estimates.</p>'+economicsHTML(T)+'</div>'+
      '<div class="panel analytics-section"><h2>TRENDS OVER TIME</h2><p class="section-note">This chart shows logged event activity by the selected period. Use cumulative mode to see the running total.</p><div class="chart-controls"><div class="seg">'+seg(RANGES,ui.chart.range,"chart-range","r")+'</div><div class="seg">'+seg(METRIC_LIST,ui.chart.metric,"chart-metric","m")+'</div><button type="button" class="chip'+(ui.chart.cumulative?" active":"")+'" data-action="chart-cum">CUMULATIVE</button></div><div class="chart-wrap" id="chartWrap"></div></div>'+
-     '<div class="panel analytics-section"><h2>COMPARE STRIKES</h2>'+strikeCompareHTML()+'</div>'+
+     '<div class="panel analytics-section"><h2>COMPARE FOCUS SESSIONS</h2>'+strikeCompareHTML()+'</div>'+
      '<div class="panel">'+learningHTML("review")+'</div>';
    safe(renderChart,"chart");
    safe(bindLearningWidgets,"learn-bind-review");
